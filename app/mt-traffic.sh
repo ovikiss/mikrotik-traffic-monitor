@@ -530,7 +530,7 @@ function applyLanguage() {
   document.getElementById('tab-month').textContent = t('month');
   document.getElementById('tab-year').textContent = t('year');
   document.getElementById('th-period').textContent = t('period');
-  document.getElementById('th-total').textContent = t('total');
+  document.getElementById('th-total').innerHTML = `${uiIcon('total')}${t('total')}`;
   document.getElementById('th-rx').innerHTML = `${uiIcon('rx')}RX (GiB)`;
   document.getElementById('th-tx').innerHTML = `${uiIcon('tx')}TX (GiB)`;
   document.getElementById('th-visual').textContent = t('visual');
