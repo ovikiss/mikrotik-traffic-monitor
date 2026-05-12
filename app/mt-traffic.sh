@@ -3,7 +3,8 @@ set -eu
 
 : "${MT_HOST:?MT_HOST is required}"
 : "${MT_COMMUNITY:?MT_COMMUNITY is required}"
-: "${IFINDEX:?IFINDEX is required}"
+: "${IFINDEX:=auto}"
+: "${IFNAME_PATTERN:=pppoe}"
 : "${POLL_SEC:=3600}"
 : "${HTTP_PORT:=8080}"
 : "${TZ:=Europe/Bucharest}"
@@ -15,6 +16,82 @@ DB="$DATA_DIR/traffic.db"
 WWW="$DATA_DIR/www"
 
 mkdir -p "$WWW"
+
+ACTIVE_IFINDEX=""
+
+is_auto_ifindex() {
+  case "$IFINDEX" in
+    ""|auto|pppoe) return 0 ;;
+    *) return 1 ;;
+  esac
+}
+
+detect_pppoe_ifindex() {
+  WALK="$(snmpwalk -v2c -c "$MT_COMMUNITY" -On "$MT_HOST" "1.3.6.1.2.1.31.1.1.1.1" 2>/dev/null || true)"
+  if [ -z "$WALK" ]; then
+    WALK="$(snmpwalk -v2c -c "$MT_COMMUNITY" -On "$MT_HOST" "1.3.6.1.2.1.2.2.1.2" 2>/dev/null || true)"
+  fi
+  [ -n "$WALK" ] || return 1
+
+  FIRST_MATCH=""
+  UP_MATCH=""
+
+  while IFS= read -r LINE; do
+    [ -n "$LINE" ] || continue
+    OID="${LINE%% = *}"
+    IDX="${OID##*.}"
+    case "$IDX" in
+      ''|*[!0-9]*) continue ;;
+    esac
+
+    NAME="${LINE#*= }"
+    NAME="${NAME#STRING: }"
+    NAME_LC="$(printf '%s' "$NAME" | tr '[:upper:]' '[:lower:]')"
+
+    if ! printf '%s\n' "$NAME_LC" | grep -Eiq "$IFNAME_PATTERN"; then
+      continue
+    fi
+
+    if [ -z "$FIRST_MATCH" ]; then
+      FIRST_MATCH="$IDX"
+    fi
+
+    STATUS="$(snmpget -v2c -c "$MT_COMMUNITY" -Oqv "$MT_HOST" "1.3.6.1.2.1.2.2.1.8.$IDX" 2>/dev/null || true)"
+    STATUS_LC="$(printf '%s' "$STATUS" | tr '[:upper:]' '[:lower:]')"
+    case "$STATUS_LC" in
+      1|up*|'INTEGER: up(1)')
+        UP_MATCH="$IDX"
+        break
+        ;;
+    esac
+  done <<EOF
+$WALK
+EOF
+
+  if [ -n "$UP_MATCH" ]; then
+    printf '%s\n' "$UP_MATCH"
+    return 0
+  fi
+  if [ -n "$FIRST_MATCH" ]; then
+    printf '%s\n' "$FIRST_MATCH"
+    return 0
+  fi
+  return 1
+}
+
+resolve_ifindex() {
+  if is_auto_ifindex; then
+    DETECTED="$(detect_pppoe_ifindex || true)"
+    if [ -n "$DETECTED" ]; then
+      ACTIVE_IFINDEX="$DETECTED"
+      return 0
+    fi
+    return 1
+  fi
+
+  ACTIVE_IFINDEX="$IFINDEX"
+  return 0
+}
 
 write_ui() {
 cat > "$WWW/index.html" <<'HTML'
@@ -364,7 +441,7 @@ backfill_deltas() {
 }
 
 render_api() {
-  BASE="$WWW" IFINDEX_ENV="$IFINDEX" python3 - <<'PY'
+  BASE="$WWW" IFINDEX_ENV="$ACTIVE_IFINDEX" python3 - <<'PY'
 import csv
 import json
 import os
@@ -514,12 +591,18 @@ render_views() {
 write_ui
 init_db
 python3 -m http.server "$HTTP_PORT" --directory "$WWW" >/dev/null 2>&1 &
+resolve_ifindex || true
 render_views
 
 while true; do
+  if ! resolve_ifindex; then
+    sleep "$POLL_SEC"
+    continue
+  fi
+
   TS="$(date +%s)"
-  IN="$(snmpget -v2c -c "$MT_COMMUNITY" -Oqv "$MT_HOST" "1.3.6.1.2.1.31.1.1.1.6.$IFINDEX" 2>/dev/null || true)"
-  OUT="$(snmpget -v2c -c "$MT_COMMUNITY" -Oqv "$MT_HOST" "1.3.6.1.2.1.31.1.1.1.10.$IFINDEX" 2>/dev/null || true)"
+  IN="$(snmpget -v2c -c "$MT_COMMUNITY" -Oqv "$MT_HOST" "1.3.6.1.2.1.31.1.1.1.6.$ACTIVE_IFINDEX" 2>/dev/null || true)"
+  OUT="$(snmpget -v2c -c "$MT_COMMUNITY" -Oqv "$MT_HOST" "1.3.6.1.2.1.31.1.1.1.10.$ACTIVE_IFINDEX" 2>/dev/null || true)"
 
   case "$IN" in ''|*[!0-9]*) sleep "$POLL_SEC"; continue ;; esac
   case "$OUT" in ''|*[!0-9]*) sleep "$POLL_SEC"; continue ;; esac

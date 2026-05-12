@@ -29,7 +29,8 @@ docker build -t ghcr.io/ovikiss/mikrotik-traffic-monitor:local .
 docker run --rm -p 8080:8080 \
   -e MT_HOST=192.168.88.1 \
   -e MT_COMMUNITY=trafficdb \
-  -e IFINDEX=9 \
+  -e IFINDEX=auto \
+  -e IFNAME_PATTERN=pppoe \
   -e POLL_SEC=3600 \
   -e TZ=Europe/Bucharest \
   -v "$PWD/data:/data" \
@@ -42,7 +43,8 @@ docker run --rm -p 8080:8080 \
 - `mtmDataPath` (default `/usb1/trafficdb`)
 - `mtmRootDir` (default `/usb1/containers/trafficdb`)
 - `mtmImage` (default `ghcr.io/ovikiss/mikrotik-traffic-monitor:latest`)
-- `mtmIfIndex` (WAN ifIndex, default `9`)
+- `mtmIfIndex` (WAN ifIndex, default `auto` for PPPoE autodetect)
+- `mtmIfNamePattern` (interface-name pattern for autodetect, default `pppoe`)
 
 2. Import script:
 ```bash
