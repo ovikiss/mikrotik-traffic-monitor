@@ -31,7 +31,7 @@ docker run --rm -p 8080:8080 \
   -e MT_COMMUNITY=trafficdb \
   -e IFINDEX=auto \
   -e IFNAME_PATTERN=pppoe \
-  -e POLL_SEC=3600 \
+  -e POLL_INTERVAL=60m \
   -e TZ=Europe/Bucharest \
   -v "$PWD/data:/data" \
   ghcr.io/ovikiss/mikrotik-traffic-monitor:local
@@ -45,6 +45,7 @@ docker run --rm -p 8080:8080 \
 - `mtmImage` (default `ghcr.io/ovikiss/mikrotik-traffic-monitor:latest`)
 - `mtmIfIndex` (WAN ifIndex, default `auto` for PPPoE autodetect)
 - `mtmIfNamePattern` (interface-name pattern for autodetect, default `pppoe`)
+- `mtmPollInterval` (poll interval, default `60m`; supports `s`, `m`, `h`, e.g. `45s`, `15m`, `2h`)
 
 2. Import script:
 ```bash

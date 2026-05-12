@@ -15,6 +15,7 @@
 :local mtmContainerName "trafficdb"
 :local mtmIfIndex "auto"
 :local mtmIfNamePattern "pppoe"
+:local mtmPollInterval "60m"
 :local mtmSnmpCommunity "trafficdb"
 :local mtmHttpLanPort "8088"
 :local mtmLanCidr "192.168.88.0/24"
@@ -60,7 +61,7 @@
 /container/envs/add list="trafficdb" key="MT_COMMUNITY" value=$mtmSnmpCommunity
 /container/envs/add list="trafficdb" key="IFINDEX" value=$mtmIfIndex
 /container/envs/add list="trafficdb" key="IFNAME_PATTERN" value=$mtmIfNamePattern
-/container/envs/add list="trafficdb" key="POLL_SEC" value="3600"
+/container/envs/add list="trafficdb" key="POLL_INTERVAL" value=$mtmPollInterval
 /container/envs/add list="trafficdb" key="HTTP_PORT" value="8080"
 /container/envs/add list="trafficdb" key="TZ" value="Europe/Bucharest"
 /container/envs/add list="trafficdb" key="DATA_DIR" value="/data"

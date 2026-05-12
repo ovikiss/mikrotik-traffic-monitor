@@ -5,7 +5,8 @@ set -eu
 : "${MT_COMMUNITY:?MT_COMMUNITY is required}"
 : "${IFINDEX:=auto}"
 : "${IFNAME_PATTERN:=pppoe}"
-: "${POLL_SEC:=3600}"
+: "${POLL_INTERVAL:=60m}"
+: "${POLL_SEC:=}"
 : "${HTTP_PORT:=8080}"
 : "${TZ:=Europe/Bucharest}"
 : "${DATA_DIR:=/data}"
@@ -14,10 +15,90 @@ export TZ
 
 DB="$DATA_DIR/traffic.db"
 WWW="$DATA_DIR/www"
+SETTINGS_PATH="$DATA_DIR/settings.json"
 
 mkdir -p "$WWW"
 
 ACTIVE_IFINDEX=""
+POLL_SLEEP_SEC="3600"
+ACTIVE_POLL_INTERVAL="60m"
+
+parse_interval_to_sec() {
+  RAW="$(printf '%s' "${1:-}" | tr '[:upper:]' '[:lower:]')"
+  case "$RAW" in
+    ''|*[!0-9smh]*) return 1 ;;
+  esac
+
+  case "$RAW" in
+    *s) N="${RAW%s}"; S="$N" ;;
+    *m) N="${RAW%m}"; S="$((N * 60))" ;;
+    *h) N="${RAW%h}"; S="$((N * 3600))" ;;
+    *)  N="$RAW"; S="$N" ;;
+  esac
+
+  case "$N" in ''|*[!0-9]*) return 1 ;; esac
+  [ "$S" -gt 0 ] 2>/dev/null || return 1
+
+  PARSED_INTERVAL_RAW="$RAW"
+  PARSED_INTERVAL_SEC="$S"
+  return 0
+}
+
+read_runtime_poll_interval() {
+  if [ ! -f "$SETTINGS_PATH" ]; then
+    return 1
+  fi
+
+  V="$(SETTINGS_PATH_ENV="$SETTINGS_PATH" python3 - <<'PY'
+import json
+import os
+from pathlib import Path
+
+p = Path(os.environ["SETTINGS_PATH_ENV"])
+try:
+    data = json.loads(p.read_text(encoding="utf-8"))
+except Exception:
+    print("")
+    raise SystemExit(0)
+v = data.get("poll_interval", "")
+print(v if isinstance(v, str) else "")
+PY
+)"
+  [ -n "$V" ] || return 1
+  printf '%s\n' "$V"
+  return 0
+}
+
+resolve_poll_interval() {
+  RUNTIME="$(read_runtime_poll_interval || true)"
+  if parse_interval_to_sec "$RUNTIME"; then
+    POLL_SLEEP_SEC="$PARSED_INTERVAL_SEC"
+    ACTIVE_POLL_INTERVAL="$PARSED_INTERVAL_RAW"
+    return 0
+  fi
+
+  if parse_interval_to_sec "${POLL_INTERVAL:-}"; then
+    POLL_SLEEP_SEC="$PARSED_INTERVAL_SEC"
+    ACTIVE_POLL_INTERVAL="$PARSED_INTERVAL_RAW"
+    return 0
+  fi
+
+  case "${POLL_SEC:-}" in
+    ''|*[!0-9]*)
+      POLL_SLEEP_SEC="3600"
+      ACTIVE_POLL_INTERVAL="60m"
+      ;;
+    *)
+      if [ "$POLL_SEC" -gt 0 ] 2>/dev/null; then
+        POLL_SLEEP_SEC="$POLL_SEC"
+        ACTIVE_POLL_INTERVAL="${POLL_SEC}s"
+      else
+        POLL_SLEEP_SEC="3600"
+        ACTIVE_POLL_INTERVAL="60m"
+      fi
+      ;;
+  esac
+}
 
 is_auto_ifindex() {
   case "$IFINDEX" in
@@ -147,6 +228,8 @@ cat > "$WWW/index.html" <<'HTML'
     .controls { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; justify-content: flex-end; }
     .control { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--muted); }
     .control select { border: 1px solid var(--border); border-radius: 8px; background: var(--card); color: var(--text); padding: 4px 8px; font-size: 12px; }
+    .control input { border: 1px solid var(--border); border-radius: 8px; background: var(--card); color: var(--text); padding: 4px 8px; font-size: 12px; width: 80px; }
+    .control button { border: 1px solid var(--border); border-radius: 8px; background: var(--card); color: var(--text); padding: 4px 8px; font-size: 12px; cursor: pointer; }
     @media (max-width: 760px) {
       th:nth-child(5), td:nth-child(5) { display: none; }
       .bar-wrap { width: 80px; }
@@ -168,6 +251,11 @@ cat > "$WWW/index.html" <<'HTML'
           <option value="light" id="theme-opt-light">Light</option>
           <option value="dark" id="theme-opt-dark">Dark</option>
         </select>
+      </label>
+      <label class="control" for="poll-interval">
+        <span id="poll-label">Poll</span>
+        <input id="poll-interval" placeholder="60m" />
+        <button id="poll-save" type="button">Save</button>
       </label>
       <label class="control" for="lang">
         <span id="lang-label">Language</span>
@@ -226,6 +314,10 @@ const I18N = {
     theme: 'Theme',
     light: 'Light',
     dark: 'Dark',
+    poll: 'Poll',
+    pollSaved: 'Poll interval saved',
+    pollInvalid: 'Invalid interval (examples: 45s, 15m, 2h)',
+    save: 'Save',
     language: 'Language',
     subtitle: 'Day / Month / Year aggregation, updated hourly.',
     totalToday: 'Total Today',
@@ -247,6 +339,10 @@ const I18N = {
     theme: 'Temă',
     light: 'Luminos',
     dark: 'Întunecat',
+    poll: 'Interval',
+    pollSaved: 'Interval salvat',
+    pollInvalid: 'Interval invalid (exemple: 45s, 15m, 2h)',
+    save: 'Salvează',
     language: 'Limbă',
     subtitle: 'Agregare pe Zi / Luna / An, update la fiecare oră.',
     totalToday: 'Total azi',
@@ -296,6 +392,8 @@ function applyLanguage() {
   document.getElementById('theme-label').textContent = t('theme');
   document.getElementById('theme-opt-light').textContent = t('light');
   document.getElementById('theme-opt-dark').textContent = t('dark');
+  document.getElementById('poll-label').textContent = t('poll');
+  document.getElementById('poll-save').textContent = t('save');
   document.getElementById('lang').value = state.lang;
   document.getElementById('lang-label').textContent = t('language');
   document.getElementById('subtitle').textContent = t('subtitle');
@@ -389,6 +487,40 @@ async function loadAll() {
   renderRows();
 }
 
+function isValidInterval(v) {
+  return /^[0-9]+[smh]$/i.test((v || '').trim());
+}
+
+async function loadSettings() {
+  const q = `?_=${Date.now()}`;
+  try {
+    const d = await fetch('/api/settings.json' + q).then(r => r.json());
+    if (d && d.poll_interval) {
+      document.getElementById('poll-interval').value = d.poll_interval;
+    }
+  } catch (_) {}
+}
+
+async function savePollInterval() {
+  const inp = document.getElementById('poll-interval');
+  const v = (inp.value || '').trim().toLowerCase();
+  if (!isValidInterval(v)) {
+    document.getElementById('meta').textContent = t('pollInvalid');
+    return;
+  }
+
+  const res = await fetch('/api/settings', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ poll_interval: v })
+  });
+  if (!res.ok) {
+    document.getElementById('meta').textContent = t('loadError');
+    return;
+  }
+  document.getElementById('meta').textContent = `${t('pollSaved')}: ${v}`;
+}
+
 const storedLang = localStorage.getItem('mtm_lang');
 const storedTheme = localStorage.getItem('mtm_theme');
 state.lang = (storedLang === 'ro') ? 'ro' : 'en';
@@ -398,8 +530,10 @@ applyLanguage();
 document.getElementById('meta').textContent = t('loading');
 document.getElementById('theme').addEventListener('change', (e) => setTheme(e.target.value));
 document.getElementById('lang').addEventListener('change', (e) => setLanguage(e.target.value));
+document.getElementById('poll-save').addEventListener('click', () => { savePollInterval().catch(() => {}); });
 document.querySelectorAll('.tab').forEach(btn => btn.addEventListener('click', () => setActiveTab(btn.dataset.tab)));
 loadAll().catch(e => { document.getElementById('meta').textContent = `${t('loadError')}: ${e}`; });
+loadSettings().catch(() => {});
 setInterval(() => { loadAll().catch(() => {}); }, 60000);
 </script>
 </body>
@@ -460,7 +594,7 @@ backfill_deltas() {
 }
 
 render_api() {
-  BASE="$WWW" IFINDEX_ENV="$ACTIVE_IFINDEX" python3 - <<'PY'
+  BASE="$WWW" IFINDEX_ENV="$ACTIVE_IFINDEX" POLL_INTERVAL_ENV="$ACTIVE_POLL_INTERVAL" POLL_SEC_ENV="$POLL_SLEEP_SEC" python3 - <<'PY'
 import csv
 import json
 import os
@@ -524,6 +658,10 @@ summary = {
         "year_tx_gib": to_num(info.get("year_tx_gib", "0")),
     },
     "interface": {"ifindex": os.environ.get("IFINDEX_ENV", "")},
+    "poll": {
+        "interval": os.environ.get("POLL_INTERVAL_ENV", ""),
+        "seconds": int(to_num(os.environ.get("POLL_SEC_ENV", "0"))),
+    },
     "windows": {"day": "90d", "month": "24m", "year": "5y"},
     "endpoints": {
         "day": "/api/day.json",
@@ -631,15 +769,105 @@ render_views() {
   render_api
 }
 
+start_http_server() {
+  WWW_DIR="$WWW" HTTP_PORT_ENV="$HTTP_PORT" SETTINGS_PATH_ENV="$SETTINGS_PATH" python3 - <<'PY' &
+import json
+import os
+from http.server import ThreadingHTTPServer, SimpleHTTPRequestHandler
+from pathlib import Path
+
+www = os.environ["WWW_DIR"]
+port = int(os.environ["HTTP_PORT_ENV"])
+settings_path = Path(os.environ["SETTINGS_PATH_ENV"])
+
+
+def read_settings():
+    if not settings_path.exists():
+        return {}
+    try:
+        data = json.loads(settings_path.read_text(encoding="utf-8"))
+        if isinstance(data, dict):
+            return data
+    except Exception:
+        pass
+    return {}
+
+
+def write_settings(data):
+    settings_path.parent.mkdir(parents=True, exist_ok=True)
+    tmp = settings_path.with_suffix(".tmp")
+    tmp.write_text(json.dumps(data), encoding="utf-8")
+    tmp.replace(settings_path)
+
+
+def valid_interval(v):
+    if not isinstance(v, str):
+        return False
+    v = v.strip().lower()
+    if len(v) < 2:
+        return False
+    if v[-1] not in ("s", "m", "h"):
+        return False
+    return v[:-1].isdigit() and int(v[:-1]) > 0
+
+
+class Handler(SimpleHTTPRequestHandler):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, directory=www, **kwargs)
+
+    def _send_json(self, code, payload):
+        b = json.dumps(payload).encode("utf-8")
+        self.send_response(code)
+        self.send_header("Content-Type", "application/json")
+        self.send_header("Content-Length", str(len(b)))
+        self.end_headers()
+        self.wfile.write(b)
+
+    def do_GET(self):
+        if self.path.startswith("/api/settings.json"):
+            cfg = read_settings()
+            self._send_json(200, {"poll_interval": cfg.get("poll_interval", "")})
+            return
+        super().do_GET()
+
+    def do_POST(self):
+        if self.path != "/api/settings":
+            self._send_json(404, {"error": "not_found"})
+            return
+        try:
+            l = int(self.headers.get("Content-Length", "0"))
+        except Exception:
+            l = 0
+        body = self.rfile.read(l) if l > 0 else b"{}"
+        try:
+            data = json.loads(body.decode("utf-8"))
+        except Exception:
+            self._send_json(400, {"error": "invalid_json"})
+            return
+        interval = str(data.get("poll_interval", "")).strip().lower()
+        if not valid_interval(interval):
+            self._send_json(400, {"error": "invalid_interval"})
+            return
+        cfg = read_settings()
+        cfg["poll_interval"] = interval
+        write_settings(cfg)
+        self._send_json(200, {"ok": True, "poll_interval": interval})
+
+
+ThreadingHTTPServer(("0.0.0.0", port), Handler).serve_forever()
+PY
+}
+
 write_ui
 init_db
-python3 -m http.server "$HTTP_PORT" --directory "$WWW" >/dev/null 2>&1 &
+start_http_server
+resolve_poll_interval
 resolve_ifindex || true
 render_views
 
 while true; do
   if ! resolve_ifindex; then
-    sleep "$POLL_SEC"
+    sleep "$POLL_SLEEP_SEC"
     continue
   fi
 
@@ -647,8 +875,8 @@ while true; do
   IN="$(snmpget -v2c -c "$MT_COMMUNITY" -Oqv "$MT_HOST" "1.3.6.1.2.1.31.1.1.1.6.$ACTIVE_IFINDEX" 2>/dev/null || true)"
   OUT="$(snmpget -v2c -c "$MT_COMMUNITY" -Oqv "$MT_HOST" "1.3.6.1.2.1.31.1.1.1.10.$ACTIVE_IFINDEX" 2>/dev/null || true)"
 
-  case "$IN" in ''|*[!0-9]*) sleep "$POLL_SEC"; continue ;; esac
-  case "$OUT" in ''|*[!0-9]*) sleep "$POLL_SEC"; continue ;; esac
+  case "$IN" in ''|*[!0-9]*) sleep "$POLL_SLEEP_SEC"; continue ;; esac
+  case "$OUT" in ''|*[!0-9]*) sleep "$POLL_SLEEP_SEC"; continue ;; esac
 
   PREV="$(sqlite_exec "SELECT in_octets || '|' || out_octets FROM samples ORDER BY id DESC LIMIT 1;" || true)"
   if [ -z "$PREV" ]; then
@@ -666,5 +894,5 @@ while true; do
   sqlite_exec "DELETE FROM samples WHERE ts < strftime('%s','now','-1825 days');"
 
   render_views
-  sleep "$POLL_SEC"
+  sleep "$POLL_SLEEP_SEC"
 done
