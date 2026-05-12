@@ -24,6 +24,8 @@
   "year": "Year",
   "period": "Period",
   "total": "Total (GiB)",
+  "download": "Download",
+  "upload": "Upload",
   "visual": "Visual",
   "loading": "Loading...",
   "tab": "Tab",

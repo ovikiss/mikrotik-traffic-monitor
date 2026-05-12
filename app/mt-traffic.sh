@@ -250,6 +250,7 @@ cat > "$WWW/index.html" <<'HTML'
     .control { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--muted); }
     .control-icon { width: 14px; height: 14px; display: inline-flex; align-items: center; justify-content: center; color: var(--muted); }
     .control-icon img { width: 14px; height: 14px; display: block; opacity: .85; }
+    .ico-inline { width: 12px; height: 12px; vertical-align: -2px; margin-right: 4px; opacity: .9; }
     .control select { border: 1px solid var(--border); border-radius: 8px; background: var(--card); color: var(--text); padding: 4px 8px; font-size: 12px; }
     .control input { border: 1px solid var(--border); border-radius: 8px; background: var(--card); color: var(--text); padding: 4px 8px; font-size: 12px; width: 80px; }
     .control button { border: 1px solid var(--border); border-radius: 8px; background: var(--card); color: var(--text); padding: 4px 8px; font-size: 12px; cursor: pointer; }
@@ -306,17 +307,17 @@ cat > "$WWW/index.html" <<'HTML'
     <div class="kpi">
       <div class="label" id="label-day">Total Today</div>
       <div class="val" id="kpi-day">0.000 GiB</div>
-      <div class="sub"><span id="kpi-day-rx">RX: 0.000 GiB</span> | <span id="kpi-day-tx">TX: 0.000 GiB</span></div>
+      <div class="sub"><span id="kpi-day-rx">Download: 0.000 GiB</span> | <span id="kpi-day-tx">Upload: 0.000 GiB</span></div>
     </div>
     <div class="kpi">
       <div class="label" id="label-month">Current Month Total</div>
       <div class="val" id="kpi-month">0.000 GiB</div>
-      <div class="sub"><span id="kpi-month-rx">RX: 0.000 GiB</span> | <span id="kpi-month-tx">TX: 0.000 GiB</span></div>
+      <div class="sub"><span id="kpi-month-rx">Download: 0.000 GiB</span> | <span id="kpi-month-tx">Upload: 0.000 GiB</span></div>
     </div>
     <div class="kpi">
       <div class="label" id="label-year">Current Year Total</div>
       <div class="val" id="kpi-year">0.000 GiB</div>
-      <div class="sub"><span id="kpi-year-rx">RX: 0.000 GiB</span> | <span id="kpi-year-tx">TX: 0.000 GiB</span></div>
+      <div class="sub"><span id="kpi-year-rx">Download: 0.000 GiB</span> | <span id="kpi-year-tx">Upload: 0.000 GiB</span></div>
     </div>
   </div>
 
@@ -332,8 +333,8 @@ cat > "$WWW/index.html" <<'HTML'
         <tr>
           <th id="th-period">Period</th>
           <th class="num" id="th-total">Total (GiB)</th>
-          <th class="num">RX (GiB)</th>
-          <th class="num">TX (GiB)</th>
+          <th class="num" id="th-rx">Download (GiB)</th>
+          <th class="num" id="th-tx">Upload (GiB)</th>
           <th id="th-visual">Visual</th>
         </tr>
       </thead>
@@ -375,6 +376,8 @@ const I18N_FALLBACK = {
   year: 'Year',
   period: 'Period',
   total: 'Total (GiB)',
+  download: 'Download',
+  upload: 'Upload',
   visual: 'Visual',
   loading: 'Loading...',
   tab: 'Tab',
@@ -397,6 +400,19 @@ function toNum(v) { const n = parseFloat(v || '0'); return Number.isFinite(n) ? 
 function fmtGiB(v) { return `${toNum(v).toFixed(3)} GiB`; }
 function t(key) {
   return (I18N[state.lang] && I18N[state.lang][key]) || (I18N.en && I18N.en[key]) || I18N_FALLBACK[key] || key;
+}
+
+function uiIcon(name) {
+  return `<img class="ico-inline" src="/images/ui/${name}.svg" alt="" />`;
+}
+
+function esc(v) {
+  return String(v == null ? '' : v)
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#39;');
 }
 
 function getLanguageDef(code) {
@@ -491,6 +507,8 @@ function applyLanguage() {
   document.getElementById('tab-year').textContent = t('year');
   document.getElementById('th-period').textContent = t('period');
   document.getElementById('th-total').textContent = t('total');
+  document.getElementById('th-rx').innerHTML = `${uiIcon('download')}${t('download')} (GiB)`;
+  document.getElementById('th-tx').innerHTML = `${uiIcon('upload')}${t('upload')} (GiB)`;
   document.getElementById('th-visual').textContent = t('visual');
 }
 
@@ -505,12 +523,12 @@ function renderKpis() {
   document.getElementById('kpi-day').textContent = fmtGiB(state.info.today_total_gib);
   document.getElementById('kpi-month').textContent = fmtGiB(state.info.month_total_gib);
   document.getElementById('kpi-year').textContent = fmtGiB(state.info.year_total_gib);
-  document.getElementById('kpi-day-rx').textContent = `RX: ${fmtGiB(state.info.today_rx_gib)}`;
-  document.getElementById('kpi-day-tx').textContent = `TX: ${fmtGiB(state.info.today_tx_gib)}`;
-  document.getElementById('kpi-month-rx').textContent = `RX: ${fmtGiB(state.info.month_rx_gib)}`;
-  document.getElementById('kpi-month-tx').textContent = `TX: ${fmtGiB(state.info.month_tx_gib)}`;
-  document.getElementById('kpi-year-rx').textContent = `RX: ${fmtGiB(state.info.year_rx_gib)}`;
-  document.getElementById('kpi-year-tx').textContent = `TX: ${fmtGiB(state.info.year_tx_gib)}`;
+  document.getElementById('kpi-day-rx').innerHTML = `${uiIcon('download')}${t('download')}: ${fmtGiB(state.info.today_rx_gib)}`;
+  document.getElementById('kpi-day-tx').innerHTML = `${uiIcon('upload')}${t('upload')}: ${fmtGiB(state.info.today_tx_gib)}`;
+  document.getElementById('kpi-month-rx').innerHTML = `${uiIcon('download')}${t('download')}: ${fmtGiB(state.info.month_rx_gib)}`;
+  document.getElementById('kpi-month-tx').innerHTML = `${uiIcon('upload')}${t('upload')}: ${fmtGiB(state.info.month_tx_gib)}`;
+  document.getElementById('kpi-year-rx').innerHTML = `${uiIcon('download')}${t('download')}: ${fmtGiB(state.info.year_rx_gib)}`;
+  document.getElementById('kpi-year-tx').innerHTML = `${uiIcon('upload')}${t('upload')}: ${fmtGiB(state.info.year_tx_gib)}`;
 }
 
 function renderRows() {
@@ -541,7 +559,7 @@ function renderRows() {
   const updated = state.info.updated_local || '-';
   const activeLabel = t(TAB_LABEL_KEY[state.activeTab] || state.activeTab);
   const poll = formatPollInterval(state.pollInterval);
-  document.getElementById('meta').textContent = `${t('tab')}: ${activeLabel} | ${t('samples')}: ${samples} | ${t('lastUpdate')}: ${updated} | ${t('pollInterval')}: ${poll}`;
+  document.getElementById('meta').innerHTML = `${t('tab')}: ${esc(activeLabel)} | ${uiIcon('samples')}${t('samples')}: ${esc(samples)} | ${uiIcon('updated')}${t('lastUpdate')}: ${esc(updated)} | ${uiIcon('interval')}${t('pollInterval')}: ${esc(poll)}`;
 }
 
 function setActiveTab(tab) {
