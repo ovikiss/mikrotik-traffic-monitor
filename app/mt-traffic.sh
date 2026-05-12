@@ -16,6 +16,7 @@ export TZ
 DB="$DATA_DIR/traffic.db"
 WWW="$DATA_DIR/www"
 SETTINGS_PATH="$DATA_DIR/settings.json"
+SCRIPT_DIR="$(CDPATH= cd -- "$(dirname "$0")" && pwd)"
 
 mkdir -p "$WWW"
 
@@ -564,63 +565,16 @@ setInterval(() => { loadAll().catch(() => {}); }, 60000);
 HTML
 
 mkdir -p "$WWW/i18n"
-cat > "$WWW/i18n/en.json" <<'JSON'
-{
-  "theme": "Theme",
-  "light": "Light",
-  "dark": "Dark",
-  "poll": "Poll",
-  "pollInterval": "Poll interval",
-  "pollSaved": "Poll interval saved",
-  "pollInvalid": "Invalid interval (examples: 60, 45s, 15m, 2h)",
-  "save": "Save",
-  "language": "Language",
-  "subtitle": "Day / Month / Year aggregation, updated hourly.",
-  "totalToday": "Total Today",
-  "totalMonth": "Current Month Total",
-  "totalYear": "Current Year Total",
-  "day": "Day",
-  "month": "Month",
-  "year": "Year",
-  "period": "Period",
-  "total": "Total (GiB)",
-  "visual": "Visual",
-  "loading": "Loading...",
-  "tab": "Tab",
-  "samples": "Samples",
-  "lastUpdate": "Last update",
-  "loadError": "Load error"
-}
-JSON
-
-cat > "$WWW/i18n/ro.json" <<'JSON'
-{
-  "theme": "Temă",
-  "light": "Luminos",
-  "dark": "Întunecat",
-  "poll": "Interval",
-  "pollInterval": "Interval poll",
-  "pollSaved": "Interval salvat",
-  "pollInvalid": "Interval invalid (exemple: 60, 45s, 15m, 2h)",
-  "save": "Salvează",
-  "language": "Limbă",
-  "subtitle": "Agregare pe Zi / Luna / An, update la fiecare oră.",
-  "totalToday": "Total azi",
-  "totalMonth": "Total luna curentă",
-  "totalYear": "Total anul curent",
-  "day": "Zi",
-  "month": "Lună",
-  "year": "An",
-  "period": "Perioada",
-  "total": "Total (GiB)",
-  "visual": "Vizual",
-  "loading": "Se încarcă...",
-  "tab": "Tab",
-  "samples": "Mostre",
-  "lastUpdate": "Ultimul update",
-  "loadError": "Eroare încărcare"
-}
-JSON
+if [ -f "$SCRIPT_DIR/i18n/en.json" ]; then
+  cp "$SCRIPT_DIR/i18n/en.json" "$WWW/i18n/en.json"
+else
+  printf '%s\n' '{}' > "$WWW/i18n/en.json"
+fi
+if [ -f "$SCRIPT_DIR/i18n/ro.json" ]; then
+  cp "$SCRIPT_DIR/i18n/ro.json" "$WWW/i18n/ro.json"
+else
+  printf '%s\n' '{}' > "$WWW/i18n/ro.json"
+fi
 }
 
 sqlite_exec() {
