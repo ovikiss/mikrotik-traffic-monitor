@@ -1,0 +1,72 @@
+# MikroTik Traffic Monitor
+
+Containerized MikroTik WAN traffic monitor with:
+- hourly collection via SNMP
+- SQLite persistence on USB storage
+- mini UI with day/month/year tabs (Total, RX, TX)
+- JSON API for Home Assistant integration
+
+## What it exposes
+- UI: `http://<router-lan-ip>:8088/`
+- CSV: `/day.csv`, `/month.csv`, `/year.csv`, `/info.txt`
+- API: `/api/summary.json`, `/api/day.json`, `/api/month.json`, `/api/year.json`
+
+## Repo structure
+- `app/mt-traffic.sh` - collector + UI/API generator
+- `mikrotik/install.rsc` - importable RouterOS install script
+- `scripts/install-to-router.sh` - helper upload/import script
+- `homeassistant/mikrotik_traffic_package.yaml` - REST + template sensors
+- `homeassistant/dashboard_cards.yaml` - Lovelace card example
+- `.github/workflows/docker-publish.yml` - build/push image to GHCR
+
+## Build image locally
+```bash
+docker build -t ghcr.io/ovikiss/mikrotik-traffic-monitor:local .
+```
+
+## Run locally
+```bash
+docker run --rm -p 8080:8080 \
+  -e MT_HOST=192.168.88.1 \
+  -e MT_COMMUNITY=trafficdb \
+  -e IFINDEX=9 \
+  -e POLL_SEC=3600 \
+  -e TZ=Europe/Bucharest \
+  -v "$PWD/data:/data" \
+  ghcr.io/ovikiss/mikrotik-traffic-monitor:local
+```
+
+## Install on MikroTik
+1. Edit variables at the top of `mikrotik/install.rsc`:
+- `mtmVeth` (default `veth2`)
+- `mtmDataPath` (default `/usb1/trafficdb`)
+- `mtmRootDir` (default `/usb1/containers/trafficdb`)
+- `mtmImage` (default `ghcr.io/ovikiss/mikrotik-traffic-monitor:latest`)
+- `mtmIfIndex` (WAN ifIndex, default `9`)
+
+2. Import script:
+```bash
+./scripts/install-to-router.sh admin@192.168.88.1
+```
+
+Manual alternative:
+```bash
+scp mikrotik/install.rsc admin@192.168.88.1:install-traffic-monitor.rsc
+ssh admin@192.168.88.1 '/import file-name=install-traffic-monitor.rsc'
+```
+
+## GitHub Actions container publish
+On push to `main` (or tag `v*`), workflow publishes:
+- `ghcr.io/ovikiss/mikrotik-traffic-monitor:latest` (main)
+- `ghcr.io/ovikiss/mikrotik-traffic-monitor:sha-...`
+- `ghcr.io/ovikiss/mikrotik-traffic-monitor:vX.Y.Z` (tags)
+
+## Home Assistant integration
+- Runtime API sample: `/api/home_assistant_rest_example.yaml`
+- Repo sample package: `homeassistant/mikrotik_traffic_package.yaml`
+- Example dashboard: `homeassistant/dashboard_cards.yaml`
+
+## Notes
+- RouterOS container package must be installed and enabled.
+- Use external USB storage for `root-dir` and DB path.
+- SNMP community is scoped to container IP (`/32`) by install script.
