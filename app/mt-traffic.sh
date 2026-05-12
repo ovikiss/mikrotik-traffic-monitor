@@ -315,6 +315,7 @@ const I18N = {
     light: 'Light',
     dark: 'Dark',
     poll: 'Poll',
+    pollInterval: 'Poll interval',
     pollSaved: 'Poll interval saved',
     pollInvalid: 'Invalid interval (examples: 45s, 15m, 2h)',
     save: 'Save',
@@ -340,6 +341,7 @@ const I18N = {
     light: 'Luminos',
     dark: 'Întunecat',
     poll: 'Interval',
+    pollInterval: 'Interval poll',
     pollSaved: 'Interval salvat',
     pollInvalid: 'Interval invalid (exemple: 45s, 15m, 2h)',
     save: 'Salvează',
@@ -363,7 +365,7 @@ const I18N = {
 };
 
 const TAB_LABEL_KEY = { day: 'day', month: 'month', year: 'year' };
-const state = { activeTab: 'day', lang: 'en', theme: 'light', rows: { day: [], month: [], year: [] }, info: {} };
+const state = { activeTab: 'day', lang: 'en', theme: 'light', pollInterval: '', rows: { day: [], month: [], year: [] }, info: {} };
 
 function toNum(v) { const n = parseFloat(v || '0'); return Number.isFinite(n) ? n : 0; }
 function fmtGiB(v) { return `${toNum(v).toFixed(3)} GiB`; }
@@ -447,7 +449,8 @@ function renderRows() {
   const samples = state.info.samples || '0';
   const updated = state.info.updated_local || '-';
   const activeLabel = t(TAB_LABEL_KEY[state.activeTab] || state.activeTab);
-  document.getElementById('meta').textContent = `${t('tab')}: ${activeLabel} | ${t('samples')}: ${samples} | ${t('lastUpdate')}: ${updated}`;
+  const poll = state.pollInterval || '-';
+  document.getElementById('meta').textContent = `${t('tab')}: ${activeLabel} | ${t('samples')}: ${samples} | ${t('lastUpdate')}: ${updated} | ${t('pollInterval')}: ${poll}`;
 }
 
 function setActiveTab(tab) {
@@ -495,9 +498,10 @@ async function loadSettings() {
   const q = `?_=${Date.now()}`;
   try {
     const d = await fetch('/api/settings.json' + q).then(r => r.json());
-    if (d && d.poll_interval) {
-      document.getElementById('poll-interval').value = d.poll_interval;
-    }
+    const p = (d && d.poll_interval) ? d.poll_interval : '';
+    state.pollInterval = p;
+    document.getElementById('poll-interval').value = p;
+    renderRows();
   } catch (_) {}
 }
 
@@ -518,6 +522,8 @@ async function savePollInterval() {
     document.getElementById('meta').textContent = t('loadError');
     return;
   }
+  state.pollInterval = v;
+  renderRows();
   document.getElementById('meta').textContent = `${t('pollSaved')}: ${v}`;
 }
 
