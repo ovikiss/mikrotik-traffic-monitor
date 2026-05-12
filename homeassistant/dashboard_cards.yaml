@@ -7,10 +7,22 @@ cards:
     entities:
       - entity: sensor.mikrotik_traffic_today
         name: Today
+      - entity: sensor.mikrotik_traffic_today_rx
+        name: Today Download (RX)
+      - entity: sensor.mikrotik_traffic_today_tx
+        name: Today Upload (TX)
       - entity: sensor.mikrotik_traffic_month
         name: This Month
+      - entity: sensor.mikrotik_traffic_month_rx
+        name: Month Download (RX)
+      - entity: sensor.mikrotik_traffic_month_tx
+        name: Month Upload (TX)
       - entity: sensor.mikrotik_traffic_year
         name: This Year
+      - entity: sensor.mikrotik_traffic_year_rx
+        name: Year Download (RX)
+      - entity: sensor.mikrotik_traffic_year_tx
+        name: Year Upload (TX)
 
   - type: gauge
     entity: sensor.mikrotik_traffic_today

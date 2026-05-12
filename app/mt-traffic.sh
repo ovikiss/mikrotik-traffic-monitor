@@ -131,6 +131,7 @@ cat > "$WWW/index.html" <<'HTML'
     .kpi { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 12px; }
     .kpi .label { font-size: 12px; color: var(--muted); margin-bottom: 4px; }
     .kpi .val { font-size: 20px; font-weight: bold; }
+    .kpi .sub { font-size: 12px; color: var(--muted); margin-top: 6px; }
     .card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 12px; }
     .tabs { display: flex; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; }
     .tab { border: 1px solid var(--border); background: var(--card); color: var(--text); border-radius: 999px; padding: 7px 12px; font-size: 13px; cursor: pointer; }
@@ -179,9 +180,21 @@ cat > "$WWW/index.html" <<'HTML'
   </div>
 
   <div class="kpis">
-    <div class="kpi"><div class="label" id="label-day">Total Today</div><div class="val" id="kpi-day">0.000 GiB</div></div>
-    <div class="kpi"><div class="label" id="label-month">Current Month Total</div><div class="val" id="kpi-month">0.000 GiB</div></div>
-    <div class="kpi"><div class="label" id="label-year">Current Year Total</div><div class="val" id="kpi-year">0.000 GiB</div></div>
+    <div class="kpi">
+      <div class="label" id="label-day">Total Today</div>
+      <div class="val" id="kpi-day">0.000 GiB</div>
+      <div class="sub"><span id="kpi-day-rx">RX: 0.000 GiB</span> | <span id="kpi-day-tx">TX: 0.000 GiB</span></div>
+    </div>
+    <div class="kpi">
+      <div class="label" id="label-month">Current Month Total</div>
+      <div class="val" id="kpi-month">0.000 GiB</div>
+      <div class="sub"><span id="kpi-month-rx">RX: 0.000 GiB</span> | <span id="kpi-month-tx">TX: 0.000 GiB</span></div>
+    </div>
+    <div class="kpi">
+      <div class="label" id="label-year">Current Year Total</div>
+      <div class="val" id="kpi-year">0.000 GiB</div>
+      <div class="sub"><span id="kpi-year-rx">RX: 0.000 GiB</span> | <span id="kpi-year-tx">TX: 0.000 GiB</span></div>
+    </div>
   </div>
 
   <div class="card">
@@ -306,6 +319,12 @@ function renderKpis() {
   document.getElementById('kpi-day').textContent = fmtGiB(state.info.today_total_gib);
   document.getElementById('kpi-month').textContent = fmtGiB(state.info.month_total_gib);
   document.getElementById('kpi-year').textContent = fmtGiB(state.info.year_total_gib);
+  document.getElementById('kpi-day-rx').textContent = `RX: ${fmtGiB(state.info.today_rx_gib)}`;
+  document.getElementById('kpi-day-tx').textContent = `TX: ${fmtGiB(state.info.today_tx_gib)}`;
+  document.getElementById('kpi-month-rx').textContent = `RX: ${fmtGiB(state.info.month_rx_gib)}`;
+  document.getElementById('kpi-month-tx').textContent = `TX: ${fmtGiB(state.info.month_tx_gib)}`;
+  document.getElementById('kpi-year-rx').textContent = `RX: ${fmtGiB(state.info.year_rx_gib)}`;
+  document.getElementById('kpi-year-tx').textContent = `TX: ${fmtGiB(state.info.year_tx_gib)}`;
 }
 
 function renderRows() {
@@ -495,8 +514,14 @@ summary = {
     "samples": int(to_num(info.get("samples", "0"))),
     "kpi": {
         "today_total_gib": to_num(info.get("today_total_gib", "0")),
+        "today_rx_gib": to_num(info.get("today_rx_gib", "0")),
+        "today_tx_gib": to_num(info.get("today_tx_gib", "0")),
         "month_total_gib": to_num(info.get("month_total_gib", "0")),
+        "month_rx_gib": to_num(info.get("month_rx_gib", "0")),
+        "month_tx_gib": to_num(info.get("month_tx_gib", "0")),
         "year_total_gib": to_num(info.get("year_total_gib", "0")),
+        "year_rx_gib": to_num(info.get("year_rx_gib", "0")),
+        "year_tx_gib": to_num(info.get("year_tx_gib", "0")),
     },
     "interface": {"ifindex": os.environ.get("IFINDEX_ENV", "")},
     "windows": {"day": "90d", "month": "24m", "year": "5y"},
@@ -525,8 +550,14 @@ rest:
         json_attributes_path: "$.kpi"
         json_attributes:
           - today_total_gib
+          - today_rx_gib
+          - today_tx_gib
           - month_total_gib
+          - month_rx_gib
+          - month_tx_gib
           - year_total_gib
+          - year_rx_gib
+          - year_tx_gib
 '''
 (api / "home_assistant_rest_example.yaml").write_text(ha, encoding="utf-8")
 PY
@@ -572,15 +603,27 @@ render_views() {
   cp "$WWW/day.csv" "$WWW/daily.csv"
 
   TODAY_TOTAL_GIB="$(sqlite_exec "SELECT COALESCE(ROUND(SUM(delta_bytes)/1073741824.0,3),0) FROM samples WHERE ts >= strftime('%s','now','localtime','start of day','utc');")"
+  TODAY_RX_GIB="$(sqlite_exec "SELECT COALESCE(ROUND(SUM(delta_in_bytes)/1073741824.0,3),0) FROM samples WHERE ts >= strftime('%s','now','localtime','start of day','utc');")"
+  TODAY_TX_GIB="$(sqlite_exec "SELECT COALESCE(ROUND(SUM(delta_out_bytes)/1073741824.0,3),0) FROM samples WHERE ts >= strftime('%s','now','localtime','start of day','utc');")"
   MONTH_TOTAL_GIB="$(sqlite_exec "SELECT COALESCE(ROUND(SUM(delta_bytes)/1073741824.0,3),0) FROM samples WHERE ts >= strftime('%s','now','localtime','start of month','utc');")"
+  MONTH_RX_GIB="$(sqlite_exec "SELECT COALESCE(ROUND(SUM(delta_in_bytes)/1073741824.0,3),0) FROM samples WHERE ts >= strftime('%s','now','localtime','start of month','utc');")"
+  MONTH_TX_GIB="$(sqlite_exec "SELECT COALESCE(ROUND(SUM(delta_out_bytes)/1073741824.0,3),0) FROM samples WHERE ts >= strftime('%s','now','localtime','start of month','utc');")"
   YEAR_TOTAL_GIB="$(sqlite_exec "SELECT COALESCE(ROUND(SUM(delta_bytes)/1073741824.0,3),0) FROM samples WHERE ts >= strftime('%s','now','localtime','start of year','utc');")"
+  YEAR_RX_GIB="$(sqlite_exec "SELECT COALESCE(ROUND(SUM(delta_in_bytes)/1073741824.0,3),0) FROM samples WHERE ts >= strftime('%s','now','localtime','start of year','utc');")"
+  YEAR_TX_GIB="$(sqlite_exec "SELECT COALESCE(ROUND(SUM(delta_out_bytes)/1073741824.0,3),0) FROM samples WHERE ts >= strftime('%s','now','localtime','start of year','utc');")"
   SAMPLES="$(sqlite_exec "SELECT COUNT(*) FROM samples;")"
   UPDATED_LOCAL="$(date '+%Y-%m-%d %H:%M:%S %Z')"
 
   {
     echo "today_total_gib=$TODAY_TOTAL_GIB"
+    echo "today_rx_gib=$TODAY_RX_GIB"
+    echo "today_tx_gib=$TODAY_TX_GIB"
     echo "month_total_gib=$MONTH_TOTAL_GIB"
+    echo "month_rx_gib=$MONTH_RX_GIB"
+    echo "month_tx_gib=$MONTH_TX_GIB"
     echo "year_total_gib=$YEAR_TOTAL_GIB"
+    echo "year_rx_gib=$YEAR_RX_GIB"
+    echo "year_tx_gib=$YEAR_TX_GIB"
     echo "samples=$SAMPLES"
     echo "updated_local=$UPDATED_LOCAL"
   } > "$WWW/info.txt"
