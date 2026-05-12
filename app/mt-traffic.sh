@@ -251,6 +251,7 @@ cat > "$WWW/index.html" <<'HTML'
     .control-icon { width: 14px; height: 14px; display: inline-flex; align-items: center; justify-content: center; color: var(--muted); }
     .control-icon img { width: 14px; height: 14px; display: block; opacity: .85; }
     .ico-inline { width: 14px; height: 14px; vertical-align: -2px; margin-right: 4px; opacity: .95; }
+    .th-hint { color: var(--muted); font-size: 11px; font-weight: normal; }
     .control select { border: 1px solid var(--border); border-radius: 8px; background: var(--card); color: var(--text); padding: 4px 8px; font-size: 12px; }
     .control input { border: 1px solid var(--border); border-radius: 8px; background: var(--card); color: var(--text); padding: 4px 8px; font-size: 12px; width: 80px; }
     .control button { border: 1px solid var(--border); border-radius: 8px; background: var(--card); color: var(--text); padding: 4px 8px; font-size: 12px; cursor: pointer; }
@@ -379,6 +380,7 @@ const I18N_FALLBACK = {
   download: 'Download',
   upload: 'Upload',
   visual: 'Visual',
+  visualHint: '(relative to max Total in current tab)',
   loading: 'Loading...',
   tab: 'Tab',
   samples: 'Samples',
@@ -533,7 +535,7 @@ function applyLanguage() {
   document.getElementById('th-total').innerHTML = `${uiIcon('total')}${t('total')}`;
   document.getElementById('th-rx').innerHTML = `${uiIcon('rx')}RX (GiB)`;
   document.getElementById('th-tx').innerHTML = `${uiIcon('tx')}TX (GiB)`;
-  document.getElementById('th-visual').textContent = t('visual');
+  document.getElementById('th-visual').innerHTML = `${uiIcon('visual')}${t('visual')} <span class=\"th-hint\">${esc(t('visualHint'))}</span>`;
 }
 
 function applyTheme() {
@@ -912,7 +914,7 @@ summary = {
         "interval": os.environ.get("POLL_INTERVAL_ENV", ""),
         "seconds": int(to_num(os.environ.get("POLL_SEC_ENV", "0"))),
     },
-    "windows": {"day": "90d", "month": "24m", "year": "5y"},
+    "windows": {"day": "30d", "month": "3m", "year": "3y"},
     "endpoints": {
         "day": "/api/day.json",
         "month": "/api/month.json",
@@ -958,10 +960,10 @@ render_views() {
            ROUND(SUM(delta_in_bytes)/1073741824.0, 3) AS rx_gib,
            ROUND(SUM(delta_out_bytes)/1073741824.0, 3) AS tx_gib
     FROM samples
-    WHERE ts >= strftime('%s','now','localtime','start of day','-89 days','utc')
+    WHERE ts >= strftime('%s','now','localtime','start of day','-29 days','utc')
     GROUP BY period
     ORDER BY period DESC
-    LIMIT 90;
+    LIMIT 30;
   " > "$WWW/day.csv"
 
   sqlite3 -header -csv "$DB" "
@@ -970,10 +972,10 @@ render_views() {
            ROUND(SUM(delta_in_bytes)/1073741824.0, 3) AS rx_gib,
            ROUND(SUM(delta_out_bytes)/1073741824.0, 3) AS tx_gib
     FROM samples
-    WHERE ts >= strftime('%s','now','localtime','start of month','-23 months','utc')
+    WHERE ts >= strftime('%s','now','localtime','start of month','-2 months','utc')
     GROUP BY period
     ORDER BY period DESC
-    LIMIT 24;
+    LIMIT 3;
   " > "$WWW/month.csv"
 
   sqlite3 -header -csv "$DB" "
@@ -982,10 +984,10 @@ render_views() {
            ROUND(SUM(delta_in_bytes)/1073741824.0, 3) AS rx_gib,
            ROUND(SUM(delta_out_bytes)/1073741824.0, 3) AS tx_gib
     FROM samples
-    WHERE ts >= strftime('%s','now','localtime','start of year','-4 years','utc')
+    WHERE ts >= strftime('%s','now','localtime','start of year','-2 years','utc')
     GROUP BY period
     ORDER BY period DESC
-    LIMIT 5;
+    LIMIT 3;
   " > "$WWW/year.csv"
 
   cp "$WWW/day.csv" "$WWW/daily.csv"

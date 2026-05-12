@@ -27,6 +27,7 @@
   "download": "Descarcare",
   "upload": "Incarcare",
   "visual": "Vizual",
+  "visualHint": "(raportat la maximul Total din tabul curent)",
   "loading": "Se incarca...",
   "tab": "Tab",
   "samples": "Mostre",
