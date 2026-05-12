@@ -64,6 +64,7 @@ jobs:
         run: |
           set -euo pipefail
 
+          IMAGE="ghcr.io/${OWNER}/${PACKAGE}:latest"
           API="https://api.github.com/users/${OWNER}/packages/container/${PACKAGE}/versions?per_page=100"
           ALL="$(curl -fsSL \
             -H "Authorization: Bearer ${GH_TOKEN}" \
@@ -80,7 +81,24 @@ jobs:
             exit 0
           fi
 
-          printf '%s' "$ALL" | jq -r --argjson keep "$KEEP_ID" '.[] | select(.id != $keep) | .id' | while read -r id; do
+          RAW="$(docker buildx imagetools inspect --raw "${IMAGE}")"
+          KEEP_DIGESTS="$(printf '%s' "$RAW" | jq -r '.manifests[]?.digest // empty')"
+
+          KEEP_IDS="$(printf '%s' "$ALL" | jq -r --argjson keep "$KEEP_ID" '
+            [ .[] | select(.id == $keep) | .id ] | .[]
+          ')"
+
+          if [ -n "${KEEP_DIGESTS}" ]; then
+            EXTRA_KEEP_IDS="$(printf '%s' "$ALL" | jq -r --arg digests "$KEEP_DIGESTS" '
+              ($digests | split("\n") | map(select(length > 0))) as $want
+              | .[] | select(.name as $n | ($want | index($n))) | .id
+            ')"
+            KEEP_IDS="$(printf '%s\n%s\n' "$KEEP_IDS" "$EXTRA_KEEP_IDS" | awk 'NF' | sort -u)"
+          fi
+
+          DELETE_IDS="$(printf '%s' "$ALL" | jq -r '.[] | .id' | grep -vxF -f <(printf '%s\n' "$KEEP_IDS") || true)"
+
+          printf '%s\n' "$DELETE_IDS" | while read -r id; do
             [ -n "$id" ] || continue
             curl -fsSL -X DELETE \
               -H "Authorization: Bearer ${GH_TOKEN}" \
