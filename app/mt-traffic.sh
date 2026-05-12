@@ -307,17 +307,17 @@ cat > "$WWW/index.html" <<'HTML'
     <div class="kpi">
       <div class="label" id="label-day">Total Today</div>
       <div class="val" id="kpi-day">0.000 GiB</div>
-      <div class="sub"><span id="kpi-day-rx">Download: 0.000 GiB</span> | <span id="kpi-day-tx">Upload: 0.000 GiB</span></div>
+      <div class="sub"><span id="kpi-day-rx">RX: 0.000 GiB</span> | <span id="kpi-day-tx">TX: 0.000 GiB</span></div>
     </div>
     <div class="kpi">
       <div class="label" id="label-month">Current Month Total</div>
       <div class="val" id="kpi-month">0.000 GiB</div>
-      <div class="sub"><span id="kpi-month-rx">Download: 0.000 GiB</span> | <span id="kpi-month-tx">Upload: 0.000 GiB</span></div>
+      <div class="sub"><span id="kpi-month-rx">RX: 0.000 GiB</span> | <span id="kpi-month-tx">TX: 0.000 GiB</span></div>
     </div>
     <div class="kpi">
       <div class="label" id="label-year">Current Year Total</div>
       <div class="val" id="kpi-year">0.000 GiB</div>
-      <div class="sub"><span id="kpi-year-rx">Download: 0.000 GiB</span> | <span id="kpi-year-tx">Upload: 0.000 GiB</span></div>
+      <div class="sub"><span id="kpi-year-rx">RX: 0.000 GiB</span> | <span id="kpi-year-tx">TX: 0.000 GiB</span></div>
     </div>
   </div>
 
@@ -333,8 +333,8 @@ cat > "$WWW/index.html" <<'HTML'
         <tr>
           <th id="th-period">Period</th>
           <th class="num" id="th-total">Total (GiB)</th>
-          <th class="num" id="th-rx">Download (GiB)</th>
-          <th class="num" id="th-tx">Upload (GiB)</th>
+          <th class="num" id="th-rx">RX (GiB)</th>
+          <th class="num" id="th-tx">TX (GiB)</th>
           <th id="th-visual">Visual</th>
         </tr>
       </thead>
@@ -507,8 +507,8 @@ function applyLanguage() {
   document.getElementById('tab-year').textContent = t('year');
   document.getElementById('th-period').textContent = t('period');
   document.getElementById('th-total').textContent = t('total');
-  document.getElementById('th-rx').innerHTML = `${uiIcon('download')}${t('download')} (GiB)`;
-  document.getElementById('th-tx').innerHTML = `${uiIcon('upload')}${t('upload')} (GiB)`;
+  document.getElementById('th-rx').innerHTML = `${uiIcon('rx')}RX (GiB)`;
+  document.getElementById('th-tx').innerHTML = `${uiIcon('tx')}TX (GiB)`;
   document.getElementById('th-visual').textContent = t('visual');
 }
 
@@ -523,12 +523,12 @@ function renderKpis() {
   document.getElementById('kpi-day').textContent = fmtGiB(state.info.today_total_gib);
   document.getElementById('kpi-month').textContent = fmtGiB(state.info.month_total_gib);
   document.getElementById('kpi-year').textContent = fmtGiB(state.info.year_total_gib);
-  document.getElementById('kpi-day-rx').innerHTML = `${uiIcon('download')}${t('download')}: ${fmtGiB(state.info.today_rx_gib)}`;
-  document.getElementById('kpi-day-tx').innerHTML = `${uiIcon('upload')}${t('upload')}: ${fmtGiB(state.info.today_tx_gib)}`;
-  document.getElementById('kpi-month-rx').innerHTML = `${uiIcon('download')}${t('download')}: ${fmtGiB(state.info.month_rx_gib)}`;
-  document.getElementById('kpi-month-tx').innerHTML = `${uiIcon('upload')}${t('upload')}: ${fmtGiB(state.info.month_tx_gib)}`;
-  document.getElementById('kpi-year-rx').innerHTML = `${uiIcon('download')}${t('download')}: ${fmtGiB(state.info.year_rx_gib)}`;
-  document.getElementById('kpi-year-tx').innerHTML = `${uiIcon('upload')}${t('upload')}: ${fmtGiB(state.info.year_tx_gib)}`;
+  document.getElementById('kpi-day-rx').innerHTML = `${uiIcon('rx')}RX: ${fmtGiB(state.info.today_rx_gib)}`;
+  document.getElementById('kpi-day-tx').innerHTML = `${uiIcon('tx')}TX: ${fmtGiB(state.info.today_tx_gib)}`;
+  document.getElementById('kpi-month-rx').innerHTML = `${uiIcon('rx')}RX: ${fmtGiB(state.info.month_rx_gib)}`;
+  document.getElementById('kpi-month-tx').innerHTML = `${uiIcon('tx')}TX: ${fmtGiB(state.info.month_tx_gib)}`;
+  document.getElementById('kpi-year-rx').innerHTML = `${uiIcon('rx')}RX: ${fmtGiB(state.info.year_rx_gib)}`;
+  document.getElementById('kpi-year-tx').innerHTML = `${uiIcon('tx')}TX: ${fmtGiB(state.info.year_tx_gib)}`;
 }
 
 function renderRows() {
