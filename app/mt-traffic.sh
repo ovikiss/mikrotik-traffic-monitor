@@ -573,7 +573,7 @@ async function loadSettings() {
   const q = `?_=${Date.now()}`;
   try {
     const d = await fetch('/api/settings.json' + q).then(r => r.json());
-    const p = (d && d.poll_interval) ? d.poll_interval : '';
+    const p = (d && d.poll_interval) ? d.poll_interval : ((d && d.effective_poll_interval) ? d.effective_poll_interval : '');
     const theme = (d && (d.theme === 'light' || d.theme === 'dark' || d.theme === 'auto')) ? d.theme : '';
     const lang = (d && getLanguageDef(String(d.language || '').toLowerCase())) ? String(d.language || '').toLowerCase() : '';
     state.pollInterval = p;
@@ -953,7 +953,7 @@ render_views() {
 }
 
 start_http_server() {
-  WWW_DIR="$WWW" HTTP_PORT_ENV="$HTTP_PORT" SETTINGS_PATH_ENV="$SETTINGS_PATH" python3 - <<'PY' &
+  WWW_DIR="$WWW" HTTP_PORT_ENV="$HTTP_PORT" SETTINGS_PATH_ENV="$SETTINGS_PATH" EFFECTIVE_POLL_INTERVAL_ENV="$ACTIVE_POLL_INTERVAL" python3 - <<'PY' &
 import json
 import os
 from http.server import ThreadingHTTPServer, SimpleHTTPRequestHandler
@@ -962,6 +962,7 @@ from pathlib import Path
 www = os.environ["WWW_DIR"]
 port = int(os.environ["HTTP_PORT_ENV"])
 settings_path = Path(os.environ["SETTINGS_PATH_ENV"])
+effective_poll_interval = os.environ.get("EFFECTIVE_POLL_INTERVAL_ENV", "")
 
 
 def read_settings():
@@ -1034,6 +1035,7 @@ class Handler(SimpleHTTPRequestHandler):
             cfg = read_settings()
             self._send_json(200, {
                 "poll_interval": cfg.get("poll_interval", ""),
+                "effective_poll_interval": effective_poll_interval,
                 "theme": cfg.get("theme", ""),
                 "language": cfg.get("language", ""),
             })
@@ -1103,8 +1105,8 @@ PY
 
 write_ui
 init_db
-start_http_server
 resolve_poll_interval
+start_http_server
 resolve_ifindex || true
 render_views
 
