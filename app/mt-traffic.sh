@@ -42,7 +42,7 @@ cat > "$WWW/index.html" <<'HTML'
       --border: #243244;
       --text: #e5e7eb;
       --muted: #94a3b8;
-      --blue: #60a5fa;
+      --blue: #6b7280;
       --table-head: #1b2638;
       --table-border: #2a3a50;
       --bar-bg: #253346;
