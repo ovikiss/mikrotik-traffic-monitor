@@ -37,15 +37,15 @@ cat > "$WWW/index.html" <<'HTML'
       --bar-bg: #edf2f7;
     }
     html[data-theme="dark"] {
-      --bg: #121212;
-      --card: #1b1b1b;
-      --border: #2f2f2f;
-      --text: #e5e5e5;
-      --muted: #a3a3a3;
-      --blue: #6b7280;
-      --table-head: #202020;
-      --table-border: #303030;
-      --bar-bg: #2a2a2a;
+      --bg: #252a31;
+      --card: #21262d;
+      --border: #2a416b;
+      --text: #d6d6d6;
+      --muted: #a69f96;
+      --blue: #2d5ec7;
+      --table-head: #232931;
+      --table-border: #344463;
+      --bar-bg: #2a3443;
     }
     body { margin: 0; padding: 20px; background: var(--bg); color: var(--text); font-family: Arial, sans-serif; }
     h1 { margin: 0 0 6px; font-size: 22px; }
