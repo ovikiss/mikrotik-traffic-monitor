@@ -32,6 +32,20 @@ cat > "$WWW/index.html" <<'HTML'
       --text: #1f2937;
       --muted: #64748b;
       --blue: #2563eb;
+      --table-head: #fafbfe;
+      --table-border: #eef1f6;
+      --bar-bg: #edf2f7;
+    }
+    html[data-theme="dark"] {
+      --bg: #0f172a;
+      --card: #111827;
+      --border: #243244;
+      --text: #e5e7eb;
+      --muted: #94a3b8;
+      --blue: #60a5fa;
+      --table-head: #1b2638;
+      --table-border: #2a3a50;
+      --bar-bg: #253346;
     }
     body { margin: 0; padding: 20px; background: var(--bg); color: var(--text); font-family: Arial, sans-serif; }
     h1 { margin: 0 0 6px; font-size: 22px; }
@@ -42,19 +56,25 @@ cat > "$WWW/index.html" <<'HTML'
     .kpi .val { font-size: 20px; font-weight: bold; }
     .card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 12px; }
     .tabs { display: flex; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; }
-    .tab { border: 1px solid var(--border); background: #fff; color: var(--text); border-radius: 999px; padding: 7px 12px; font-size: 13px; cursor: pointer; }
+    .tab { border: 1px solid var(--border); background: var(--card); color: var(--text); border-radius: 999px; padding: 7px 12px; font-size: 13px; cursor: pointer; }
     .tab.active { background: var(--blue); color: #fff; border-color: var(--blue); }
     table { width: 100%; border-collapse: collapse; font-size: 13px; }
-    th, td { text-align: left; border-bottom: 1px solid #eef1f6; padding: 8px; }
-    th { background: #fafbfe; }
+    th, td { text-align: left; border-bottom: 1px solid var(--table-border); padding: 8px; }
+    th { background: var(--table-head); }
     .num { text-align: right; font-variant-numeric: tabular-nums; }
-    .bar-wrap { width: 140px; max-width: 100%; height: 8px; border-radius: 999px; background: #edf2f7; overflow: hidden; }
+    .bar-wrap { width: 140px; max-width: 100%; height: 8px; border-radius: 999px; background: var(--bar-bg); overflow: hidden; }
     .bar { height: 8px; background: var(--blue); }
     .meta { margin-top: 8px; color: var(--muted); font-size: 12px; }
     .topbar { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
-    .lang { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--muted); }
-    .lang select { border: 1px solid var(--border); border-radius: 8px; background: #fff; color: var(--text); padding: 4px 8px; font-size: 12px; }
-    @media (max-width: 760px) { th:nth-child(5), td:nth-child(5) { display: none; } .bar-wrap { width: 80px; } }
+    .controls { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; justify-content: flex-end; }
+    .control { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--muted); }
+    .control select { border: 1px solid var(--border); border-radius: 8px; background: var(--card); color: var(--text); padding: 4px 8px; font-size: 12px; }
+    @media (max-width: 760px) {
+      th:nth-child(5), td:nth-child(5) { display: none; }
+      .bar-wrap { width: 80px; }
+      .topbar { flex-direction: column; }
+      .controls { justify-content: flex-start; }
+    }
   </style>
 </head>
 <body>
@@ -63,13 +83,22 @@ cat > "$WWW/index.html" <<'HTML'
       <h1>MikroTik Traffic Monitor</h1>
       <div class="subtitle" id="subtitle">Day / Month / Year aggregation, updated hourly.</div>
     </div>
-    <label class="lang" for="lang">
-      <span id="lang-label">Language</span>
-      <select id="lang">
-        <option value="en">EN</option>
-        <option value="ro">RO</option>
-      </select>
-    </label>
+    <div class="controls">
+      <label class="control" for="theme">
+        <span id="theme-label">Theme</span>
+        <select id="theme">
+          <option value="light" id="theme-opt-light">Light</option>
+          <option value="dark" id="theme-opt-dark">Dark</option>
+        </select>
+      </label>
+      <label class="control" for="lang">
+        <span id="lang-label">Language</span>
+        <select id="lang">
+          <option value="en">EN</option>
+          <option value="ro">RO</option>
+        </select>
+      </label>
+    </div>
   </div>
 
   <div class="kpis">
@@ -104,6 +133,9 @@ cat > "$WWW/index.html" <<'HTML'
 <script>
 const I18N = {
   en: {
+    theme: 'Theme',
+    light: 'Light',
+    dark: 'Dark',
     language: 'Language',
     subtitle: 'Day / Month / Year aggregation, updated hourly.',
     totalToday: 'Total Today',
@@ -122,6 +154,9 @@ const I18N = {
     loadError: 'Load error'
   },
   ro: {
+    theme: 'Temă',
+    light: 'Luminos',
+    dark: 'Întunecat',
     language: 'Limbă',
     subtitle: 'Agregare pe Zi / Luna / An, update la fiecare oră.',
     totalToday: 'Total azi',
@@ -142,7 +177,7 @@ const I18N = {
 };
 
 const TAB_LABEL_KEY = { day: 'day', month: 'month', year: 'year' };
-const state = { activeTab: 'day', lang: 'en', rows: { day: [], month: [], year: [] }, info: {} };
+const state = { activeTab: 'day', lang: 'en', theme: 'light', rows: { day: [], month: [], year: [] }, info: {} };
 
 function toNum(v) { const n = parseFloat(v || '0'); return Number.isFinite(n) ? n : 0; }
 function fmtGiB(v) { return `${toNum(v).toFixed(3)} GiB`; }
@@ -168,6 +203,9 @@ function parseInfo(txt) {
 
 function applyLanguage() {
   document.documentElement.lang = state.lang;
+  document.getElementById('theme-label').textContent = t('theme');
+  document.getElementById('theme-opt-light').textContent = t('light');
+  document.getElementById('theme-opt-dark').textContent = t('dark');
   document.getElementById('lang').value = state.lang;
   document.getElementById('lang-label').textContent = t('language');
   document.getElementById('subtitle').textContent = t('subtitle');
@@ -180,6 +218,11 @@ function applyLanguage() {
   document.getElementById('th-period').textContent = t('period');
   document.getElementById('th-total').textContent = t('total');
   document.getElementById('th-visual').textContent = t('visual');
+}
+
+function applyTheme() {
+  document.documentElement.setAttribute('data-theme', state.theme);
+  document.getElementById('theme').value = state.theme;
 }
 
 function renderKpis() {
@@ -226,6 +269,12 @@ function setLanguage(lang) {
   renderRows();
 }
 
+function setTheme(theme) {
+  state.theme = (theme === 'dark') ? 'dark' : 'light';
+  localStorage.setItem('mtm_theme', state.theme);
+  applyTheme();
+}
+
 async function loadAll() {
   const q = `?_=${Date.now()}`;
   const [d, m, y, i] = await Promise.all([
@@ -245,9 +294,13 @@ async function loadAll() {
 }
 
 const storedLang = localStorage.getItem('mtm_lang');
+const storedTheme = localStorage.getItem('mtm_theme');
 state.lang = (storedLang === 'ro') ? 'ro' : 'en';
+state.theme = (storedTheme === 'dark') ? 'dark' : 'light';
+applyTheme();
 applyLanguage();
 document.getElementById('meta').textContent = t('loading');
+document.getElementById('theme').addEventListener('change', (e) => setTheme(e.target.value));
 document.getElementById('lang').addEventListener('change', (e) => setLanguage(e.target.value));
 document.querySelectorAll('.tab').forEach(btn => btn.addEventListener('click', () => setActiveTab(btn.dataset.tab)));
 loadAll().catch(e => { document.getElementById('meta').textContent = `${t('loadError')}: ${e}`; });
