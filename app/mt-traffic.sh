@@ -320,8 +320,8 @@ cat > "$WWW/index.html" <<'HTML'
 
 <script>
 const DEFAULT_LANGUAGES = [
-  { code: 'en', label: 'EN', file: '/i18n/en.json', icon: '/images/lang/en.svg' },
-  { code: 'ro', label: 'RO', file: '/i18n/ro.json', icon: '/images/lang/ro.svg' }
+  { code: 'en', label: 'EN', flag: '🇺🇸', file: '/i18n/en.json', icon: '/images/lang/en.svg' },
+  { code: 'ro', label: 'RO', flag: '🇷🇴', file: '/i18n/ro.json', icon: '/images/lang/ro.svg' }
 ];
 const I18N = {};
 const I18N_FALLBACK = {
@@ -385,11 +385,12 @@ function normalizeLanguageList(items) {
     if (!x || typeof x !== 'object') return;
     const code = String(x.code || '').trim().toLowerCase();
     const label = String(x.label || code.toUpperCase()).trim();
+    const flag = String(x.flag || '').trim();
     const file = String(x.file || '').trim();
     const icon = String(x.icon || `/images/lang/${code}.svg`).trim();
     if (!/^[a-z][a-z0-9_-]{1,15}$/.test(code)) return;
     if (!file || file[0] !== '/') return;
-    out.push({ code, label: label || code.toUpperCase(), file, icon });
+    out.push({ code, label: label || code.toUpperCase(), flag, file, icon });
   });
   if (!out.find(l => l.code === 'en')) {
     out.unshift(DEFAULT_LANGUAGES[0]);
@@ -403,7 +404,7 @@ function renderLanguageOptions() {
   (state.languages || []).forEach((l) => {
     const opt = document.createElement('option');
     opt.value = l.code;
-    opt.textContent = l.label;
+    opt.textContent = `${l.flag ? `${l.flag} ` : ''}${l.label}`;
     sel.appendChild(opt);
   });
 }
@@ -446,9 +447,9 @@ function applyLanguage() {
   const langDef = getLanguageDef(state.lang) || getLanguageDef('en');
   document.getElementById('lang-icon-img').setAttribute('src', (langDef && langDef.icon) ? langDef.icon : '/images/lang/en.svg');
   document.getElementById('theme-label').textContent = t('theme');
-  document.getElementById('theme-opt-auto').textContent = t('auto');
-  document.getElementById('theme-opt-light').textContent = t('light');
-  document.getElementById('theme-opt-dark').textContent = t('dark');
+  document.getElementById('theme-opt-auto').textContent = `🖥️ ${t('auto')}`;
+  document.getElementById('theme-opt-light').textContent = `☀️ ${t('light')}`;
+  document.getElementById('theme-opt-dark').textContent = `🌙 ${t('dark')}`;
   document.getElementById('poll-label').textContent = t('poll');
   document.getElementById('poll-save').textContent = t('save');
   document.getElementById('lang').value = state.lang;
@@ -684,7 +685,7 @@ fi
 if [ -f "$SCRIPT_DIR/i18n/languages.json" ]; then
   cp "$SCRIPT_DIR/i18n/languages.json" "$WWW/i18n/languages.json"
 else
-  printf '%s\n' '[{"code":"en","label":"EN","file":"/i18n/en.json","icon":"/images/lang/en.svg"},{"code":"ro","label":"RO","file":"/i18n/ro.json","icon":"/images/lang/ro.svg"}]' > "$WWW/i18n/languages.json"
+  printf '%s\n' '[{"code":"en","label":"EN","flag":"🇺🇸","file":"/i18n/en.json","icon":"/images/lang/en.svg"},{"code":"ro","label":"RO","flag":"🇷🇴","file":"/i18n/ro.json","icon":"/images/lang/ro.svg"}]' > "$WWW/i18n/languages.json"
 fi
 
 mkdir -p "$WWW/images"
