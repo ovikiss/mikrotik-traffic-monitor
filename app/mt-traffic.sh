@@ -261,7 +261,12 @@ cat > "$WWW/index.html" <<'HTML'
       </label>
       <label class="control" for="poll-interval">
         <span id="poll-label">Poll</span>
-        <input id="poll-interval" placeholder="60m" />
+        <input id="poll-interval" type="number" min="1" step="1" placeholder="60" />
+        <select id="poll-unit">
+          <option value="s" id="poll-unit-s">seconds</option>
+          <option value="m" id="poll-unit-m">minutes</option>
+          <option value="h" id="poll-unit-h">hours</option>
+        </select>
         <button id="poll-save" type="button">Save</button>
       </label>
       <label class="control" for="lang">
@@ -451,6 +456,9 @@ function applyLanguage() {
   document.getElementById('theme-opt-light').textContent = `☀️ ${t('light')}`;
   document.getElementById('theme-opt-dark').textContent = `🌙 ${t('dark')}`;
   document.getElementById('poll-label').textContent = t('poll');
+  document.getElementById('poll-unit-s').textContent = t('secondsPlural');
+  document.getElementById('poll-unit-m').textContent = t('minutesPlural');
+  document.getElementById('poll-unit-h').textContent = t('hoursPlural');
   document.getElementById('poll-save').textContent = t('save');
   document.getElementById('lang').value = state.lang;
   document.getElementById('lang-label').textContent = t('language');
@@ -554,9 +562,11 @@ function isValidInterval(v) {
   return /^[0-9]+([smh])?$/i.test((v || '').trim());
 }
 
-function normalizeInterval(v) {
+function splitInterval(v) {
   const s = (v || '').trim().toLowerCase();
-  return /^[0-9]+$/.test(s) ? `${s}m` : s;
+  const m = s.match(/^([0-9]+)([smh]?)$/);
+  if (!m) return null;
+  return { value: m[1], unit: m[2] || 'm' };
 }
 
 async function loadSettings() {
@@ -567,7 +577,14 @@ async function loadSettings() {
     const theme = (d && (d.theme === 'light' || d.theme === 'dark' || d.theme === 'auto')) ? d.theme : '';
     const lang = (d && getLanguageDef(String(d.language || '').toLowerCase())) ? String(d.language || '').toLowerCase() : '';
     state.pollInterval = p;
-    document.getElementById('poll-interval').value = p;
+    const parsed = splitInterval(p);
+    if (parsed) {
+      document.getElementById('poll-interval').value = parsed.value;
+      document.getElementById('poll-unit').value = parsed.unit;
+    } else {
+      document.getElementById('poll-interval').value = '';
+      document.getElementById('poll-unit').value = 'm';
+    }
     if (theme) {
       state.theme = theme;
       localStorage.setItem('mtm_theme', theme);
@@ -621,7 +638,19 @@ async function loadLanguageConfig() {
 
 async function savePollInterval() {
   const inp = document.getElementById('poll-interval');
-  const v = normalizeInterval(inp.value || '');
+  const unitSel = document.getElementById('poll-unit');
+  const numRaw = String(inp.value || '').trim();
+  const unit = String(unitSel.value || 'm').trim().toLowerCase();
+  if (!/^[0-9]+$/.test(numRaw) || !/^[smh]$/.test(unit)) {
+    document.getElementById('meta').textContent = t('pollInvalid');
+    return;
+  }
+  const n = parseInt(numRaw, 10);
+  if (!Number.isFinite(n) || n <= 0) {
+    document.getElementById('meta').textContent = t('pollInvalid');
+    return;
+  }
+  const v = `${n}${unit}`;
   if (!isValidInterval(v)) {
     document.getElementById('meta').textContent = t('pollInvalid');
     return;
@@ -634,9 +663,10 @@ async function savePollInterval() {
     return;
   }
   state.pollInterval = v;
-  inp.value = v;
+  inp.value = String(n);
+  unitSel.value = unit;
   renderRows();
-  document.getElementById('meta').textContent = `${t('pollSaved')}: ${v}`;
+  document.getElementById('meta').textContent = `${t('pollSaved')}: ${formatPollInterval(v)}`;
   setTimeout(() => { window.location.reload(); }, 900);
 }
 
