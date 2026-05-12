@@ -1,0 +1,20 @@
+# Lovelace example cards
+
+type: vertical-stack
+cards:
+  - type: entities
+    title: MikroTik Traffic KPIs
+    entities:
+      - entity: sensor.mikrotik_traffic_today
+        name: Today
+      - entity: sensor.mikrotik_traffic_month
+        name: This Month
+      - entity: sensor.mikrotik_traffic_year
+        name: This Year
+
+  - type: gauge
+    entity: sensor.mikrotik_traffic_today
+    name: Today traffic
+    min: 0
+    max: 100
+    unit: GiB
