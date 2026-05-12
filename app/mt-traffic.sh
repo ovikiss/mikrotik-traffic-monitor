@@ -250,7 +250,7 @@ cat > "$WWW/index.html" <<'HTML'
     .control { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--muted); }
     .control-icon { width: 14px; height: 14px; display: inline-flex; align-items: center; justify-content: center; color: var(--muted); }
     .control-icon img { width: 14px; height: 14px; display: block; opacity: .85; }
-    .ico-inline { width: 12px; height: 12px; vertical-align: -2px; margin-right: 4px; opacity: .9; }
+    .ico-inline { width: 14px; height: 14px; vertical-align: -2px; margin-right: 4px; opacity: .95; }
     .control select { border: 1px solid var(--border); border-radius: 8px; background: var(--card); color: var(--text); padding: 4px 8px; font-size: 12px; }
     .control input { border: 1px solid var(--border); border-radius: 8px; background: var(--card); color: var(--text); padding: 4px 8px; font-size: 12px; width: 80px; }
     .control button { border: 1px solid var(--border); border-radius: 8px; background: var(--card); color: var(--text); padding: 4px 8px; font-size: 12px; cursor: pointer; }
