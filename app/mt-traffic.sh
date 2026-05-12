@@ -532,7 +532,12 @@ function renderRows() {
     tbody.appendChild(tr);
   });
 
-  const samples = state.info.samples || '0';
+  const sampleByTab = {
+    day: state.info.samples_day || state.info.samples || '0',
+    month: state.info.samples_month || state.info.samples || '0',
+    year: state.info.samples_year || state.info.samples || '0'
+  };
+  const samples = sampleByTab[state.activeTab] || state.info.samples || '0';
   const updated = state.info.updated_local || '-';
   const activeLabel = t(TAB_LABEL_KEY[state.activeTab] || state.activeTab);
   const poll = formatPollInterval(state.pollInterval);
@@ -953,6 +958,9 @@ render_views() {
   YEAR_RX_GIB="$(sqlite_exec "SELECT COALESCE(ROUND(SUM(delta_in_bytes)/1073741824.0,3),0) FROM samples WHERE ts >= strftime('%s','now','localtime','start of year','utc');")"
   YEAR_TX_GIB="$(sqlite_exec "SELECT COALESCE(ROUND(SUM(delta_out_bytes)/1073741824.0,3),0) FROM samples WHERE ts >= strftime('%s','now','localtime','start of year','utc');")"
   SAMPLES="$(sqlite_exec "SELECT COUNT(*) FROM samples;")"
+  SAMPLES_DAY="$(sqlite_exec "SELECT COUNT(*) FROM samples WHERE ts >= strftime('%s','now','localtime','start of day','utc');")"
+  SAMPLES_MONTH="$(sqlite_exec "SELECT COUNT(*) FROM samples WHERE ts >= strftime('%s','now','localtime','start of month','utc');")"
+  SAMPLES_YEAR="$(sqlite_exec "SELECT COUNT(*) FROM samples WHERE ts >= strftime('%s','now','localtime','start of year','utc');")"
   UPDATED_LOCAL="$(date '+%Y-%m-%d %H:%M:%S %Z')"
 
   {
@@ -966,6 +974,9 @@ render_views() {
     echo "year_rx_gib=$YEAR_RX_GIB"
     echo "year_tx_gib=$YEAR_TX_GIB"
     echo "samples=$SAMPLES"
+    echo "samples_day=$SAMPLES_DAY"
+    echo "samples_month=$SAMPLES_MONTH"
+    echo "samples_year=$SAMPLES_YEAR"
     echo "updated_local=$UPDATED_LOCAL"
   } > "$WWW/info.txt"
 
