@@ -33,7 +33,7 @@ parse_interval_to_sec() {
     *s) N="${RAW%s}"; S="$N" ;;
     *m) N="${RAW%m}"; S="$((N * 60))" ;;
     *h) N="${RAW%h}"; S="$((N * 3600))" ;;
-    *)  N="$RAW"; S="$N" ;;
+    *)  N="$RAW"; RAW="${RAW}m"; S="$((N * 60))" ;;
   esac
 
   case "$N" in ''|*[!0-9]*) return 1 ;; esac
@@ -309,59 +309,32 @@ cat > "$WWW/index.html" <<'HTML'
   </div>
 
 <script>
-const I18N = {
-  en: {
-    theme: 'Theme',
-    light: 'Light',
-    dark: 'Dark',
-    poll: 'Poll',
-    pollInterval: 'Poll interval',
-    pollSaved: 'Poll interval saved',
-    pollInvalid: 'Invalid interval (examples: 45s, 15m, 2h)',
-    save: 'Save',
-    language: 'Language',
-    subtitle: 'Day / Month / Year aggregation, updated hourly.',
-    totalToday: 'Total Today',
-    totalMonth: 'Current Month Total',
-    totalYear: 'Current Year Total',
-    day: 'Day',
-    month: 'Month',
-    year: 'Year',
-    period: 'Period',
-    total: 'Total (GiB)',
-    visual: 'Visual',
-    loading: 'Loading...',
-    tab: 'Tab',
-    samples: 'Samples',
-    lastUpdate: 'Last update',
-    loadError: 'Load error'
-  },
-  ro: {
-    theme: 'Temă',
-    light: 'Luminos',
-    dark: 'Întunecat',
-    poll: 'Interval',
-    pollInterval: 'Interval poll',
-    pollSaved: 'Interval salvat',
-    pollInvalid: 'Interval invalid (exemple: 45s, 15m, 2h)',
-    save: 'Salvează',
-    language: 'Limbă',
-    subtitle: 'Agregare pe Zi / Luna / An, update la fiecare oră.',
-    totalToday: 'Total azi',
-    totalMonth: 'Total luna curentă',
-    totalYear: 'Total anul curent',
-    day: 'Zi',
-    month: 'Lună',
-    year: 'An',
-    period: 'Perioada',
-    total: 'Total (GiB)',
-    visual: 'Vizual',
-    loading: 'Se încarcă...',
-    tab: 'Tab',
-    samples: 'Mostre',
-    lastUpdate: 'Ultimul update',
-    loadError: 'Eroare încărcare'
-  }
+const I18N = { en: {}, ro: {} };
+const I18N_FALLBACK = {
+  theme: 'Theme',
+  light: 'Light',
+  dark: 'Dark',
+  poll: 'Poll',
+  pollInterval: 'Poll interval',
+  pollSaved: 'Poll interval saved',
+  pollInvalid: 'Invalid interval (examples: 60, 45s, 15m, 2h)',
+  save: 'Save',
+  language: 'Language',
+  subtitle: 'Day / Month / Year aggregation, updated hourly.',
+  totalToday: 'Total Today',
+  totalMonth: 'Current Month Total',
+  totalYear: 'Current Year Total',
+  day: 'Day',
+  month: 'Month',
+  year: 'Year',
+  period: 'Period',
+  total: 'Total (GiB)',
+  visual: 'Visual',
+  loading: 'Loading...',
+  tab: 'Tab',
+  samples: 'Samples',
+  lastUpdate: 'Last update',
+  loadError: 'Load error'
 };
 
 const TAB_LABEL_KEY = { day: 'day', month: 'month', year: 'year' };
@@ -369,7 +342,9 @@ const state = { activeTab: 'day', lang: 'en', theme: 'light', pollInterval: '', 
 
 function toNum(v) { const n = parseFloat(v || '0'); return Number.isFinite(n) ? n : 0; }
 function fmtGiB(v) { return `${toNum(v).toFixed(3)} GiB`; }
-function t(key) { return (I18N[state.lang] && I18N[state.lang][key]) || I18N.en[key] || key; }
+function t(key) {
+  return (I18N[state.lang] && I18N[state.lang][key]) || (I18N.en && I18N.en[key]) || I18N_FALLBACK[key] || key;
+}
 
 function parseCsv(txt) {
   const lines = (txt || '').trim().split('\n');
@@ -464,12 +439,14 @@ function setLanguage(lang) {
   localStorage.setItem('mtm_lang', state.lang);
   applyLanguage();
   renderRows();
+  saveSettings({ language: state.lang }).catch(() => {});
 }
 
 function setTheme(theme) {
   state.theme = (theme === 'dark') ? 'dark' : 'light';
   localStorage.setItem('mtm_theme', state.theme);
   applyTheme();
+  saveSettings({ theme: state.theme }).catch(() => {});
 }
 
 async function loadAll() {
@@ -491,7 +468,12 @@ async function loadAll() {
 }
 
 function isValidInterval(v) {
-  return /^[0-9]+[smh]$/i.test((v || '').trim());
+  return /^[0-9]+([smh])?$/i.test((v || '').trim());
+}
+
+function normalizeInterval(v) {
+  const s = (v || '').trim().toLowerCase();
+  return /^[0-9]+$/.test(s) ? `${s}m` : s;
 }
 
 async function loadSettings() {
@@ -499,30 +481,64 @@ async function loadSettings() {
   try {
     const d = await fetch('/api/settings.json' + q).then(r => r.json());
     const p = (d && d.poll_interval) ? d.poll_interval : '';
+    const theme = (d && (d.theme === 'light' || d.theme === 'dark')) ? d.theme : '';
+    const lang = (d && (d.language === 'en' || d.language === 'ro')) ? d.language : '';
     state.pollInterval = p;
     document.getElementById('poll-interval').value = p;
+    if (theme) {
+      state.theme = theme;
+      localStorage.setItem('mtm_theme', theme);
+      applyTheme();
+    }
+    if (lang) {
+      state.lang = lang;
+      localStorage.setItem('mtm_lang', lang);
+      applyLanguage();
+    }
+    renderRows();
+  } catch (_) {}
+}
+
+async function saveSettings(patch) {
+  const res = await fetch('/api/settings', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(patch || {})
+  });
+  if (!res.ok) throw new Error('save_failed');
+  return res.json();
+}
+
+async function loadTranslations() {
+  const q = `?_=${Date.now()}`;
+  try {
+    const [en, ro] = await Promise.all([
+      fetch('/i18n/en.json' + q).then(r => r.json()),
+      fetch('/i18n/ro.json' + q).then(r => r.json())
+    ]);
+    I18N.en = en || {};
+    I18N.ro = ro || {};
+    applyLanguage();
     renderRows();
   } catch (_) {}
 }
 
 async function savePollInterval() {
   const inp = document.getElementById('poll-interval');
-  const v = (inp.value || '').trim().toLowerCase();
+  const v = normalizeInterval(inp.value || '');
   if (!isValidInterval(v)) {
     document.getElementById('meta').textContent = t('pollInvalid');
     return;
   }
 
-  const res = await fetch('/api/settings', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ poll_interval: v })
-  });
-  if (!res.ok) {
+  try {
+    await saveSettings({ poll_interval: v });
+  } catch (_) {
     document.getElementById('meta').textContent = t('loadError');
     return;
   }
   state.pollInterval = v;
+  inp.value = v;
   renderRows();
   document.getElementById('meta').textContent = `${t('pollSaved')}: ${v}`;
 }
@@ -540,11 +556,71 @@ document.getElementById('poll-save').addEventListener('click', () => { savePollI
 document.querySelectorAll('.tab').forEach(btn => btn.addEventListener('click', () => setActiveTab(btn.dataset.tab)));
 loadAll().catch(e => { document.getElementById('meta').textContent = `${t('loadError')}: ${e}`; });
 loadSettings().catch(() => {});
+loadTranslations().catch(() => {});
 setInterval(() => { loadAll().catch(() => {}); }, 60000);
 </script>
 </body>
 </html>
 HTML
+
+mkdir -p "$WWW/i18n"
+cat > "$WWW/i18n/en.json" <<'JSON'
+{
+  "theme": "Theme",
+  "light": "Light",
+  "dark": "Dark",
+  "poll": "Poll",
+  "pollInterval": "Poll interval",
+  "pollSaved": "Poll interval saved",
+  "pollInvalid": "Invalid interval (examples: 60, 45s, 15m, 2h)",
+  "save": "Save",
+  "language": "Language",
+  "subtitle": "Day / Month / Year aggregation, updated hourly.",
+  "totalToday": "Total Today",
+  "totalMonth": "Current Month Total",
+  "totalYear": "Current Year Total",
+  "day": "Day",
+  "month": "Month",
+  "year": "Year",
+  "period": "Period",
+  "total": "Total (GiB)",
+  "visual": "Visual",
+  "loading": "Loading...",
+  "tab": "Tab",
+  "samples": "Samples",
+  "lastUpdate": "Last update",
+  "loadError": "Load error"
+}
+JSON
+
+cat > "$WWW/i18n/ro.json" <<'JSON'
+{
+  "theme": "Temă",
+  "light": "Luminos",
+  "dark": "Întunecat",
+  "poll": "Interval",
+  "pollInterval": "Interval poll",
+  "pollSaved": "Interval salvat",
+  "pollInvalid": "Interval invalid (exemple: 60, 45s, 15m, 2h)",
+  "save": "Salvează",
+  "language": "Limbă",
+  "subtitle": "Agregare pe Zi / Luna / An, update la fiecare oră.",
+  "totalToday": "Total azi",
+  "totalMonth": "Total luna curentă",
+  "totalYear": "Total anul curent",
+  "day": "Zi",
+  "month": "Lună",
+  "year": "An",
+  "period": "Perioada",
+  "total": "Total (GiB)",
+  "visual": "Vizual",
+  "loading": "Se încarcă...",
+  "tab": "Tab",
+  "samples": "Mostre",
+  "lastUpdate": "Ultimul update",
+  "loadError": "Eroare încărcare"
+}
+JSON
 }
 
 sqlite_exec() {
@@ -810,11 +886,26 @@ def valid_interval(v):
     if not isinstance(v, str):
         return False
     v = v.strip().lower()
-    if len(v) < 2:
+    if len(v) < 1:
         return False
-    if v[-1] not in ("s", "m", "h"):
-        return False
-    return v[:-1].isdigit() and int(v[:-1]) > 0
+    if v[-1] in ("s", "m", "h"):
+        return v[:-1].isdigit() and int(v[:-1]) > 0
+    return v.isdigit() and int(v) > 0
+
+
+def normalize_interval(v):
+    v = v.strip().lower()
+    if v.isdigit():
+        return f"{v}m"
+    return v
+
+
+def valid_theme(v):
+    return isinstance(v, str) and v in ("light", "dark")
+
+
+def valid_language(v):
+    return isinstance(v, str) and v in ("en", "ro")
 
 
 class Handler(SimpleHTTPRequestHandler):
@@ -832,7 +923,11 @@ class Handler(SimpleHTTPRequestHandler):
     def do_GET(self):
         if self.path.startswith("/api/settings.json"):
             cfg = read_settings()
-            self._send_json(200, {"poll_interval": cfg.get("poll_interval", "")})
+            self._send_json(200, {
+                "poll_interval": cfg.get("poll_interval", ""),
+                "theme": cfg.get("theme", ""),
+                "language": cfg.get("language", ""),
+            })
             return
         super().do_GET()
 
@@ -850,14 +945,47 @@ class Handler(SimpleHTTPRequestHandler):
         except Exception:
             self._send_json(400, {"error": "invalid_json"})
             return
-        interval = str(data.get("poll_interval", "")).strip().lower()
-        if not valid_interval(interval):
-            self._send_json(400, {"error": "invalid_interval"})
+        if not isinstance(data, dict):
+            self._send_json(400, {"error": "invalid_payload"})
             return
+
         cfg = read_settings()
-        cfg["poll_interval"] = interval
+        out = {"ok": True}
+        changed = False
+
+        if "poll_interval" in data:
+            interval = normalize_interval(str(data.get("poll_interval", "")))
+            if not valid_interval(interval):
+                self._send_json(400, {"error": "invalid_interval"})
+                return
+            cfg["poll_interval"] = interval
+            out["poll_interval"] = interval
+            changed = True
+
+        if "theme" in data:
+            theme = str(data.get("theme", "")).strip().lower()
+            if not valid_theme(theme):
+                self._send_json(400, {"error": "invalid_theme"})
+                return
+            cfg["theme"] = theme
+            out["theme"] = theme
+            changed = True
+
+        if "language" in data:
+            language = str(data.get("language", "")).strip().lower()
+            if not valid_language(language):
+                self._send_json(400, {"error": "invalid_language"})
+                return
+            cfg["language"] = language
+            out["language"] = language
+            changed = True
+
+        if not changed:
+            self._send_json(400, {"error": "empty_payload"})
+            return
+
         write_settings(cfg)
-        self._send_json(200, {"ok": True, "poll_interval": interval})
+        self._send_json(200, out)
 
 
 ThreadingHTTPServer(("0.0.0.0", port), Handler).serve_forever()

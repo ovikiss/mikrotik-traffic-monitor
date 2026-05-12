@@ -4,6 +4,7 @@ Containerized MikroTik WAN traffic monitor with:
 - hourly collection via SNMP
 - SQLite persistence on USB storage
 - mini UI with day/month/year tabs (Total, RX, TX)
+- EN default UI with RO selector (translations loaded from JSON files)
 - JSON API for Home Assistant integration
 
 ## What it exposes
@@ -45,7 +46,7 @@ docker run --rm -p 8080:8080 \
 - `mtmImage` (default `ghcr.io/ovikiss/mikrotik-traffic-monitor:latest`)
 - `mtmIfIndex` (WAN ifIndex, default `auto` for PPPoE autodetect)
 - `mtmIfNamePattern` (interface-name pattern for autodetect, default `pppoe`)
-- `mtmPollInterval` (poll interval, default `60m`; supports `s`, `m`, `h`, e.g. `45s`, `15m`, `2h`)
+- `mtmPollInterval` (poll interval, default `60m`; supports plain numbers as minutes plus `s`, `m`, `h`, e.g. `60`, `45s`, `15m`, `2h`)
 
 2. Import script:
 ```bash
