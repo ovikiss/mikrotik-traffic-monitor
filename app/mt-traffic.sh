@@ -19,7 +19,7 @@ mkdir -p "$WWW"
 write_ui() {
 cat > "$WWW/index.html" <<'HTML'
 <!doctype html>
-<html lang="ro">
+<html lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -51,47 +51,102 @@ cat > "$WWW/index.html" <<'HTML'
     .bar-wrap { width: 140px; max-width: 100%; height: 8px; border-radius: 999px; background: #edf2f7; overflow: hidden; }
     .bar { height: 8px; background: var(--blue); }
     .meta { margin-top: 8px; color: var(--muted); font-size: 12px; }
+    .topbar { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
+    .lang { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--muted); }
+    .lang select { border: 1px solid var(--border); border-radius: 8px; background: #fff; color: var(--text); padding: 4px 8px; font-size: 12px; }
     @media (max-width: 760px) { th:nth-child(5), td:nth-child(5) { display: none; } .bar-wrap { width: 80px; } }
   </style>
 </head>
 <body>
-  <h1>MikroTik Traffic Monitor</h1>
-  <div class="subtitle">Agregare pe Zi / Luna / An, update la fiecare ora.</div>
+  <div class="topbar">
+    <div>
+      <h1>MikroTik Traffic Monitor</h1>
+      <div class="subtitle" id="subtitle">Day / Month / Year aggregation, updated hourly.</div>
+    </div>
+    <label class="lang" for="lang">
+      <span id="lang-label">Language</span>
+      <select id="lang">
+        <option value="en">EN</option>
+        <option value="ro">RO</option>
+      </select>
+    </label>
+  </div>
 
   <div class="kpis">
-    <div class="kpi"><div class="label">Total azi</div><div class="val" id="kpi-day">0.000 GiB</div></div>
-    <div class="kpi"><div class="label">Total luna curenta</div><div class="val" id="kpi-month">0.000 GiB</div></div>
-    <div class="kpi"><div class="label">Total anul curent</div><div class="val" id="kpi-year">0.000 GiB</div></div>
+    <div class="kpi"><div class="label" id="label-day">Total Today</div><div class="val" id="kpi-day">0.000 GiB</div></div>
+    <div class="kpi"><div class="label" id="label-month">Current Month Total</div><div class="val" id="kpi-month">0.000 GiB</div></div>
+    <div class="kpi"><div class="label" id="label-year">Current Year Total</div><div class="val" id="kpi-year">0.000 GiB</div></div>
   </div>
 
   <div class="card">
     <div class="tabs">
-      <button class="tab active" data-tab="day">Zi</button>
-      <button class="tab" data-tab="month">Luna</button>
-      <button class="tab" data-tab="year">An</button>
+      <button class="tab active" data-tab="day" id="tab-day">Day</button>
+      <button class="tab" data-tab="month" id="tab-month">Month</button>
+      <button class="tab" data-tab="year" id="tab-year">Year</button>
     </div>
 
     <table>
       <thead>
         <tr>
-          <th>Perioada</th>
-          <th class="num">Total (GiB)</th>
+          <th id="th-period">Period</th>
+          <th class="num" id="th-total">Total (GiB)</th>
           <th class="num">RX (GiB)</th>
           <th class="num">TX (GiB)</th>
-          <th>Vizual</th>
+          <th id="th-visual">Visual</th>
         </tr>
       </thead>
       <tbody id="rows"></tbody>
     </table>
 
-    <div class="meta" id="meta">Se incarca...</div>
+    <div class="meta" id="meta">Loading...</div>
   </div>
 
 <script>
-const state = { activeTab: 'day', rows: { day: [], month: [], year: [] }, info: {} };
+const I18N = {
+  en: {
+    language: 'Language',
+    subtitle: 'Day / Month / Year aggregation, updated hourly.',
+    totalToday: 'Total Today',
+    totalMonth: 'Current Month Total',
+    totalYear: 'Current Year Total',
+    day: 'Day',
+    month: 'Month',
+    year: 'Year',
+    period: 'Period',
+    total: 'Total (GiB)',
+    visual: 'Visual',
+    loading: 'Loading...',
+    tab: 'Tab',
+    samples: 'Samples',
+    lastUpdate: 'Last update',
+    loadError: 'Load error'
+  },
+  ro: {
+    language: 'Limbă',
+    subtitle: 'Agregare pe Zi / Luna / An, update la fiecare oră.',
+    totalToday: 'Total azi',
+    totalMonth: 'Total luna curentă',
+    totalYear: 'Total anul curent',
+    day: 'Zi',
+    month: 'Lună',
+    year: 'An',
+    period: 'Perioada',
+    total: 'Total (GiB)',
+    visual: 'Vizual',
+    loading: 'Se încarcă...',
+    tab: 'Tab',
+    samples: 'Mostre',
+    lastUpdate: 'Ultimul update',
+    loadError: 'Eroare încărcare'
+  }
+};
+
+const TAB_LABEL_KEY = { day: 'day', month: 'month', year: 'year' };
+const state = { activeTab: 'day', lang: 'en', rows: { day: [], month: [], year: [] }, info: {} };
 
 function toNum(v) { const n = parseFloat(v || '0'); return Number.isFinite(n) ? n : 0; }
 function fmtGiB(v) { return `${toNum(v).toFixed(3)} GiB`; }
+function t(key) { return (I18N[state.lang] && I18N[state.lang][key]) || I18N.en[key] || key; }
 
 function parseCsv(txt) {
   const lines = (txt || '').trim().split('\n');
@@ -109,6 +164,22 @@ function parseInfo(txt) {
     if (i > 0) out[line.slice(0, i)] = line.slice(i + 1);
   });
   return out;
+}
+
+function applyLanguage() {
+  document.documentElement.lang = state.lang;
+  document.getElementById('lang').value = state.lang;
+  document.getElementById('lang-label').textContent = t('language');
+  document.getElementById('subtitle').textContent = t('subtitle');
+  document.getElementById('label-day').textContent = t('totalToday');
+  document.getElementById('label-month').textContent = t('totalMonth');
+  document.getElementById('label-year').textContent = t('totalYear');
+  document.getElementById('tab-day').textContent = t('day');
+  document.getElementById('tab-month').textContent = t('month');
+  document.getElementById('tab-year').textContent = t('year');
+  document.getElementById('th-period').textContent = t('period');
+  document.getElementById('th-total').textContent = t('total');
+  document.getElementById('th-visual').textContent = t('visual');
 }
 
 function renderKpis() {
@@ -138,12 +209,20 @@ function renderRows() {
 
   const samples = state.info.samples || '0';
   const updated = state.info.updated_local || '-';
-  document.getElementById('meta').textContent = `Tab: ${state.activeTab.toUpperCase()} | Samples: ${samples} | Ultimul update: ${updated}`;
+  const activeLabel = t(TAB_LABEL_KEY[state.activeTab] || state.activeTab);
+  document.getElementById('meta').textContent = `${t('tab')}: ${activeLabel} | ${t('samples')}: ${samples} | ${t('lastUpdate')}: ${updated}`;
 }
 
 function setActiveTab(tab) {
   state.activeTab = tab;
   document.querySelectorAll('.tab').forEach(btn => btn.classList.toggle('active', btn.dataset.tab === tab));
+  renderRows();
+}
+
+function setLanguage(lang) {
+  state.lang = (lang === 'ro') ? 'ro' : 'en';
+  localStorage.setItem('mtm_lang', state.lang);
+  applyLanguage();
   renderRows();
 }
 
@@ -165,8 +244,13 @@ async function loadAll() {
   renderRows();
 }
 
+const storedLang = localStorage.getItem('mtm_lang');
+state.lang = (storedLang === 'ro') ? 'ro' : 'en';
+applyLanguage();
+document.getElementById('meta').textContent = t('loading');
+document.getElementById('lang').addEventListener('change', (e) => setLanguage(e.target.value));
 document.querySelectorAll('.tab').forEach(btn => btn.addEventListener('click', () => setActiveTab(btn.dataset.tab)));
-loadAll().catch(e => { document.getElementById('meta').textContent = 'Eroare incarcare: ' + e; });
+loadAll().catch(e => { document.getElementById('meta').textContent = `${t('loadError')}: ${e}`; });
 setInterval(() => { loadAll().catch(() => {}); }, 60000);
 </script>
 </body>
