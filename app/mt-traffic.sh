@@ -228,6 +228,8 @@ cat > "$WWW/index.html" <<'HTML'
     .topbar { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
     .controls { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; justify-content: flex-end; }
     .control { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--muted); }
+    .control-icon { width: 14px; height: 14px; display: inline-flex; align-items: center; justify-content: center; color: var(--muted); }
+    .control-icon img { width: 14px; height: 14px; display: block; opacity: .85; }
     .control select { border: 1px solid var(--border); border-radius: 8px; background: var(--card); color: var(--text); padding: 4px 8px; font-size: 12px; }
     .control input { border: 1px solid var(--border); border-radius: 8px; background: var(--card); color: var(--text); padding: 4px 8px; font-size: 12px; width: 80px; }
     .control button { border: 1px solid var(--border); border-radius: 8px; background: var(--card); color: var(--text); padding: 4px 8px; font-size: 12px; cursor: pointer; }
@@ -247,8 +249,12 @@ cat > "$WWW/index.html" <<'HTML'
     </div>
     <div class="controls">
       <label class="control" for="theme">
+        <span class="control-icon" id="theme-icon" aria-hidden="true">
+          <img id="theme-icon-img" src="/images/ui/theme-auto.svg" alt="" />
+        </span>
         <span id="theme-label">Theme</span>
         <select id="theme">
+          <option value="auto" id="theme-opt-auto">Auto</option>
           <option value="light" id="theme-opt-light">Light</option>
           <option value="dark" id="theme-opt-dark">Dark</option>
         </select>
@@ -259,6 +265,9 @@ cat > "$WWW/index.html" <<'HTML'
         <button id="poll-save" type="button">Save</button>
       </label>
       <label class="control" for="lang">
+        <span class="control-icon" aria-hidden="true">
+          <img id="lang-icon-img" src="/images/lang/en.svg" alt="" />
+        </span>
         <span id="lang-label">Language</span>
         <select id="lang">
           <option value="en">EN</option>
@@ -310,9 +319,14 @@ cat > "$WWW/index.html" <<'HTML'
   </div>
 
 <script>
-const I18N = { en: {}, ro: {} };
+const DEFAULT_LANGUAGES = [
+  { code: 'en', label: 'EN', file: '/i18n/en.json', icon: '/images/lang/en.svg' },
+  { code: 'ro', label: 'RO', file: '/i18n/ro.json', icon: '/images/lang/ro.svg' }
+];
+const I18N = {};
 const I18N_FALLBACK = {
   theme: 'Theme',
+  auto: 'Auto',
   light: 'Light',
   dark: 'Dark',
   poll: 'Poll',
@@ -345,12 +359,53 @@ const I18N_FALLBACK = {
 };
 
 const TAB_LABEL_KEY = { day: 'day', month: 'month', year: 'year' };
-const state = { activeTab: 'day', lang: 'en', theme: 'light', pollInterval: '', rows: { day: [], month: [], year: [] }, info: {} };
+const state = { activeTab: 'day', lang: 'en', theme: 'auto', pollInterval: '', rows: { day: [], month: [], year: [] }, info: {}, languages: DEFAULT_LANGUAGES.slice() };
+const prefersDarkQuery = window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)') : null;
+
+function themeIconSvg(mode, resolved) {
+  if (mode === 'auto') return '/images/ui/theme-auto.svg';
+  if (resolved === 'dark') return '/images/ui/theme-dark.svg';
+  return '/images/ui/theme-light.svg';
+}
 
 function toNum(v) { const n = parseFloat(v || '0'); return Number.isFinite(n) ? n : 0; }
 function fmtGiB(v) { return `${toNum(v).toFixed(3)} GiB`; }
 function t(key) {
   return (I18N[state.lang] && I18N[state.lang][key]) || (I18N.en && I18N.en[key]) || I18N_FALLBACK[key] || key;
+}
+
+function getLanguageDef(code) {
+  return (state.languages || []).find(l => l.code === code) || null;
+}
+
+function normalizeLanguageList(items) {
+  if (!Array.isArray(items)) return DEFAULT_LANGUAGES.slice();
+  const out = [];
+  items.forEach((x) => {
+    if (!x || typeof x !== 'object') return;
+    const code = String(x.code || '').trim().toLowerCase();
+    const label = String(x.label || code.toUpperCase()).trim();
+    const file = String(x.file || '').trim();
+    const icon = String(x.icon || `/images/lang/${code}.svg`).trim();
+    if (!/^[a-z][a-z0-9_-]{1,15}$/.test(code)) return;
+    if (!file || file[0] !== '/') return;
+    out.push({ code, label: label || code.toUpperCase(), file, icon });
+  });
+  if (!out.find(l => l.code === 'en')) {
+    out.unshift(DEFAULT_LANGUAGES[0]);
+  }
+  return out.length ? out : DEFAULT_LANGUAGES.slice();
+}
+
+function renderLanguageOptions() {
+  const sel = document.getElementById('lang');
+  sel.innerHTML = '';
+  (state.languages || []).forEach((l) => {
+    const opt = document.createElement('option');
+    opt.value = l.code;
+    opt.textContent = l.label;
+    sel.appendChild(opt);
+  });
 }
 
 function formatPollInterval(v) {
@@ -388,7 +443,10 @@ function parseInfo(txt) {
 
 function applyLanguage() {
   document.documentElement.lang = state.lang;
+  const langDef = getLanguageDef(state.lang) || getLanguageDef('en');
+  document.getElementById('lang-icon-img').setAttribute('src', (langDef && langDef.icon) ? langDef.icon : '/images/lang/en.svg');
   document.getElementById('theme-label').textContent = t('theme');
+  document.getElementById('theme-opt-auto').textContent = t('auto');
   document.getElementById('theme-opt-light').textContent = t('light');
   document.getElementById('theme-opt-dark').textContent = t('dark');
   document.getElementById('poll-label').textContent = t('poll');
@@ -408,8 +466,10 @@ function applyLanguage() {
 }
 
 function applyTheme() {
-  document.documentElement.setAttribute('data-theme', state.theme);
+  const resolved = state.theme === 'auto' ? ((prefersDarkQuery && prefersDarkQuery.matches) ? 'dark' : 'light') : state.theme;
+  document.documentElement.setAttribute('data-theme', resolved);
   document.getElementById('theme').value = state.theme;
+  document.getElementById('theme-icon-img').setAttribute('src', themeIconSvg(state.theme, resolved));
 }
 
 function renderKpis() {
@@ -457,7 +517,7 @@ function setActiveTab(tab) {
 }
 
 function setLanguage(lang) {
-  state.lang = (lang === 'ro') ? 'ro' : 'en';
+  state.lang = getLanguageDef(lang) ? lang : 'en';
   localStorage.setItem('mtm_lang', state.lang);
   applyLanguage();
   renderRows();
@@ -465,7 +525,7 @@ function setLanguage(lang) {
 }
 
 function setTheme(theme) {
-  state.theme = (theme === 'dark') ? 'dark' : 'light';
+  state.theme = (theme === 'dark' || theme === 'light' || theme === 'auto') ? theme : 'auto';
   localStorage.setItem('mtm_theme', state.theme);
   applyTheme();
   saveSettings({ theme: state.theme }).catch(() => {});
@@ -503,8 +563,8 @@ async function loadSettings() {
   try {
     const d = await fetch('/api/settings.json' + q).then(r => r.json());
     const p = (d && d.poll_interval) ? d.poll_interval : '';
-    const theme = (d && (d.theme === 'light' || d.theme === 'dark')) ? d.theme : '';
-    const lang = (d && (d.language === 'en' || d.language === 'ro')) ? d.language : '';
+    const theme = (d && (d.theme === 'light' || d.theme === 'dark' || d.theme === 'auto')) ? d.theme : '';
+    const lang = (d && getLanguageDef(String(d.language || '').toLowerCase())) ? String(d.language || '').toLowerCase() : '';
     state.pollInterval = p;
     document.getElementById('poll-interval').value = p;
     if (theme) {
@@ -534,15 +594,28 @@ async function saveSettings(patch) {
 async function loadTranslations() {
   const q = `?_=${Date.now()}`;
   try {
-    const [en, ro] = await Promise.all([
-      fetch('/i18n/en.json' + q).then(r => r.json()),
-      fetch('/i18n/ro.json' + q).then(r => r.json())
-    ]);
-    I18N.en = en || {};
-    I18N.ro = ro || {};
+    const loaded = await Promise.all((state.languages || []).map(async (l) => {
+      const data = await fetch(`${l.file}${q}`).then(r => r.json());
+      return { code: l.code, data: data || {} };
+    }));
+    loaded.forEach((x) => { I18N[x.code] = x.data; });
+    if (!I18N.en) I18N.en = {};
     applyLanguage();
     renderRows();
   } catch (_) {}
+}
+
+async function loadLanguageConfig() {
+  const q = `?_=${Date.now()}`;
+  try {
+    const cfg = await fetch('/i18n/languages.json' + q).then(r => r.json());
+    state.languages = normalizeLanguageList(cfg);
+  } catch (_) {
+    state.languages = DEFAULT_LANGUAGES.slice();
+  }
+  renderLanguageOptions();
+  if (!getLanguageDef(state.lang)) state.lang = 'en';
+  document.getElementById('lang').value = state.lang;
 }
 
 async function savePollInterval() {
@@ -568,18 +641,29 @@ async function savePollInterval() {
 
 const storedLang = localStorage.getItem('mtm_lang');
 const storedTheme = localStorage.getItem('mtm_theme');
-state.lang = (storedLang === 'ro') ? 'ro' : 'en';
-state.theme = (storedTheme === 'dark') ? 'dark' : 'light';
+state.lang = (typeof storedLang === 'string' && storedLang) ? storedLang.toLowerCase() : 'en';
+state.theme = (storedTheme === 'dark' || storedTheme === 'light' || storedTheme === 'auto') ? storedTheme : 'auto';
 applyTheme();
+renderLanguageOptions();
 applyLanguage();
+if (prefersDarkQuery) {
+  const onThemePrefChange = () => { if (state.theme === 'auto') applyTheme(); };
+  if (prefersDarkQuery.addEventListener) prefersDarkQuery.addEventListener('change', onThemePrefChange);
+  else if (prefersDarkQuery.addListener) prefersDarkQuery.addListener(onThemePrefChange);
+}
 document.getElementById('meta').textContent = t('loading');
 document.getElementById('theme').addEventListener('change', (e) => setTheme(e.target.value));
 document.getElementById('lang').addEventListener('change', (e) => setLanguage(e.target.value));
 document.getElementById('poll-save').addEventListener('click', () => { savePollInterval().catch(() => {}); });
 document.querySelectorAll('.tab').forEach(btn => btn.addEventListener('click', () => setActiveTab(btn.dataset.tab)));
 loadAll().catch(e => { document.getElementById('meta').textContent = `${t('loadError')}: ${e}`; });
-loadSettings().catch(() => {});
-loadTranslations().catch(() => {});
+loadLanguageConfig().then(() => {
+  loadSettings().catch(() => {});
+  loadTranslations().catch(() => {});
+}).catch(() => {
+  loadSettings().catch(() => {});
+  loadTranslations().catch(() => {});
+});
 setInterval(() => { loadAll().catch(() => {}); }, 60000);
 </script>
 </body>
@@ -596,6 +680,16 @@ if [ -f "$SCRIPT_DIR/i18n/ro.json" ]; then
   cp "$SCRIPT_DIR/i18n/ro.json" "$WWW/i18n/ro.json"
 else
   printf '%s\n' '{}' > "$WWW/i18n/ro.json"
+fi
+if [ -f "$SCRIPT_DIR/i18n/languages.json" ]; then
+  cp "$SCRIPT_DIR/i18n/languages.json" "$WWW/i18n/languages.json"
+else
+  printf '%s\n' '[{"code":"en","label":"EN","file":"/i18n/en.json","icon":"/images/lang/en.svg"},{"code":"ro","label":"RO","file":"/i18n/ro.json","icon":"/images/lang/ro.svg"}]' > "$WWW/i18n/languages.json"
+fi
+
+mkdir -p "$WWW/images"
+if [ -d "$SCRIPT_DIR/images" ]; then
+  cp -R "$SCRIPT_DIR/images/." "$WWW/images/"
 fi
 }
 
@@ -877,11 +971,19 @@ def normalize_interval(v):
 
 
 def valid_theme(v):
-    return isinstance(v, str) and v in ("light", "dark")
+    return isinstance(v, str) and v in ("light", "dark", "auto")
 
 
 def valid_language(v):
-    return isinstance(v, str) and v in ("en", "ro")
+    if not isinstance(v, str):
+        return False
+    v = v.strip().lower()
+    if len(v) < 2 or len(v) > 16:
+        return False
+    for c in v:
+        if not (c.isalnum() or c in ("-", "_")):
+            return False
+    return v[0].isalpha()
 
 
 class Handler(SimpleHTTPRequestHandler):
