@@ -101,6 +101,26 @@ resolve_poll_interval() {
   esac
 }
 
+sleep_poll_interval() {
+  TARGET="$POLL_SLEEP_SEC"
+  ELAPSED=0
+  while [ "$ELAPSED" -lt "$TARGET" ]; do
+    REMAIN=$((TARGET - ELAPSED))
+    STEP=5
+    if [ "$REMAIN" -lt "$STEP" ]; then
+      STEP="$REMAIN"
+    fi
+    [ "$STEP" -gt 0 ] 2>/dev/null || break
+    sleep "$STEP"
+    ELAPSED=$((ELAPSED + STEP))
+    resolve_poll_interval
+    TARGET="$POLL_SLEEP_SEC"
+    if [ "$TARGET" -le "$ELAPSED" ]; then
+      break
+    fi
+  done
+}
+
 is_auto_ifindex() {
   case "$IFINDEX" in
     ""|auto|pppoe) return 0 ;;
@@ -1111,8 +1131,9 @@ resolve_ifindex || true
 render_views
 
 while true; do
+  resolve_poll_interval
   if ! resolve_ifindex; then
-    sleep "$POLL_SLEEP_SEC"
+    sleep_poll_interval
     continue
   fi
 
@@ -1120,8 +1141,8 @@ while true; do
   IN="$(snmpget -v2c -c "$MT_COMMUNITY" -Oqv "$MT_HOST" "1.3.6.1.2.1.31.1.1.1.6.$ACTIVE_IFINDEX" 2>/dev/null || true)"
   OUT="$(snmpget -v2c -c "$MT_COMMUNITY" -Oqv "$MT_HOST" "1.3.6.1.2.1.31.1.1.1.10.$ACTIVE_IFINDEX" 2>/dev/null || true)"
 
-  case "$IN" in ''|*[!0-9]*) sleep "$POLL_SLEEP_SEC"; continue ;; esac
-  case "$OUT" in ''|*[!0-9]*) sleep "$POLL_SLEEP_SEC"; continue ;; esac
+  case "$IN" in ''|*[!0-9]*) sleep_poll_interval; continue ;; esac
+  case "$OUT" in ''|*[!0-9]*) sleep_poll_interval; continue ;; esac
 
   PREV="$(sqlite_exec "SELECT in_octets || '|' || out_octets FROM samples ORDER BY id DESC LIMIT 1;" || true)"
   if [ -z "$PREV" ]; then
@@ -1139,5 +1160,5 @@ while true; do
   sqlite_exec "DELETE FROM samples WHERE ts < strftime('%s','now','-1825 days');"
 
   render_views
-  sleep "$POLL_SLEEP_SEC"
+  sleep_poll_interval
 done
