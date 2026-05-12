@@ -265,7 +265,7 @@ cat > "$WWW/index.html" <<'HTML'
         <select id="poll-unit">
           <option value="s" id="poll-unit-s">seconds</option>
           <option value="m" id="poll-unit-m">minutes</option>
-          <option value="h" id="poll-unit-h">hours</option>
+          <option value="h" id="poll-unit-h" selected>hours</option>
         </select>
         <button id="poll-save" type="button">Save</button>
       </label>
@@ -583,7 +583,7 @@ async function loadSettings() {
       document.getElementById('poll-unit').value = parsed.unit;
     } else {
       document.getElementById('poll-interval').value = '';
-      document.getElementById('poll-unit').value = 'm';
+      document.getElementById('poll-unit').value = 'h';
     }
     if (theme) {
       state.theme = theme;
@@ -640,7 +640,7 @@ async function savePollInterval() {
   const inp = document.getElementById('poll-interval');
   const unitSel = document.getElementById('poll-unit');
   const numRaw = String(inp.value || '').trim();
-  const unit = String(unitSel.value || 'm').trim().toLowerCase();
+  const unit = String(unitSel.value || 'h').trim().toLowerCase();
   if (!/^[0-9]+$/.test(numRaw) || !/^[smh]$/.test(unit)) {
     document.getElementById('meta').textContent = t('pollInvalid');
     return;
