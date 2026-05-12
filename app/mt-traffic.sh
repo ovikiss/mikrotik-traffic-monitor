@@ -241,6 +241,10 @@ cat > "$WWW/index.html" <<'HTML'
     table { width: 100%; border-collapse: collapse; font-size: 13px; }
     th, td { text-align: left; border-bottom: 1px solid var(--table-border); padding: 8px; }
     th { background: var(--table-head); }
+    .expander { border: 0; background: transparent; color: var(--muted); cursor: pointer; padding: 0 6px 0 0; font-size: 12px; }
+    .expander-empty { display: inline-block; width: 12px; margin-right: 6px; }
+    .detail-row td { background: var(--table-head); }
+    .detail-period { padding-left: 24px; color: var(--muted); }
     .num { text-align: right; font-variant-numeric: tabular-nums; }
     .bar-wrap { width: 140px; max-width: 100%; height: 8px; border-radius: 999px; background: var(--bar-bg); overflow: hidden; }
     .bar { height: 8px; background: var(--blue); }
@@ -395,10 +399,16 @@ const state = {
   theme: 'auto',
   pollInterval: '',
   rows: { day: [], month: [], year: [] },
+  details: { monthDays: [], yearMonths: [] },
+  expanded: { month: null, year: null },
   info: {},
   languages: DEFAULT_LANGUAGES.slice()
 };
 const prefersDarkQuery = window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)') : null;
+const MONTH_NAMES = {
+  en: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+  ro: ['Ian', 'Feb', 'Mar', 'Apr', 'Mai', 'Iun', 'Iul', 'Aug', 'Sep', 'Oct', 'Noi', 'Dec']
+};
 
 function themeIconSvg(mode, resolved) {
   if (mode === 'auto') return '/images/ui/theme-auto.svg';
@@ -508,6 +518,45 @@ function parseCsv(txt) {
   });
 }
 
+function parseDetailJson(items) {
+  if (!Array.isArray(items)) return [];
+  return items.map((x) => ({
+    period: String(x && x.period ? x.period : ''),
+    month_key: String(x && x.month_key ? x.month_key : ''),
+    year_key: String(x && x.year_key ? x.year_key : ''),
+    total_gib: toNum(x && x.total_gib),
+    rx_gib: toNum(x && x.rx_gib),
+    tx_gib: toNum(x && x.tx_gib)
+  }));
+}
+
+function formatPeriod(tab, raw) {
+  const s = String(raw || '').trim();
+  if (!s) return s;
+
+  if (tab === 'day') {
+    const m = s.match(/^([0-9]{4})-([0-9]{2})-([0-9]{2})$/);
+    if (!m) return s;
+    const yyyy = m[1];
+    const mm = m[2];
+    const dd = m[3];
+    if (state.lang === 'ro') return `${dd}-${mm}-${yyyy}`;
+    return `${mm}-${dd}-${yyyy}`;
+  }
+
+  if (tab === 'month') {
+    const m = s.match(/^([0-9]{4})-([0-9]{2})$/);
+    if (!m) return s;
+    const yyyy = m[1];
+    const mi = parseInt(m[2], 10);
+    if (!Number.isFinite(mi) || mi < 1 || mi > 12) return s;
+    const names = MONTH_NAMES[state.lang] || MONTH_NAMES.en;
+    return `${names[mi - 1]}-${yyyy}`;
+  }
+
+  return s;
+}
+
 function parseInfo(txt) {
   const out = {};
   (txt || '').trim().split('\n').forEach(line => {
@@ -571,17 +620,73 @@ function renderRows() {
   const maxTotal = Math.max(0, ...rows.map(r => r.total_gib));
   tbody.innerHTML = '';
 
+  const monthDetailsByMonth = {};
+  (state.details.monthDays || []).forEach((r) => {
+    const k = String(r.month_key || '');
+    if (!k) return;
+    if (!monthDetailsByMonth[k]) monthDetailsByMonth[k] = [];
+    monthDetailsByMonth[k].push(r);
+  });
+
+  const yearDetailsByYear = {};
+  (state.details.yearMonths || []).forEach((r) => {
+    const k = String(r.year_key || '');
+    if (!k) return;
+    if (!yearDetailsByYear[k]) yearDetailsByYear[k] = [];
+    yearDetailsByYear[k].push(r);
+  });
+
   rows.forEach(r => {
     const pct = maxTotal > 0 ? (r.total_gib / maxTotal) * 100 : 0;
+    const rowKey = String(r.period || '');
+    const isMonthTab = state.activeTab === 'month';
+    const isYearTab = state.activeTab === 'year';
+    const detailRows = isMonthTab
+      ? (monthDetailsByMonth[rowKey] || [])
+      : (isYearTab ? (yearDetailsByYear[rowKey] || []) : []);
+    const canExpand = detailRows.length > 0;
+    const isExpanded = (isMonthTab && state.expanded.month === rowKey) || (isYearTab && state.expanded.year === rowKey);
+    const showExpand = isMonthTab || isYearTab;
+    const prefix = showExpand
+      ? (canExpand ? `<button class="expander" type="button" data-key="${esc(rowKey)}" aria-label="toggle">${isExpanded ? '▾' : '▸'}</button>` : '<span class="expander-empty"></span>')
+      : '';
+
     const tr = document.createElement('tr');
     tr.innerHTML = `
-      <td>${r.period}</td>
+      <td>${prefix}${esc(formatPeriod(state.activeTab, r.period))}</td>
       <td class="num">${r.total_gib.toFixed(3)}</td>
       <td class="num">${r.rx_gib.toFixed(3)}</td>
       <td class="num">${r.tx_gib.toFixed(3)}</td>
       <td><div class="bar-wrap"><div class="bar" style="width:${pct.toFixed(2)}%"></div></div></td>
     `;
     tbody.appendChild(tr);
+
+    if (canExpand) {
+      const btn = tr.querySelector('.expander');
+      if (btn) {
+        btn.addEventListener('click', () => {
+          if (isMonthTab) state.expanded.month = (state.expanded.month === rowKey) ? null : rowKey;
+          if (isYearTab) state.expanded.year = (state.expanded.year === rowKey) ? null : rowKey;
+          renderRows();
+        });
+      }
+    }
+
+    if (isExpanded) {
+      detailRows.forEach((d) => {
+        const dpct = maxTotal > 0 ? (d.total_gib / maxTotal) * 100 : 0;
+        const dtr = document.createElement('tr');
+        dtr.className = 'detail-row';
+        dtr.innerHTML = `
+          <td class="detail-period">${esc(formatPeriod(isMonthTab ? 'day' : 'month', d.period))}</td>
+          <td class="num">${d.total_gib.toFixed(3)}</td>
+          <td class="num">${d.rx_gib.toFixed(3)}</td>
+          <td class="num">${d.tx_gib.toFixed(3)}</td>
+          <td><div class="bar-wrap"><div class="bar" style="width:${dpct.toFixed(2)}%"></div></div></td>
+        `;
+        tbody.appendChild(dtr);
+      });
+    }
   });
 
   const sampleByTab = {
@@ -619,16 +724,20 @@ function setTheme(theme) {
 
 async function loadAll() {
   const q = `?_=${Date.now()}`;
-  const [d, m, y, i] = await Promise.all([
+  const [d, m, y, i, md, ym] = await Promise.all([
     fetch('/day.csv' + q).then(r => r.text()),
     fetch('/month.csv' + q).then(r => r.text()),
     fetch('/year.csv' + q).then(r => r.text()),
-    fetch('/info.txt' + q).then(r => r.text())
+    fetch('/info.txt' + q).then(r => r.text()),
+    fetch('/api/month_days.json' + q).then(r => r.json()),
+    fetch('/api/year_months.json' + q).then(r => r.json())
   ]);
 
   state.rows.day = parseCsv(d);
   state.rows.month = parseCsv(m);
   state.rows.year = parseCsv(y);
+  state.details.monthDays = parseDetailJson(md);
+  state.details.yearMonths = parseDetailJson(ym);
   state.info = parseInfo(i);
 
   renderKpis();
@@ -881,6 +990,27 @@ def load_csv(name: str):
     return out
 
 
+def load_detail_csv(name: str):
+    out = []
+    path = base / name
+    if not path.exists():
+        return out
+    with path.open(newline="", encoding="utf-8") as f:
+        for row in csv.DictReader(f):
+            item = {
+                "period": row.get("period", ""),
+                "total_gib": float(row.get("total_gib") or 0),
+                "rx_gib": float(row.get("rx_gib") or 0),
+                "tx_gib": float(row.get("tx_gib") or 0),
+            }
+            if "month_key" in row:
+                item["month_key"] = row.get("month_key", "")
+            if "year_key" in row:
+                item["year_key"] = row.get("year_key", "")
+            out.append(item)
+    return out
+
+
 def load_info():
     info = {}
     p = base / "info.txt"
@@ -902,6 +1032,8 @@ info = load_info()
 day = load_csv("day.csv")
 month = load_csv("month.csv")
 year = load_csv("year.csv")
+month_days = load_detail_csv("month_days.csv")
+year_months = load_detail_csv("year_months.csv")
 
 summary = {
     "updated_local": info.get("updated_local", ""),
@@ -927,6 +1059,8 @@ summary = {
         "day": "/api/day.json",
         "month": "/api/month.json",
         "year": "/api/year.json",
+        "month_days": "/api/month_days.json",
+        "year_months": "/api/year_months.json",
         "summary": "/api/summary.json",
     },
 }
@@ -934,6 +1068,8 @@ summary = {
 (api / "day.json").write_text(json.dumps(day, indent=2), encoding="utf-8")
 (api / "month.json").write_text(json.dumps(month, indent=2), encoding="utf-8")
 (api / "year.json").write_text(json.dumps(year, indent=2), encoding="utf-8")
+(api / "month_days.json").write_text(json.dumps(month_days, indent=2), encoding="utf-8")
+(api / "year_months.json").write_text(json.dumps(year_months, indent=2), encoding="utf-8")
 (api / "summary.json").write_text(json.dumps(summary, indent=2), encoding="utf-8")
 
 ha = '''# Home Assistant example (REST sensor)
@@ -996,6 +1132,30 @@ render_views() {
     GROUP BY period
     ORDER BY period DESC;
   " > "$WWW/year.csv"
+
+  sqlite3 -header -csv "$DB" "
+    SELECT date(ts,'unixepoch','localtime') AS period,
+           strftime('%Y-%m', ts,'unixepoch','localtime') AS month_key,
+           ROUND(SUM(delta_bytes)/1073741824.0, 3) AS total_gib,
+           ROUND(SUM(delta_in_bytes)/1073741824.0, 3) AS rx_gib,
+           ROUND(SUM(delta_out_bytes)/1073741824.0, 3) AS tx_gib
+    FROM samples
+    WHERE ts >= strftime('%s','now','localtime','start of year','utc')
+    GROUP BY period
+    ORDER BY period DESC;
+  " > "$WWW/month_days.csv"
+
+  sqlite3 -header -csv "$DB" "
+    SELECT strftime('%Y-%m', ts,'unixepoch','localtime') AS period,
+           strftime('%Y', ts,'unixepoch','localtime') AS year_key,
+           ROUND(SUM(delta_bytes)/1073741824.0, 3) AS total_gib,
+           ROUND(SUM(delta_in_bytes)/1073741824.0, 3) AS rx_gib,
+           ROUND(SUM(delta_out_bytes)/1073741824.0, 3) AS tx_gib
+    FROM samples
+    WHERE ts >= 0
+    GROUP BY period
+    ORDER BY period DESC;
+  " > "$WWW/year_months.csv"
 
   cp "$WWW/day.csv" "$WWW/daily.csv"
 
