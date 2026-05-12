@@ -317,6 +317,12 @@ const I18N_FALLBACK = {
   dark: 'Dark',
   poll: 'Poll',
   pollInterval: 'Poll interval',
+  secondsSingular: 'second',
+  secondsPlural: 'seconds',
+  minutesSingular: 'minute',
+  minutesPlural: 'minutes',
+  hoursSingular: 'hour',
+  hoursPlural: 'hours',
   pollSaved: 'Poll interval saved',
   pollInvalid: 'Invalid interval (examples: 60, 45s, 15m, 2h)',
   save: 'Save',
@@ -345,6 +351,21 @@ function toNum(v) { const n = parseFloat(v || '0'); return Number.isFinite(n) ? 
 function fmtGiB(v) { return `${toNum(v).toFixed(3)} GiB`; }
 function t(key) {
   return (I18N[state.lang] && I18N[state.lang][key]) || (I18N.en && I18N.en[key]) || I18N_FALLBACK[key] || key;
+}
+
+function formatPollInterval(v) {
+  const s = (v || '').trim().toLowerCase();
+  if (!s) return '-';
+  const m = s.match(/^([0-9]+)([smh]?)$/);
+  if (!m) return s;
+  const n = parseInt(m[1], 10);
+  if (!Number.isFinite(n) || n <= 0) return s;
+  const u = m[2] || 'm';
+  let unitKey = 'minutesPlural';
+  if (u === 's') unitKey = (n === 1) ? 'secondsSingular' : 'secondsPlural';
+  if (u === 'm') unitKey = (n === 1) ? 'minutesSingular' : 'minutesPlural';
+  if (u === 'h') unitKey = (n === 1) ? 'hoursSingular' : 'hoursPlural';
+  return `${n} ${t(unitKey)}`;
 }
 
 function parseCsv(txt) {
@@ -425,7 +446,7 @@ function renderRows() {
   const samples = state.info.samples || '0';
   const updated = state.info.updated_local || '-';
   const activeLabel = t(TAB_LABEL_KEY[state.activeTab] || state.activeTab);
-  const poll = state.pollInterval || '-';
+  const poll = formatPollInterval(state.pollInterval);
   document.getElementById('meta').textContent = `${t('tab')}: ${activeLabel} | ${t('samples')}: ${samples} | ${t('lastUpdate')}: ${updated} | ${t('pollInterval')}: ${poll}`;
 }
 
