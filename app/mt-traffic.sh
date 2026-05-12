@@ -542,6 +542,7 @@ async function savePollInterval() {
   inp.value = v;
   renderRows();
   document.getElementById('meta').textContent = `${t('pollSaved')}: ${v}`;
+  setTimeout(() => { window.location.reload(); }, 900);
 }
 
 const storedLang = localStorage.getItem('mtm_lang');
