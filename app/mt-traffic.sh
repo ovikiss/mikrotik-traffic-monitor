@@ -372,7 +372,7 @@ const I18N_FALLBACK = {
   pollInvalid: 'Invalid interval (examples: 60, 45s, 15m, 2h)',
   save: 'Save',
   language: 'Language',
-  subtitle: 'Day / Month / Year aggregation, updated hourly.',
+  subtitleBase: 'Day / Month / Year aggregation, updated every',
   totalToday: 'Total Today',
   totalMonth: 'Current Month Total',
   totalYear: 'Current Year Total',
@@ -485,6 +485,11 @@ function formatPollInterval(v) {
   return `${n} ${t(unitKey)}`;
 }
 
+function renderSubtitle() {
+  const poll = formatPollInterval(state.pollInterval || '60m');
+  document.getElementById('subtitle').textContent = `${t('subtitleBase')} ${poll}.`;
+}
+
 function formatUpdatedLocal(raw) {
   const s = (raw || '').trim();
   if (!s) return '-';
@@ -581,7 +586,7 @@ function applyLanguage() {
   document.getElementById('poll-save').textContent = t('save');
   document.getElementById('lang').value = state.lang;
   document.getElementById('lang-label').textContent = t('language');
-  document.getElementById('subtitle').textContent = t('subtitle');
+  renderSubtitle();
   document.getElementById('label-day').textContent = t('totalToday');
   document.getElementById('label-month').textContent = t('totalMonth');
   document.getElementById('label-year').textContent = t('totalYear');
@@ -781,6 +786,7 @@ async function loadSettings() {
       localStorage.setItem('mtm_lang', lang);
       applyLanguage();
     }
+    renderSubtitle();
     renderRows();
   } catch (_) {}
 }
@@ -851,6 +857,7 @@ async function savePollInterval() {
   state.pollInterval = v;
   inp.value = String(n);
   unitSel.value = unit;
+  renderSubtitle();
   renderRows();
   document.getElementById('meta').textContent = `${t('pollSaved')}: ${formatPollInterval(v)}`;
   setTimeout(() => { window.location.reload(); }, 900);
