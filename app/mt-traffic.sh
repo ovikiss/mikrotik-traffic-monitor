@@ -266,7 +266,7 @@ cat > "$WWW/index.html" <<'HTML'
       </label>
       <label class="control" for="lang">
         <span class="control-icon" aria-hidden="true">
-          <img id="lang-icon-img" src="/images/lang/en.svg" alt="" />
+          <img id="lang-icon-img" src="/images/lang/us.svg" alt="" />
         </span>
         <span id="lang-label">Language</span>
         <select id="lang">
@@ -320,7 +320,7 @@ cat > "$WWW/index.html" <<'HTML'
 
 <script>
 const DEFAULT_LANGUAGES = [
-  { code: 'en', label: 'EN', file: '/i18n/en.json', icon: '/images/lang/en.svg' },
+  { code: 'en', label: 'EN', file: '/i18n/en.json', icon: '/images/lang/us.svg' },
   { code: 'ro', label: 'RO', file: '/i18n/ro.json', icon: '/images/lang/ro.svg' }
 ];
 const I18N = {};
@@ -444,7 +444,7 @@ function parseInfo(txt) {
 function applyLanguage() {
   document.documentElement.lang = state.lang;
   const langDef = getLanguageDef(state.lang) || getLanguageDef('en');
-  document.getElementById('lang-icon-img').setAttribute('src', (langDef && langDef.icon) ? langDef.icon : '/images/lang/en.svg');
+  document.getElementById('lang-icon-img').setAttribute('src', (langDef && langDef.icon) ? langDef.icon : '/images/lang/us.svg');
   document.getElementById('theme-label').textContent = t('theme');
   document.getElementById('theme-opt-auto').textContent = t('auto');
   document.getElementById('theme-opt-light').textContent = t('light');
@@ -684,7 +684,7 @@ fi
 if [ -f "$SCRIPT_DIR/i18n/languages.json" ]; then
   cp "$SCRIPT_DIR/i18n/languages.json" "$WWW/i18n/languages.json"
 else
-  printf '%s\n' '[{"code":"en","label":"EN","file":"/i18n/en.json","icon":"/images/lang/en.svg"},{"code":"ro","label":"RO","file":"/i18n/ro.json","icon":"/images/lang/ro.svg"}]' > "$WWW/i18n/languages.json"
+  printf '%s\n' '[{"code":"en","label":"EN","file":"/i18n/en.json","icon":"/images/lang/us.svg"},{"code":"ro","label":"RO","file":"/i18n/ro.json","icon":"/images/lang/ro.svg"}]' > "$WWW/i18n/languages.json"
 fi
 
 mkdir -p "$WWW/images"
