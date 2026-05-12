@@ -23,6 +23,9 @@ mkdir -p "$WWW"
 ACTIVE_IFINDEX=""
 POLL_SLEEP_SEC="3600"
 ACTIVE_POLL_INTERVAL="60m"
+ACTIVE_DAY_WINDOW_DAYS="30"
+ACTIVE_MONTH_WINDOW_MONTHS="3"
+ACTIVE_YEAR_WINDOW_YEARS="3"
 
 parse_interval_to_sec() {
   RAW="$(printf '%s' "${1:-}" | tr '[:upper:]' '[:lower:]')"
@@ -70,6 +73,46 @@ PY
   return 0
 }
 
+read_runtime_windows() {
+  if [ ! -f "$SETTINGS_PATH" ]; then
+    return 1
+  fi
+
+  V="$(SETTINGS_PATH_ENV="$SETTINGS_PATH" python3 - <<'PY'
+import json
+import os
+from pathlib import Path
+
+p = Path(os.environ["SETTINGS_PATH_ENV"])
+try:
+    data = json.loads(p.read_text(encoding="utf-8"))
+except Exception:
+    print("")
+    raise SystemExit(0)
+
+if not isinstance(data, dict):
+    print("")
+    raise SystemExit(0)
+
+def pick(name, allowed, default):
+    raw = data.get(name, default)
+    try:
+        val = int(str(raw).strip())
+    except Exception:
+        return default
+    return val if val in allowed else default
+
+day = pick("day_window_days", {30, 60, 90}, 30)
+month = pick("month_window_months", {3, 6, 9}, 3)
+year = pick("year_window_years", {1, 3, 5}, 3)
+print(f"{day},{month},{year}")
+PY
+)"
+  [ -n "$V" ] || return 1
+  printf '%s\n' "$V"
+  return 0
+}
+
 resolve_poll_interval() {
   RUNTIME="$(read_runtime_poll_interval || true)"
   if parse_interval_to_sec "$RUNTIME"; then
@@ -99,6 +142,24 @@ resolve_poll_interval() {
       fi
       ;;
   esac
+}
+
+resolve_windows() {
+  ACTIVE_DAY_WINDOW_DAYS="30"
+  ACTIVE_MONTH_WINDOW_MONTHS="3"
+  ACTIVE_YEAR_WINDOW_YEARS="3"
+
+  RUNTIME="$(read_runtime_windows || true)"
+  [ -n "$RUNTIME" ] || return 0
+
+  D="${RUNTIME%%,*}"
+  REST="${RUNTIME#*,}"
+  M="${REST%%,*}"
+  Y="${REST##*,}"
+
+  case "$D" in 30|60|90) ACTIVE_DAY_WINDOW_DAYS="$D" ;; esac
+  case "$M" in 3|6|9) ACTIVE_MONTH_WINDOW_MONTHS="$M" ;; esac
+  case "$Y" in 1|3|5) ACTIVE_YEAR_WINDOW_YEARS="$Y" ;; esac
 }
 
 sleep_poll_interval() {
@@ -291,6 +352,13 @@ cat > "$WWW/index.html" <<'HTML'
         </select>
         <button id="poll-save" type="button">Save</button>
       </label>
+      <label class="control" for="window-day">
+        <span id="window-label">History</span>
+        <select id="window-day"></select>
+        <select id="window-month"></select>
+        <select id="window-year"></select>
+        <button id="window-save" type="button">Save</button>
+      </label>
       <label class="control" for="lang">
         <span class="control-icon" aria-hidden="true">
           <img id="lang-icon-img" src="/images/lang/en.svg" alt="" />
@@ -366,6 +434,18 @@ const I18N_FALLBACK = {
   hoursPlural: 'hours',
   pollSaved: 'Poll interval saved',
   pollInvalid: 'Invalid interval (examples: 60, 45s, 15m, 2h)',
+  history: 'History',
+  dayWindow: 'Day',
+  monthWindow: 'Month',
+  yearWindow: 'Year',
+  daysSingular: 'day',
+  daysPlural: 'days',
+  monthsSingular: 'month',
+  monthsPlural: 'months',
+  yearsSingular: 'year',
+  yearsPlural: 'years',
+  historySaved: 'History window saved',
+  historyInvalid: 'Invalid history window',
   save: 'Save',
   language: 'Language',
   subtitle: 'Day / Month / Year aggregation, updated hourly.',
@@ -389,7 +469,18 @@ const I18N_FALLBACK = {
 };
 
 const TAB_LABEL_KEY = { day: 'day', month: 'month', year: 'year' };
-const state = { activeTab: 'day', lang: 'en', theme: 'auto', pollInterval: '', rows: { day: [], month: [], year: [] }, info: {}, languages: DEFAULT_LANGUAGES.slice() };
+const WINDOW_OPTIONS = { day: [30, 60, 90], month: [3, 6, 9], year: [1, 3, 5] };
+const DEFAULT_WINDOWS = { day: 30, month: 3, year: 3 };
+const state = {
+  activeTab: 'day',
+  lang: 'en',
+  theme: 'auto',
+  pollInterval: '',
+  windows: { day: DEFAULT_WINDOWS.day, month: DEFAULT_WINDOWS.month, year: DEFAULT_WINDOWS.year },
+  rows: { day: [], month: [], year: [] },
+  info: {},
+  languages: DEFAULT_LANGUAGES.slice()
+};
 const prefersDarkQuery = window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)') : null;
 
 function themeIconSvg(mode, resolved) {
@@ -467,6 +558,38 @@ function formatPollInterval(v) {
   return `${n} ${t(unitKey)}`;
 }
 
+function pickWindow(tab, raw) {
+  const choices = WINDOW_OPTIONS[tab] || [];
+  const n = parseInt(String(raw || ''), 10);
+  if (choices.includes(n)) return n;
+  return DEFAULT_WINDOWS[tab];
+}
+
+function windowUnitKey(tab, n) {
+  if (tab === 'day') return n === 1 ? 'daysSingular' : 'daysPlural';
+  if (tab === 'month') return n === 1 ? 'monthsSingular' : 'monthsPlural';
+  return n === 1 ? 'yearsSingular' : 'yearsPlural';
+}
+
+function renderWindowOptions() {
+  const daySel = document.getElementById('window-day');
+  const monthSel = document.getElementById('window-month');
+  const yearSel = document.getElementById('window-year');
+  const maps = { day: daySel, month: monthSel, year: yearSel };
+
+  ['day', 'month', 'year'].forEach((tab) => {
+    const sel = maps[tab];
+    sel.innerHTML = '';
+    (WINDOW_OPTIONS[tab] || []).forEach((n) => {
+      const opt = document.createElement('option');
+      opt.value = String(n);
+      opt.textContent = `${n} ${t(windowUnitKey(tab, n))}`;
+      sel.appendChild(opt);
+    });
+    sel.value = String(pickWindow(tab, state.windows[tab]));
+  });
+}
+
 function formatUpdatedLocal(raw) {
   const s = (raw || '').trim();
   if (!s) return '-';
@@ -522,6 +645,12 @@ function applyLanguage() {
   document.getElementById('poll-unit-m').textContent = t('minutesPlural');
   document.getElementById('poll-unit-h').textContent = t('hoursPlural');
   document.getElementById('poll-save').textContent = t('save');
+  document.getElementById('window-label').textContent = t('history');
+  document.getElementById('window-save').textContent = t('save');
+  document.getElementById('window-day').setAttribute('title', t('dayWindow'));
+  document.getElementById('window-month').setAttribute('title', t('monthWindow'));
+  document.getElementById('window-year').setAttribute('title', t('yearWindow'));
+  renderWindowOptions();
   document.getElementById('lang').value = state.lang;
   document.getElementById('lang-label').textContent = t('language');
   document.getElementById('subtitle').textContent = t('subtitle');
@@ -664,6 +793,10 @@ async function loadSettings() {
       localStorage.setItem('mtm_lang', lang);
       applyLanguage();
     }
+    state.windows.day = pickWindow('day', (d && d.day_window_days) || (d && d.effective_day_window_days));
+    state.windows.month = pickWindow('month', (d && d.month_window_months) || (d && d.effective_month_window_months));
+    state.windows.year = pickWindow('year', (d && d.year_window_years) || (d && d.effective_year_window_years));
+    renderWindowOptions();
     renderRows();
   } catch (_) {}
 }
@@ -739,6 +872,35 @@ async function savePollInterval() {
   setTimeout(() => { window.location.reload(); }, 900);
 }
 
+async function saveWindowSettings() {
+  const day = pickWindow('day', document.getElementById('window-day').value);
+  const month = pickWindow('month', document.getElementById('window-month').value);
+  const year = pickWindow('year', document.getElementById('window-year').value);
+
+  if (!WINDOW_OPTIONS.day.includes(day) || !WINDOW_OPTIONS.month.includes(month) || !WINDOW_OPTIONS.year.includes(year)) {
+    document.getElementById('meta').textContent = t('historyInvalid');
+    return;
+  }
+
+  try {
+    await saveSettings({
+      day_window_days: day,
+      month_window_months: month,
+      year_window_years: year
+    });
+  } catch (_) {
+    document.getElementById('meta').textContent = t('loadError');
+    return;
+  }
+
+  state.windows.day = day;
+  state.windows.month = month;
+  state.windows.year = year;
+  renderWindowOptions();
+  document.getElementById('meta').textContent = `${t('historySaved')}: ${day} ${t(windowUnitKey('day', day))}, ${month} ${t(windowUnitKey('month', month))}, ${year} ${t(windowUnitKey('year', year))}`;
+  setTimeout(() => { window.location.reload(); }, 900);
+}
+
 const storedLang = localStorage.getItem('mtm_lang');
 const storedTheme = localStorage.getItem('mtm_theme');
 state.lang = (typeof storedLang === 'string' && storedLang) ? storedLang.toLowerCase() : 'en';
@@ -755,6 +917,7 @@ document.getElementById('meta').textContent = t('loading');
 document.getElementById('theme').addEventListener('change', (e) => setTheme(e.target.value));
 document.getElementById('lang').addEventListener('change', (e) => setLanguage(e.target.value));
 document.getElementById('poll-save').addEventListener('click', () => { savePollInterval().catch(() => {}); });
+document.getElementById('window-save').addEventListener('click', () => { saveWindowSettings().catch(() => {}); });
 document.querySelectorAll('.tab').forEach(btn => btn.addEventListener('click', () => setActiveTab(btn.dataset.tab)));
 loadAll().catch(e => { document.getElementById('meta').textContent = `${t('loadError')}: ${e}`; });
 loadLanguageConfig().then(() => {
@@ -846,7 +1009,7 @@ backfill_deltas() {
 }
 
 render_api() {
-  BASE="$WWW" IFINDEX_ENV="$ACTIVE_IFINDEX" POLL_INTERVAL_ENV="$ACTIVE_POLL_INTERVAL" POLL_SEC_ENV="$POLL_SLEEP_SEC" python3 - <<'PY'
+  BASE="$WWW" IFINDEX_ENV="$ACTIVE_IFINDEX" POLL_INTERVAL_ENV="$ACTIVE_POLL_INTERVAL" POLL_SEC_ENV="$POLL_SLEEP_SEC" DAY_WINDOW_DAYS_ENV="$ACTIVE_DAY_WINDOW_DAYS" MONTH_WINDOW_MONTHS_ENV="$ACTIVE_MONTH_WINDOW_MONTHS" YEAR_WINDOW_YEARS_ENV="$ACTIVE_YEAR_WINDOW_YEARS" python3 - <<'PY'
 import csv
 import json
 import os
@@ -914,7 +1077,11 @@ summary = {
         "interval": os.environ.get("POLL_INTERVAL_ENV", ""),
         "seconds": int(to_num(os.environ.get("POLL_SEC_ENV", "0"))),
     },
-    "windows": {"day": "30d", "month": "3m", "year": "3y"},
+    "windows": {
+        "day": f'{os.environ.get("DAY_WINDOW_DAYS_ENV", "30")}d',
+        "month": f'{os.environ.get("MONTH_WINDOW_MONTHS_ENV", "3")}m',
+        "year": f'{os.environ.get("YEAR_WINDOW_YEARS_ENV", "3")}y'
+    },
     "endpoints": {
         "day": "/api/day.json",
         "month": "/api/month.json",
@@ -954,16 +1121,24 @@ PY
 }
 
 render_views() {
+  resolve_windows
+  DAY_LIMIT="$ACTIVE_DAY_WINDOW_DAYS"
+  DAY_OFFSET=$((DAY_LIMIT - 1))
+  MONTH_LIMIT="$ACTIVE_MONTH_WINDOW_MONTHS"
+  MONTH_OFFSET=$((MONTH_LIMIT - 1))
+  YEAR_LIMIT="$ACTIVE_YEAR_WINDOW_YEARS"
+  YEAR_OFFSET=$((YEAR_LIMIT - 1))
+
   sqlite3 -header -csv "$DB" "
     SELECT date(ts,'unixepoch','localtime') AS period,
            ROUND(SUM(delta_bytes)/1073741824.0, 3) AS total_gib,
            ROUND(SUM(delta_in_bytes)/1073741824.0, 3) AS rx_gib,
            ROUND(SUM(delta_out_bytes)/1073741824.0, 3) AS tx_gib
     FROM samples
-    WHERE ts >= strftime('%s','now','localtime','start of day','-29 days','utc')
+    WHERE ts >= strftime('%s','now','localtime','start of day','-${DAY_OFFSET} days','utc')
     GROUP BY period
     ORDER BY period DESC
-    LIMIT 30;
+    LIMIT ${DAY_LIMIT};
   " > "$WWW/day.csv"
 
   sqlite3 -header -csv "$DB" "
@@ -972,10 +1147,10 @@ render_views() {
            ROUND(SUM(delta_in_bytes)/1073741824.0, 3) AS rx_gib,
            ROUND(SUM(delta_out_bytes)/1073741824.0, 3) AS tx_gib
     FROM samples
-    WHERE ts >= strftime('%s','now','localtime','start of month','-2 months','utc')
+    WHERE ts >= strftime('%s','now','localtime','start of month','-${MONTH_OFFSET} months','utc')
     GROUP BY period
     ORDER BY period DESC
-    LIMIT 3;
+    LIMIT ${MONTH_LIMIT};
   " > "$WWW/month.csv"
 
   sqlite3 -header -csv "$DB" "
@@ -984,10 +1159,10 @@ render_views() {
            ROUND(SUM(delta_in_bytes)/1073741824.0, 3) AS rx_gib,
            ROUND(SUM(delta_out_bytes)/1073741824.0, 3) AS tx_gib
     FROM samples
-    WHERE ts >= strftime('%s','now','localtime','start of year','-2 years','utc')
+    WHERE ts >= strftime('%s','now','localtime','start of year','-${YEAR_OFFSET} years','utc')
     GROUP BY period
     ORDER BY period DESC
-    LIMIT 3;
+    LIMIT ${YEAR_LIMIT};
   " > "$WWW/year.csv"
 
   cp "$WWW/day.csv" "$WWW/daily.csv"
@@ -1028,7 +1203,7 @@ render_views() {
 }
 
 start_http_server() {
-  WWW_DIR="$WWW" HTTP_PORT_ENV="$HTTP_PORT" SETTINGS_PATH_ENV="$SETTINGS_PATH" EFFECTIVE_POLL_INTERVAL_ENV="$ACTIVE_POLL_INTERVAL" python3 - <<'PY' &
+  WWW_DIR="$WWW" HTTP_PORT_ENV="$HTTP_PORT" SETTINGS_PATH_ENV="$SETTINGS_PATH" EFFECTIVE_POLL_INTERVAL_ENV="$ACTIVE_POLL_INTERVAL" EFFECTIVE_DAY_WINDOW_DAYS_ENV="$ACTIVE_DAY_WINDOW_DAYS" EFFECTIVE_MONTH_WINDOW_MONTHS_ENV="$ACTIVE_MONTH_WINDOW_MONTHS" EFFECTIVE_YEAR_WINDOW_YEARS_ENV="$ACTIVE_YEAR_WINDOW_YEARS" python3 - <<'PY' &
 import json
 import os
 from http.server import ThreadingHTTPServer, SimpleHTTPRequestHandler
@@ -1038,6 +1213,9 @@ www = os.environ["WWW_DIR"]
 port = int(os.environ["HTTP_PORT_ENV"])
 settings_path = Path(os.environ["SETTINGS_PATH_ENV"])
 effective_poll_interval = os.environ.get("EFFECTIVE_POLL_INTERVAL_ENV", "")
+effective_day_window_days = int(os.environ.get("EFFECTIVE_DAY_WINDOW_DAYS_ENV", "30") or 30)
+effective_month_window_months = int(os.environ.get("EFFECTIVE_MONTH_WINDOW_MONTHS_ENV", "3") or 3)
+effective_year_window_years = int(os.environ.get("EFFECTIVE_YEAR_WINDOW_YEARS_ENV", "3") or 3)
 
 
 def read_settings():
@@ -1093,6 +1271,14 @@ def valid_language(v):
     return v[0].isalpha()
 
 
+def parse_int_choice(value, allowed):
+    try:
+        n = int(str(value).strip())
+    except Exception:
+        return None
+    return n if n in allowed else None
+
+
 class Handler(SimpleHTTPRequestHandler):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, directory=www, **kwargs)
@@ -1108,11 +1294,20 @@ class Handler(SimpleHTTPRequestHandler):
     def do_GET(self):
         if self.path.startswith("/api/settings.json"):
             cfg = read_settings()
+            day_window = parse_int_choice(cfg.get("day_window_days", ""), {30, 60, 90})
+            month_window = parse_int_choice(cfg.get("month_window_months", ""), {3, 6, 9})
+            year_window = parse_int_choice(cfg.get("year_window_years", ""), {1, 3, 5})
             self._send_json(200, {
                 "poll_interval": cfg.get("poll_interval", ""),
                 "effective_poll_interval": effective_poll_interval,
                 "theme": cfg.get("theme", ""),
                 "language": cfg.get("language", ""),
+                "day_window_days": day_window or "",
+                "month_window_months": month_window or "",
+                "year_window_years": year_window or "",
+                "effective_day_window_days": effective_day_window_days,
+                "effective_month_window_months": effective_month_window_months,
+                "effective_year_window_years": effective_year_window_years,
             })
             return
         super().do_GET()
@@ -1166,6 +1361,33 @@ class Handler(SimpleHTTPRequestHandler):
             out["language"] = language
             changed = True
 
+        if "day_window_days" in data:
+            day_window = parse_int_choice(data.get("day_window_days", ""), {30, 60, 90})
+            if day_window is None:
+                self._send_json(400, {"error": "invalid_day_window"})
+                return
+            cfg["day_window_days"] = day_window
+            out["day_window_days"] = day_window
+            changed = True
+
+        if "month_window_months" in data:
+            month_window = parse_int_choice(data.get("month_window_months", ""), {3, 6, 9})
+            if month_window is None:
+                self._send_json(400, {"error": "invalid_month_window"})
+                return
+            cfg["month_window_months"] = month_window
+            out["month_window_months"] = month_window
+            changed = True
+
+        if "year_window_years" in data:
+            year_window = parse_int_choice(data.get("year_window_years", ""), {1, 3, 5})
+            if year_window is None:
+                self._send_json(400, {"error": "invalid_year_window"})
+                return
+            cfg["year_window_years"] = year_window
+            out["year_window_years"] = year_window
+            changed = True
+
         if not changed:
             self._send_json(400, {"error": "empty_payload"})
             return
@@ -1181,6 +1403,7 @@ PY
 write_ui
 init_db
 resolve_poll_interval
+resolve_windows
 start_http_server
 resolve_ifindex || true
 render_views
