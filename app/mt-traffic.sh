@@ -465,6 +465,30 @@ function formatPollInterval(v) {
   return `${n} ${t(unitKey)}`;
 }
 
+function formatUpdatedLocal(raw) {
+  const s = (raw || '').trim();
+  if (!s) return '-';
+  const m = s.match(/^([0-9]{4})-([0-9]{2})-([0-9]{2}) ([0-9]{2}):([0-9]{2})(?::[0-9]{2})? ([+-])([0-9]{2})([0-9]{2})$/);
+  if (!m) return s;
+
+  const yyyy = m[1];
+  const mm = m[2];
+  const dd = m[3];
+  const hh = m[4];
+  const mi = m[5];
+  const sign = m[6];
+  const offH = parseInt(m[7], 10);
+  const offM = parseInt(m[8], 10);
+
+  let tz = `GMT${sign}${offH}`;
+  if (offM > 0) tz += `:${String(offM).padStart(2, '0')}`;
+
+  if (state.lang === 'ro') {
+    return `${dd}-${mm}-${yyyy} ${hh}:${mi} ${tz}`;
+  }
+  return `${mm}-${dd}-${yyyy} ${hh}:${mi} ${tz}`;
+}
+
 function parseCsv(txt) {
   const lines = (txt || '').trim().split('\n');
   if (lines.length <= 1) return [];
@@ -556,7 +580,7 @@ function renderRows() {
     year: state.info.samples_year || state.info.samples || '0'
   };
   const samples = sampleByTab[state.activeTab] || state.info.samples || '0';
-  const updated = state.info.updated_local || '-';
+  const updated = formatUpdatedLocal(state.info.updated_local || '');
   const activeLabel = t(TAB_LABEL_KEY[state.activeTab] || state.activeTab);
   const poll = formatPollInterval(state.pollInterval);
   document.getElementById('meta').innerHTML = `${t('tab')}: ${esc(activeLabel)} | ${uiIcon('samples')}${t('samples')}: ${esc(samples)} | ${uiIcon('updated')}${t('lastUpdate')}: ${esc(updated)} | ${uiIcon('interval')}${t('pollInterval')}: ${esc(poll)}`;
@@ -979,7 +1003,7 @@ render_views() {
   SAMPLES_DAY="$(sqlite_exec "SELECT COUNT(*) FROM samples WHERE ts >= strftime('%s','now','localtime','start of day','utc');")"
   SAMPLES_MONTH="$(sqlite_exec "SELECT COUNT(*) FROM samples WHERE ts >= strftime('%s','now','localtime','start of month','utc');")"
   SAMPLES_YEAR="$(sqlite_exec "SELECT COUNT(*) FROM samples WHERE ts >= strftime('%s','now','localtime','start of year','utc');")"
-  UPDATED_LOCAL="$(date '+%Y-%m-%d %H:%M:%S %Z')"
+  UPDATED_LOCAL="$(date '+%Y-%m-%d %H:%M:%S %z')"
 
   {
     echo "today_total_gib=$TODAY_TOTAL_GIB"
