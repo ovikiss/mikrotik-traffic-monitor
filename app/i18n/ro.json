@@ -12,7 +12,7 @@
   "hoursSingular": "ora",
   "hoursPlural": "ore",
   "pollSaved": "Interval salvat",
-  "pollInvalid": "Interval invalid (exemple: 60, 45s, 15m, 2h)",
+  "pollInvalid": "Interval invalid (permise: 1h, 3h, 6h, 12h)",
   "save": "Salveaza",
   "language": "Limba",
   "subtitleBase": "Agregare pe Zi / Luna / An, update la fiecare",

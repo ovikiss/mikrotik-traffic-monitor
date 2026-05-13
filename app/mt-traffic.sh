@@ -5,7 +5,7 @@ set -eu
 : "${MT_COMMUNITY:?MT_COMMUNITY is required}"
 : "${IFINDEX:=auto}"
 : "${IFNAME_PATTERN:=pppoe}"
-: "${POLL_INTERVAL:=60m}"
+: "${POLL_INTERVAL:=1h}"
 : "${POLL_SEC:=}"
 : "${HTTP_PORT:=8080}"
 : "${TZ:=Europe/Bucharest}"
@@ -22,7 +22,7 @@ mkdir -p "$WWW"
 
 ACTIVE_IFINDEX=""
 POLL_SLEEP_SEC="3600"
-ACTIVE_POLL_INTERVAL="60m"
+ACTIVE_POLL_INTERVAL="1h"
 
 parse_interval_to_sec() {
   RAW="$(printf '%s' "${1:-}" | tr '[:upper:]' '[:lower:]')"
@@ -87,7 +87,7 @@ resolve_poll_interval() {
   case "${POLL_SEC:-}" in
     ''|*[!0-9]*)
       POLL_SLEEP_SEC="3600"
-      ACTIVE_POLL_INTERVAL="60m"
+      ACTIVE_POLL_INTERVAL="1h"
       ;;
     *)
       if [ "$POLL_SEC" -gt 0 ] 2>/dev/null; then
@@ -95,7 +95,7 @@ resolve_poll_interval() {
         ACTIVE_POLL_INTERVAL="${POLL_SEC}s"
       else
         POLL_SLEEP_SEC="3600"
-        ACTIVE_POLL_INTERVAL="60m"
+        ACTIVE_POLL_INTERVAL="1h"
       fi
       ;;
   esac
@@ -287,11 +287,11 @@ cat > "$WWW/index.html" <<'HTML'
       </label>
       <label class="control" for="poll-interval">
         <span id="poll-label">Poll</span>
-        <input id="poll-interval" type="number" min="1" step="1" placeholder="60" />
-        <select id="poll-unit">
-          <option value="s" id="poll-unit-s">seconds</option>
-          <option value="m" id="poll-unit-m">minutes</option>
-          <option value="h" id="poll-unit-h" selected>hours</option>
+        <select id="poll-interval">
+          <option value="1h" id="poll-interval-1h">1 hour</option>
+          <option value="3h" id="poll-interval-3h">3 hours</option>
+          <option value="6h" id="poll-interval-6h">6 hours</option>
+          <option value="12h" id="poll-interval-12h">12 hours</option>
         </select>
         <button id="poll-save" type="button">Save</button>
       </label>
@@ -369,7 +369,7 @@ const I18N_FALLBACK = {
   hoursSingular: 'hour',
   hoursPlural: 'hours',
   pollSaved: 'Poll interval saved',
-  pollInvalid: 'Invalid interval (examples: 60, 45s, 15m, 2h)',
+  pollInvalid: 'Invalid interval (allowed: 1h, 3h, 6h, 12h)',
   save: 'Save',
   language: 'Language',
   subtitleBase: 'Day / Month / Year aggregation, updated every',
@@ -485,6 +485,27 @@ function formatPollInterval(v) {
   return `${n} ${t(unitKey)}`;
 }
 
+function normalizePollIntervalOption(v) {
+  const s = String(v || '').trim().toLowerCase();
+  if (s === '60m') return '1h';
+  if (s === '180m') return '3h';
+  if (s === '360m') return '6h';
+  if (s === '720m') return '12h';
+  if (/^[0-9]+$/.test(s)) {
+    const n = parseInt(s, 10);
+    if (n === 60) return '1h';
+    if (n === 180) return '3h';
+    if (n === 360) return '6h';
+    if (n === 720) return '12h';
+  }
+  return s;
+}
+
+function isAllowedPollInterval(v) {
+  const s = normalizePollIntervalOption(v);
+  return s === '1h' || s === '3h' || s === '6h' || s === '12h';
+}
+
 function renderSubtitle() {
   const poll = formatPollInterval(state.pollInterval || '60m');
   document.getElementById('subtitle').textContent = `${t('subtitleBase')} ${poll}.`;
@@ -580,9 +601,10 @@ function applyLanguage() {
   document.getElementById('theme-opt-light').textContent = `☀️ ${t('light')}`;
   document.getElementById('theme-opt-dark').textContent = `🌙 ${t('dark')}`;
   document.getElementById('poll-label').textContent = t('poll');
-  document.getElementById('poll-unit-s').textContent = t('secondsPlural');
-  document.getElementById('poll-unit-m').textContent = t('minutesPlural');
-  document.getElementById('poll-unit-h').textContent = t('hoursPlural');
+  document.getElementById('poll-interval-1h').textContent = `1 ${t('hoursSingular')}`;
+  document.getElementById('poll-interval-3h').textContent = `3 ${t('hoursPlural')}`;
+  document.getElementById('poll-interval-6h').textContent = `6 ${t('hoursPlural')}`;
+  document.getElementById('poll-interval-12h').textContent = `12 ${t('hoursPlural')}`;
   document.getElementById('poll-save').textContent = t('save');
   document.getElementById('lang').value = state.lang;
   document.getElementById('lang-label').textContent = t('language');
@@ -749,33 +771,16 @@ async function loadAll() {
   renderRows();
 }
 
-function isValidInterval(v) {
-  return /^[0-9]+([smh])?$/i.test((v || '').trim());
-}
-
-function splitInterval(v) {
-  const s = (v || '').trim().toLowerCase();
-  const m = s.match(/^([0-9]+)([smh]?)$/);
-  if (!m) return null;
-  return { value: m[1], unit: m[2] || 'm' };
-}
-
 async function loadSettings() {
   const q = `?_=${Date.now()}`;
   try {
     const d = await fetch('/api/settings.json' + q).then(r => r.json());
-    const p = (d && d.poll_interval) ? d.poll_interval : ((d && d.effective_poll_interval) ? d.effective_poll_interval : '');
+    const pRaw = (d && d.poll_interval) ? d.poll_interval : ((d && d.effective_poll_interval) ? d.effective_poll_interval : '');
+    const p = normalizePollIntervalOption(pRaw);
     const theme = (d && (d.theme === 'light' || d.theme === 'dark' || d.theme === 'auto')) ? d.theme : '';
     const lang = (d && getLanguageDef(String(d.language || '').toLowerCase())) ? String(d.language || '').toLowerCase() : '';
     state.pollInterval = p;
-    const parsed = splitInterval(p);
-    if (parsed) {
-      document.getElementById('poll-interval').value = parsed.value;
-      document.getElementById('poll-unit').value = parsed.unit;
-    } else {
-      document.getElementById('poll-interval').value = '';
-      document.getElementById('poll-unit').value = 'h';
-    }
+    document.getElementById('poll-interval').value = isAllowedPollInterval(p) ? p : '1h';
     if (theme) {
       state.theme = theme;
       localStorage.setItem('mtm_theme', theme);
@@ -829,21 +834,9 @@ async function loadLanguageConfig() {
 }
 
 async function savePollInterval() {
-  const inp = document.getElementById('poll-interval');
-  const unitSel = document.getElementById('poll-unit');
-  const numRaw = String(inp.value || '').trim();
-  const unit = String(unitSel.value || 'h').trim().toLowerCase();
-  if (!/^[0-9]+$/.test(numRaw) || !/^[smh]$/.test(unit)) {
-    document.getElementById('meta').textContent = t('pollInvalid');
-    return;
-  }
-  const n = parseInt(numRaw, 10);
-  if (!Number.isFinite(n) || n <= 0) {
-    document.getElementById('meta').textContent = t('pollInvalid');
-    return;
-  }
-  const v = `${n}${unit}`;
-  if (!isValidInterval(v)) {
+  const sel = document.getElementById('poll-interval');
+  const v = normalizePollIntervalOption(sel.value || '');
+  if (!isAllowedPollInterval(v)) {
     document.getElementById('meta').textContent = t('pollInvalid');
     return;
   }
@@ -855,8 +848,7 @@ async function savePollInterval() {
     return;
   }
   state.pollInterval = v;
-  inp.value = String(n);
-  unitSel.value = unit;
+  sel.value = v;
   renderSubtitle();
   renderRows();
   document.getElementById('meta').textContent = `${t('pollSaved')}: ${formatPollInterval(v)}`;
@@ -1233,22 +1225,33 @@ def write_settings(data):
     tmp.replace(settings_path)
 
 
-def valid_interval(v):
-    if not isinstance(v, str):
-        return False
-    v = v.strip().lower()
-    if len(v) < 1:
-        return False
-    if v[-1] in ("s", "m", "h"):
-        return v[:-1].isdigit() and int(v[:-1]) > 0
-    return v.isdigit() and int(v) > 0
-
-
 def normalize_interval(v):
+    if not isinstance(v, str):
+        return ""
     v = v.strip().lower()
+    if v == "60m":
+        return "1h"
+    if v == "180m":
+        return "3h"
+    if v == "360m":
+        return "6h"
+    if v == "720m":
+        return "12h"
     if v.isdigit():
-        return f"{v}m"
+        n = int(v)
+        if n == 60:
+            return "1h"
+        if n == 180:
+            return "3h"
+        if n == 360:
+            return "6h"
+        if n == 720:
+            return "12h"
     return v
+
+
+def valid_interval(v):
+    return v in ("1h", "3h", "6h", "12h")
 
 
 def valid_theme(v):

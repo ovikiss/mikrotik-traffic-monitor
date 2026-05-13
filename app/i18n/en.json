@@ -12,7 +12,7 @@
   "hoursSingular": "hour",
   "hoursPlural": "hours",
   "pollSaved": "Poll interval saved",
-  "pollInvalid": "Invalid interval (examples: 60, 45s, 15m, 2h)",
+  "pollInvalid": "Invalid interval (allowed: 1h, 3h, 6h, 12h)",
   "save": "Save",
   "language": "Language",
   "subtitleBase": "Day / Month / Year aggregation, updated every",

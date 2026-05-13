@@ -15,7 +15,7 @@
 :local mtmContainerName "trafficdb"
 :local mtmIfIndex "auto"
 :local mtmIfNamePattern "pppoe"
-:local mtmPollInterval "60m"
+:local mtmPollInterval "1h"
 :local mtmSnmpCommunity "trafficdb"
 :local mtmHttpLanPort "8088"
 :local mtmLanCidr "192.168.88.0/24"
