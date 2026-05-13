@@ -853,7 +853,7 @@ function renderRows() {
     const isExpanded = (isMonthTab && state.expanded.month === rowKey) || (isYearTab && state.expanded.year === rowKey);
     const showExpand = isMonthTab || isYearTab;
     const prefix = showExpand
-      ? (canExpand ? `<button class="expander" type="button" data-key="${esc(rowKey)}" aria-label="toggle">${isExpanded ? '▾' : '▸'}</button>` : '<span class="expander-empty"></span>')
+      ? (canExpand ? `<button class="expander" type="button" data-key="${esc(rowKey)}" aria-label="toggle">${isExpanded ? '&#9662;' : '&#9656;'}</button>` : '<span class="expander-empty"></span>')
       : '';
 
     const tr = document.createElement('tr');
