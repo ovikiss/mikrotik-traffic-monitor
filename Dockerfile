@@ -8,6 +8,7 @@ RUN apk add --no-cache \
 
 WORKDIR /app
 COPY app/mt-traffic.sh /app/mt-traffic.sh
+COPY app/www /app/www
 COPY app/i18n /app/i18n
 COPY app/images /app/images
 RUN chmod +x /app/mt-traffic.sh
