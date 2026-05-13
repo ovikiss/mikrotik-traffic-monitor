@@ -301,8 +301,8 @@ cat > "$WWW/index.html" <<'HTML'
         </span>
         <span id="lang-label">Language</span>
         <select id="lang">
-          <option value="en">EN</option>
-          <option value="ro">RO</option>
+          <option value="en">🇺🇸 EN</option>
+          <option value="ro">🇷🇴 RO</option>
         </select>
       </label>
     </div>
@@ -351,8 +351,8 @@ cat > "$WWW/index.html" <<'HTML'
 
 <script>
 const DEFAULT_LANGUAGES = [
-  { code: 'en', label: 'EN', flag: '\u{1F1FA}\u{1F1F8}', file: '/i18n/en.json', icon: '/images/lang/en.svg' },
-  { code: 'ro', label: 'RO', flag: '\u{1F1F7}\u{1F1F4}', file: '/i18n/ro.json', icon: '/images/lang/ro.svg' }
+  { code: 'en', label: 'EN', flag: '\uD83C\uDDFA\uD83C\uDDF8', file: '/i18n/en.json', icon: '/images/lang/en.svg' },
+  { code: 'ro', label: 'RO', flag: '\uD83C\uDDF7\uD83C\uDDF4', file: '/i18n/ro.json', icon: '/images/lang/ro.svg' }
 ];
 const I18N = {};
 const I18N_FALLBACK = {
