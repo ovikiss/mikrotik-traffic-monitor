@@ -116,7 +116,32 @@
     }
     .expander { border: 0; background: transparent; color: var(--muted); cursor: pointer; padding: 0 6px 0 0; font-size: 12px; }
     .expander-empty { display: inline-block; width: 12px; margin-right: 6px; }
-    .detail-row td { background: color-mix(in srgb, var(--table-head) 78%, transparent); }
+    .detail-row td {
+      background: color-mix(in srgb, var(--table-head) 78%, transparent);
+      border-bottom: 0;
+    }
+    .group-parent-expanded td {
+      border-bottom: 0;
+    }
+    .detail-row + .detail-row td {
+      border-top: 1px solid var(--table-border);
+    }
+    .detail-row-first td:first-child {
+      border-top-left-radius: 12px;
+      overflow: hidden;
+    }
+    .detail-row-first td:last-child {
+      border-top-right-radius: 12px;
+      overflow: hidden;
+    }
+    .detail-row-last td:first-child {
+      border-bottom-left-radius: 12px;
+      overflow: hidden;
+    }
+    .detail-row-last td:last-child {
+      border-bottom-right-radius: 12px;
+      overflow: hidden;
+    }
     .detail-period { padding-left: 24px; color: var(--muted); }
     .num { text-align: right; font-variant-numeric: tabular-nums; }
     .bar-wrap { width: 140px; max-width: 100%; height: 8px; border-radius: 999px; background: var(--bar-bg); overflow: hidden; }
@@ -831,6 +856,7 @@ function renderRows() {
       : '';
 
     const tr = document.createElement('tr');
+    if (isExpanded) tr.className = 'group-parent-expanded';
     tr.innerHTML = `
       <td>${prefix}${esc(formatPeriod(state.activeTab, r.period))}</td>
       <td class="num">${esc(fmtTraffic(r.total_gib))}</td>
@@ -852,10 +878,12 @@ function renderRows() {
     }
 
     if (isExpanded) {
-      detailRows.forEach((d) => {
+      detailRows.forEach((d, idx) => {
         const dpct = maxTotal > 0 ? (d.total_gib / maxTotal) * 100 : 0;
         const dtr = document.createElement('tr');
-        dtr.className = 'detail-row';
+        const isFirstDetail = idx === 0;
+        const isLastDetail = idx === detailRows.length - 1;
+        dtr.className = `detail-row${isFirstDetail ? ' detail-row-first' : ''}${isLastDetail ? ' detail-row-last' : ''}`;
         dtr.innerHTML = `
           <td class="detail-period">${esc(formatPeriod(isMonthTab ? 'day' : 'month', d.period))}</td>
           <td class="num">${esc(fmtTraffic(d.total_gib))}</td>
