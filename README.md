@@ -8,7 +8,7 @@ Containerized MikroTik WAN traffic monitor with:
 - JSON API for Home Assistant integration
 
 ## UI preview (Light + Dark)
-![MikroTik Traffic Monitor UI (Light and Dark)](docs/ui-dark-light.png)
+![MikroTik Traffic Monitor UI (Light and Dark)](docs/ui-light-dark.png)
 
 ## What it exposes
 - UI: `http://<router-lan-ip>:8088/`
