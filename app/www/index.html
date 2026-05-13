@@ -78,7 +78,6 @@
     .theme-item:hover { background: var(--table-head); }
     .theme-item img { width: 16px; height: 16px; display: block; }
     .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); border: 0; }
-    .ico-inline { width: 14px; height: 14px; vertical-align: -2px; margin-right: 4px; opacity: .95; }
     .text-inherit { font: inherit; color: inherit; letter-spacing: inherit; }
     .th-hint { color: var(--muted); font-weight: normal; }
     .control select { border: 1px solid var(--border); border-radius: 8px; background: var(--card); color: var(--text); padding: 4px 8px; font-size: 12px; }
@@ -103,9 +102,6 @@
     </div>
     <div class="controls">
       <label class="control" for="theme">
-        <span class="control-icon" id="theme-icon" aria-hidden="true">
-          <img id="theme-icon-img" src="/images/ui/theme-auto.svg" alt="" />
-        </span>
         <span id="theme-label">Theme</span>
         <div class="theme-dropdown" id="theme-dropdown">
           <button type="button" class="theme-toggle" id="theme-toggle" aria-haspopup="listbox" aria-expanded="false">
@@ -121,7 +117,6 @@
         </div>
       </label>
       <label class="control" for="font-size">
-        <span class="control-icon" aria-hidden="true"><img src="/images/ui/font-size.svg" alt="" /></span>
         <span id="font-label">Font size</span>
         <div class="theme-dropdown" id="font-dropdown">
           <button type="button" class="theme-toggle" id="font-toggle" aria-haspopup="listbox" aria-expanded="false">
@@ -153,9 +148,6 @@
         </div>
       </label>
       <label class="control" for="lang">
-        <span class="control-icon" aria-hidden="true">
-          <img id="lang-icon-img" src="/images/lang/en.svg" alt="" />
-        </span>
         <span id="lang-label">Language</span>
         <div class="lang-dropdown" id="lang-dropdown">
           <button type="button" class="lang-toggle" id="lang-toggle" aria-haspopup="listbox" aria-expanded="false">
@@ -201,9 +193,9 @@
       <thead>
         <tr>
           <th id="th-period">Period</th>
-          <th class="num" id="th-total">Total (GiB)</th>
-          <th class="num" id="th-rx">RX (GiB)</th>
-          <th class="num" id="th-tx">TX (GiB)</th>
+          <th class="num" id="th-total">Total</th>
+          <th class="num" id="th-rx">RX</th>
+          <th class="num" id="th-tx">TX</th>
           <th id="th-visual">Visual</th>
         </tr>
       </thead>
@@ -249,7 +241,7 @@ const I18N_FALLBACK = {
   month: 'Month',
   year: 'Year',
   period: 'Period',
-  total: 'Total (GiB)',
+  total: 'Total',
   download: 'Download',
   upload: 'Upload',
   visual: 'Visual',
@@ -304,7 +296,13 @@ function themeIconSvg(mode, resolved) {
 }
 
 function toNum(v) { const n = parseFloat(v || '0'); return Number.isFinite(n) ? n : 0; }
-function fmtGiB(v) { return `${toNum(v).toFixed(3)} GiB`; }
+function fmtTraffic(v) {
+  const gib = toNum(v);
+  if (Math.abs(gib) >= 1024) {
+    return `${(gib / 1024).toFixed(3)} TiB`;
+  }
+  return `${gib.toFixed(3)} GiB`;
+}
 function fmtBytes(v) {
   const n = Math.max(0, Number(v || 0));
   if (!Number.isFinite(n)) return '0 B';
@@ -315,10 +313,6 @@ function fmtBytes(v) {
 }
 function t(key) {
   return (I18N[state.lang] && I18N[state.lang][key]) || (I18N.en && I18N.en[key]) || I18N_FALLBACK[key] || key;
-}
-
-function uiIcon(name) {
-  return `<img class="ico-inline" src="/images/ui/${name}.svg" alt="" />`;
 }
 
 function esc(v) {
@@ -657,8 +651,6 @@ function parseInfo(txt) {
 
 function applyLanguage() {
   document.documentElement.lang = state.lang;
-  const langDef = getLanguageDef(state.lang) || getLanguageDef('en');
-  document.getElementById('lang-icon-img').setAttribute('src', (langDef && langDef.icon) ? langDef.icon : '/images/lang/en.svg');
   document.getElementById('theme-label').textContent = t('theme');
   document.getElementById('theme-opt-auto').textContent = t('auto');
   document.getElementById('theme-opt-light').textContent = t('light');
@@ -686,17 +678,16 @@ function applyLanguage() {
   document.getElementById('tab-month').textContent = t('month');
   document.getElementById('tab-year').textContent = t('year');
   document.getElementById('th-period').textContent = t('period');
-  document.getElementById('th-total').innerHTML = `${uiIcon('total')}${t('total')}`;
-  document.getElementById('th-rx').innerHTML = `${uiIcon('rx')}RX (GiB)`;
-  document.getElementById('th-tx').innerHTML = `${uiIcon('tx')}TX (GiB)`;
-  document.getElementById('th-visual').innerHTML = `${uiIcon('visual')}${t('visual')} <span class=\"th-hint text-inherit\">${esc(t('visualHint'))}</span>`;
+  document.getElementById('th-total').textContent = t('total');
+  document.getElementById('th-rx').textContent = 'RX';
+  document.getElementById('th-tx').textContent = 'TX';
+  document.getElementById('th-visual').innerHTML = `${t('visual')} <span class=\"th-hint text-inherit\">${esc(t('visualHint'))}</span>`;
 }
 
 function applyTheme() {
   const resolved = state.theme === 'auto' ? ((prefersDarkQuery && prefersDarkQuery.matches) ? 'dark' : 'light') : state.theme;
   document.documentElement.setAttribute('data-theme', resolved);
   document.getElementById('theme').value = state.theme;
-  document.getElementById('theme-icon-img').setAttribute('src', themeIconSvg(state.theme, resolved));
   updateThemeButton();
 }
 
@@ -708,15 +699,15 @@ function applyFontSize() {
 }
 
 function renderKpis() {
-  document.getElementById('kpi-day').textContent = fmtGiB(state.info.today_total_gib);
-  document.getElementById('kpi-month').textContent = fmtGiB(state.info.month_total_gib);
-  document.getElementById('kpi-year').textContent = fmtGiB(state.info.year_total_gib);
-  document.getElementById('kpi-day-rx').innerHTML = `${uiIcon('rx')}RX: ${fmtGiB(state.info.today_rx_gib)}`;
-  document.getElementById('kpi-day-tx').innerHTML = `${uiIcon('tx')}TX: ${fmtGiB(state.info.today_tx_gib)}`;
-  document.getElementById('kpi-month-rx').innerHTML = `${uiIcon('rx')}RX: ${fmtGiB(state.info.month_rx_gib)}`;
-  document.getElementById('kpi-month-tx').innerHTML = `${uiIcon('tx')}TX: ${fmtGiB(state.info.month_tx_gib)}`;
-  document.getElementById('kpi-year-rx').innerHTML = `${uiIcon('rx')}RX: ${fmtGiB(state.info.year_rx_gib)}`;
-  document.getElementById('kpi-year-tx').innerHTML = `${uiIcon('tx')}TX: ${fmtGiB(state.info.year_tx_gib)}`;
+  document.getElementById('kpi-day').textContent = fmtTraffic(state.info.today_total_gib);
+  document.getElementById('kpi-month').textContent = fmtTraffic(state.info.month_total_gib);
+  document.getElementById('kpi-year').textContent = fmtTraffic(state.info.year_total_gib);
+  document.getElementById('kpi-day-rx').textContent = `RX: ${fmtTraffic(state.info.today_rx_gib)}`;
+  document.getElementById('kpi-day-tx').textContent = `TX: ${fmtTraffic(state.info.today_tx_gib)}`;
+  document.getElementById('kpi-month-rx').textContent = `RX: ${fmtTraffic(state.info.month_rx_gib)}`;
+  document.getElementById('kpi-month-tx').textContent = `TX: ${fmtTraffic(state.info.month_tx_gib)}`;
+  document.getElementById('kpi-year-rx').textContent = `RX: ${fmtTraffic(state.info.year_rx_gib)}`;
+  document.getElementById('kpi-year-tx').textContent = `TX: ${fmtTraffic(state.info.year_tx_gib)}`;
 }
 
 function renderRows() {
@@ -759,9 +750,9 @@ function renderRows() {
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td>${prefix}${esc(formatPeriod(state.activeTab, r.period))}</td>
-      <td class="num">${r.total_gib.toFixed(3)}</td>
-      <td class="num">${r.rx_gib.toFixed(3)}</td>
-      <td class="num">${r.tx_gib.toFixed(3)}</td>
+      <td class="num">${esc(fmtTraffic(r.total_gib))}</td>
+      <td class="num">${esc(fmtTraffic(r.rx_gib))}</td>
+      <td class="num">${esc(fmtTraffic(r.tx_gib))}</td>
       <td><div class="bar-wrap"><div class="bar" style="width:${pct.toFixed(2)}%"></div></div></td>
     `;
     tbody.appendChild(tr);
@@ -784,9 +775,9 @@ function renderRows() {
         dtr.className = 'detail-row';
         dtr.innerHTML = `
           <td class="detail-period">${esc(formatPeriod(isMonthTab ? 'day' : 'month', d.period))}</td>
-          <td class="num">${d.total_gib.toFixed(3)}</td>
-          <td class="num">${d.rx_gib.toFixed(3)}</td>
-          <td class="num">${d.tx_gib.toFixed(3)}</td>
+          <td class="num">${esc(fmtTraffic(d.total_gib))}</td>
+          <td class="num">${esc(fmtTraffic(d.rx_gib))}</td>
+          <td class="num">${esc(fmtTraffic(d.tx_gib))}</td>
           <td><div class="bar-wrap"><div class="bar" style="width:${dpct.toFixed(2)}%"></div></div></td>
         `;
         tbody.appendChild(dtr);
@@ -804,7 +795,7 @@ function renderRows() {
   const activeLabel = t(TAB_LABEL_KEY[state.activeTab] || state.activeTab);
   const poll = formatPollInterval(state.pollInterval);
   const dbSize = fmtBytes(state.info.db_size_bytes || '0');
-  document.getElementById('meta').innerHTML = `${t('tab')}: ${esc(activeLabel)} | ${uiIcon('samples')}${t('samples')}: ${esc(samples)} | ${uiIcon('updated')}${t('lastUpdate')}: ${esc(updated)} | ${uiIcon('db-size')}${t('dbSize')}: ${esc(dbSize)} | ${uiIcon('interval')}${t('pollInterval')}: ${esc(poll)}`;
+  document.getElementById('meta').innerHTML = `${t('tab')}: ${esc(activeLabel)} | ${t('samples')}: ${esc(samples)} | ${t('lastUpdate')}: ${esc(updated)} | ${t('dbSize')}: ${esc(dbSize)} | ${t('pollInterval')}: ${esc(poll)}`;
 }
 
 function setActiveTab(tab) {
