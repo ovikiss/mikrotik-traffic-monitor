@@ -2,9 +2,9 @@
 
 Containerized MikroTik WAN traffic monitor with:
 - hourly collection via SNMP
-- SQLite persistence on USB storage
+- SQLite persistence (recommended on USB storage)
 - mini UI with day/month/year tabs (Total, RX, TX)
-- EN default UI with RO selector (translations loaded from JSON files)
+- UI with Language selector EN/RO (translations loaded from JSON files)
 - JSON API for Home Assistant integration
 
 ## UI preview (Light + Dark)
