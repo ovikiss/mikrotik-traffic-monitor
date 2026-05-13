@@ -78,6 +78,7 @@
     .theme-item:hover { background: var(--table-head); }
     .theme-item img { width: 16px; height: 16px; display: block; }
     .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); border: 0; }
+    .ico-inline { width: 14px; height: 14px; vertical-align: -2px; margin-right: 4px; opacity: .95; }
     .text-inherit { font: inherit; color: inherit; letter-spacing: inherit; }
     .th-hint { color: var(--muted); font-weight: normal; }
     .control select { border: 1px solid var(--border); border-radius: 8px; background: var(--card); color: var(--text); padding: 4px 8px; font-size: 12px; }
@@ -313,6 +314,10 @@ function fmtBytes(v) {
 }
 function t(key) {
   return (I18N[state.lang] && I18N[state.lang][key]) || (I18N.en && I18N.en[key]) || I18N_FALLBACK[key] || key;
+}
+
+function uiMetricIcon(name) {
+  return `<img class="ico-inline" src="/images/ui/${name}.svg" alt="" />`;
 }
 
 function esc(v) {
@@ -678,10 +683,10 @@ function applyLanguage() {
   document.getElementById('tab-month').textContent = t('month');
   document.getElementById('tab-year').textContent = t('year');
   document.getElementById('th-period').textContent = t('period');
-  document.getElementById('th-total').textContent = t('total');
-  document.getElementById('th-rx').textContent = 'RX';
-  document.getElementById('th-tx').textContent = 'TX';
-  document.getElementById('th-visual').innerHTML = `${t('visual')} <span class=\"th-hint text-inherit\">${esc(t('visualHint'))}</span>`;
+  document.getElementById('th-total').innerHTML = `${uiMetricIcon('total')}${t('total')}`;
+  document.getElementById('th-rx').innerHTML = `${uiMetricIcon('rx')}RX`;
+  document.getElementById('th-tx').innerHTML = `${uiMetricIcon('tx')}TX`;
+  document.getElementById('th-visual').innerHTML = `${uiMetricIcon('visual')}${t('visual')} <span class=\"th-hint text-inherit\">${esc(t('visualHint'))}</span>`;
 }
 
 function applyTheme() {
@@ -702,12 +707,12 @@ function renderKpis() {
   document.getElementById('kpi-day').textContent = fmtTraffic(state.info.today_total_gib);
   document.getElementById('kpi-month').textContent = fmtTraffic(state.info.month_total_gib);
   document.getElementById('kpi-year').textContent = fmtTraffic(state.info.year_total_gib);
-  document.getElementById('kpi-day-rx').textContent = `RX: ${fmtTraffic(state.info.today_rx_gib)}`;
-  document.getElementById('kpi-day-tx').textContent = `TX: ${fmtTraffic(state.info.today_tx_gib)}`;
-  document.getElementById('kpi-month-rx').textContent = `RX: ${fmtTraffic(state.info.month_rx_gib)}`;
-  document.getElementById('kpi-month-tx').textContent = `TX: ${fmtTraffic(state.info.month_tx_gib)}`;
-  document.getElementById('kpi-year-rx').textContent = `RX: ${fmtTraffic(state.info.year_rx_gib)}`;
-  document.getElementById('kpi-year-tx').textContent = `TX: ${fmtTraffic(state.info.year_tx_gib)}`;
+  document.getElementById('kpi-day-rx').innerHTML = `${uiMetricIcon('rx')}RX: ${fmtTraffic(state.info.today_rx_gib)}`;
+  document.getElementById('kpi-day-tx').innerHTML = `${uiMetricIcon('tx')}TX: ${fmtTraffic(state.info.today_tx_gib)}`;
+  document.getElementById('kpi-month-rx').innerHTML = `${uiMetricIcon('rx')}RX: ${fmtTraffic(state.info.month_rx_gib)}`;
+  document.getElementById('kpi-month-tx').innerHTML = `${uiMetricIcon('tx')}TX: ${fmtTraffic(state.info.month_tx_gib)}`;
+  document.getElementById('kpi-year-rx').innerHTML = `${uiMetricIcon('rx')}RX: ${fmtTraffic(state.info.year_rx_gib)}`;
+  document.getElementById('kpi-year-tx').innerHTML = `${uiMetricIcon('tx')}TX: ${fmtTraffic(state.info.year_tx_gib)}`;
 }
 
 function renderRows() {
@@ -795,7 +800,7 @@ function renderRows() {
   const activeLabel = t(TAB_LABEL_KEY[state.activeTab] || state.activeTab);
   const poll = formatPollInterval(state.pollInterval);
   const dbSize = fmtBytes(state.info.db_size_bytes || '0');
-  document.getElementById('meta').innerHTML = `${t('tab')}: ${esc(activeLabel)} | ${t('samples')}: ${esc(samples)} | ${t('lastUpdate')}: ${esc(updated)} | ${t('dbSize')}: ${esc(dbSize)} | ${t('pollInterval')}: ${esc(poll)}`;
+  document.getElementById('meta').innerHTML = `${t('tab')}: ${esc(activeLabel)} | ${uiMetricIcon('samples')}${t('samples')}: ${esc(samples)} | ${uiMetricIcon('updated')}${t('lastUpdate')}: ${esc(updated)} | ${uiMetricIcon('db-size')}${t('dbSize')}: ${esc(dbSize)} | ${uiMetricIcon('interval')}${t('pollInterval')}: ${esc(poll)}`;
 }
 
 function setActiveTab(tab) {
