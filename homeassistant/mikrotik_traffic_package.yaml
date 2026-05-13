@@ -22,39 +22,39 @@ template:
       - name: "MikroTik Traffic Today"
         unique_id: mikrotik_traffic_today
         unit_of_measurement: "GiB"
-        state: "{{ state_attr('sensor.mikrotik_traffic_summary', 'kpi').today_total_gib | float(0) | round(3) }}"
+        state: "{{ state_attr('sensor.mikrotik_traffic_summary', 'kpi').today_total_gib | float(0) | round(2) }}"
       - name: "MikroTik Traffic Today RX"
         unique_id: mikrotik_traffic_today_rx
         unit_of_measurement: "GiB"
-        state: "{{ state_attr('sensor.mikrotik_traffic_summary', 'kpi').today_rx_gib | float(0) | round(3) }}"
+        state: "{{ state_attr('sensor.mikrotik_traffic_summary', 'kpi').today_rx_gib | float(0) | round(2) }}"
       - name: "MikroTik Traffic Today TX"
         unique_id: mikrotik_traffic_today_tx
         unit_of_measurement: "GiB"
-        state: "{{ state_attr('sensor.mikrotik_traffic_summary', 'kpi').today_tx_gib | float(0) | round(3) }}"
+        state: "{{ state_attr('sensor.mikrotik_traffic_summary', 'kpi').today_tx_gib | float(0) | round(2) }}"
       - name: "MikroTik Traffic Month"
         unique_id: mikrotik_traffic_month
         unit_of_measurement: "GiB"
-        state: "{{ state_attr('sensor.mikrotik_traffic_summary', 'kpi').month_total_gib | float(0) | round(3) }}"
+        state: "{{ state_attr('sensor.mikrotik_traffic_summary', 'kpi').month_total_gib | float(0) | round(2) }}"
       - name: "MikroTik Traffic Month RX"
         unique_id: mikrotik_traffic_month_rx
         unit_of_measurement: "GiB"
-        state: "{{ state_attr('sensor.mikrotik_traffic_summary', 'kpi').month_rx_gib | float(0) | round(3) }}"
+        state: "{{ state_attr('sensor.mikrotik_traffic_summary', 'kpi').month_rx_gib | float(0) | round(2) }}"
       - name: "MikroTik Traffic Month TX"
         unique_id: mikrotik_traffic_month_tx
         unit_of_measurement: "GiB"
-        state: "{{ state_attr('sensor.mikrotik_traffic_summary', 'kpi').month_tx_gib | float(0) | round(3) }}"
+        state: "{{ state_attr('sensor.mikrotik_traffic_summary', 'kpi').month_tx_gib | float(0) | round(2) }}"
       - name: "MikroTik Traffic Year"
         unique_id: mikrotik_traffic_year
         unit_of_measurement: "GiB"
-        state: "{{ state_attr('sensor.mikrotik_traffic_summary', 'kpi').year_total_gib | float(0) | round(3) }}"
+        state: "{{ state_attr('sensor.mikrotik_traffic_summary', 'kpi').year_total_gib | float(0) | round(2) }}"
       - name: "MikroTik Traffic Year RX"
         unique_id: mikrotik_traffic_year_rx
         unit_of_measurement: "GiB"
-        state: "{{ state_attr('sensor.mikrotik_traffic_summary', 'kpi').year_rx_gib | float(0) | round(3) }}"
+        state: "{{ state_attr('sensor.mikrotik_traffic_summary', 'kpi').year_rx_gib | float(0) | round(2) }}"
       - name: "MikroTik Traffic Year TX"
         unique_id: mikrotik_traffic_year_tx
         unit_of_measurement: "GiB"
-        state: "{{ state_attr('sensor.mikrotik_traffic_summary', 'kpi').year_tx_gib | float(0) | round(3) }}"
+        state: "{{ state_attr('sensor.mikrotik_traffic_summary', 'kpi').year_tx_gib | float(0) | round(2) }}"
       - name: "MikroTik Traffic Samples"
         unique_id: mikrotik_traffic_samples
         unit_of_measurement: "samples"
@@ -62,7 +62,7 @@ template:
       - name: "MikroTik DB Size"
         unique_id: mikrotik_traffic_db_size
         unit_of_measurement: "MB"
-        state: "{{ ((state_attr('sensor.mikrotik_traffic_summary', 'db_size_bytes') | float(0)) / 1048576) | round(3) }}"
+        state: "{{ ((state_attr('sensor.mikrotik_traffic_summary', 'db_size_bytes') | float(0)) / 1048576) | round(2) }}"
       - name: "MikroTik DB Size Bytes"
         unique_id: mikrotik_traffic_db_size_bytes
         unit_of_measurement: "B"

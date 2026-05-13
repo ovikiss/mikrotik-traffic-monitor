@@ -271,18 +271,18 @@
   <div class="kpis">
     <div class="kpi">
       <div class="label" id="label-day">Total Today</div>
-      <div class="val" id="kpi-day">0.000 GiB</div>
-      <div class="sub"><span id="kpi-day-rx">RX: 0.000 GiB</span> | <span id="kpi-day-tx">TX: 0.000 GiB</span></div>
+      <div class="val" id="kpi-day">0.00 GiB</div>
+      <div class="sub"><span id="kpi-day-rx">RX: 0.00 GiB</span> | <span id="kpi-day-tx">TX: 0.00 GiB</span></div>
     </div>
     <div class="kpi">
       <div class="label" id="label-month">Current Month Total</div>
-      <div class="val" id="kpi-month">0.000 GiB</div>
-      <div class="sub"><span id="kpi-month-rx">RX: 0.000 GiB</span> | <span id="kpi-month-tx">TX: 0.000 GiB</span></div>
+      <div class="val" id="kpi-month">0.00 GiB</div>
+      <div class="sub"><span id="kpi-month-rx">RX: 0.00 GiB</span> | <span id="kpi-month-tx">TX: 0.00 GiB</span></div>
     </div>
     <div class="kpi">
       <div class="label" id="label-year">Current Year Total</div>
-      <div class="val" id="kpi-year">0.000 GiB</div>
-      <div class="sub"><span id="kpi-year-rx">RX: 0.000 GiB</span> | <span id="kpi-year-tx">TX: 0.000 GiB</span></div>
+      <div class="val" id="kpi-year">0.00 GiB</div>
+      <div class="sub"><span id="kpi-year-rx">RX: 0.00 GiB</span> | <span id="kpi-year-tx">TX: 0.00 GiB</span></div>
     </div>
   </div>
 
@@ -403,9 +403,9 @@ function toNum(v) { const n = parseFloat(v || '0'); return Number.isFinite(n) ? 
 function fmtTraffic(v) {
   const gib = toNum(v);
   if (Math.abs(gib) >= 1024) {
-    return `${(gib / 1024).toFixed(3)} TiB`;
+    return `${(gib / 1024).toFixed(2)} TiB`;
   }
-  return `${gib.toFixed(3)} GiB`;
+  return `${gib.toFixed(2)} GiB`;
 }
 function fmtBytes(v) {
   const n = Math.max(0, Number(v || 0));

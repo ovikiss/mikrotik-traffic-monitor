@@ -421,39 +421,39 @@ template:
       - name: "MikroTik Traffic Today"
         unique_id: mikrotik_traffic_today
         unit_of_measurement: "GiB"
-        state: "{{ state_attr('sensor.mikrotik_traffic_summary', 'kpi').today_total_gib | float(0) | round(3) }}"
+        state: "{{ state_attr('sensor.mikrotik_traffic_summary', 'kpi').today_total_gib | float(0) | round(2) }}"
       - name: "MikroTik Traffic Today RX"
         unique_id: mikrotik_traffic_today_rx
         unit_of_measurement: "GiB"
-        state: "{{ state_attr('sensor.mikrotik_traffic_summary', 'kpi').today_rx_gib | float(0) | round(3) }}"
+        state: "{{ state_attr('sensor.mikrotik_traffic_summary', 'kpi').today_rx_gib | float(0) | round(2) }}"
       - name: "MikroTik Traffic Today TX"
         unique_id: mikrotik_traffic_today_tx
         unit_of_measurement: "GiB"
-        state: "{{ state_attr('sensor.mikrotik_traffic_summary', 'kpi').today_tx_gib | float(0) | round(3) }}"
+        state: "{{ state_attr('sensor.mikrotik_traffic_summary', 'kpi').today_tx_gib | float(0) | round(2) }}"
       - name: "MikroTik Traffic Month"
         unique_id: mikrotik_traffic_month
         unit_of_measurement: "GiB"
-        state: "{{ state_attr('sensor.mikrotik_traffic_summary', 'kpi').month_total_gib | float(0) | round(3) }}"
+        state: "{{ state_attr('sensor.mikrotik_traffic_summary', 'kpi').month_total_gib | float(0) | round(2) }}"
       - name: "MikroTik Traffic Month RX"
         unique_id: mikrotik_traffic_month_rx
         unit_of_measurement: "GiB"
-        state: "{{ state_attr('sensor.mikrotik_traffic_summary', 'kpi').month_rx_gib | float(0) | round(3) }}"
+        state: "{{ state_attr('sensor.mikrotik_traffic_summary', 'kpi').month_rx_gib | float(0) | round(2) }}"
       - name: "MikroTik Traffic Month TX"
         unique_id: mikrotik_traffic_month_tx
         unit_of_measurement: "GiB"
-        state: "{{ state_attr('sensor.mikrotik_traffic_summary', 'kpi').month_tx_gib | float(0) | round(3) }}"
+        state: "{{ state_attr('sensor.mikrotik_traffic_summary', 'kpi').month_tx_gib | float(0) | round(2) }}"
       - name: "MikroTik Traffic Year"
         unique_id: mikrotik_traffic_year
         unit_of_measurement: "GiB"
-        state: "{{ state_attr('sensor.mikrotik_traffic_summary', 'kpi').year_total_gib | float(0) | round(3) }}"
+        state: "{{ state_attr('sensor.mikrotik_traffic_summary', 'kpi').year_total_gib | float(0) | round(2) }}"
       - name: "MikroTik Traffic Year RX"
         unique_id: mikrotik_traffic_year_rx
         unit_of_measurement: "GiB"
-        state: "{{ state_attr('sensor.mikrotik_traffic_summary', 'kpi').year_rx_gib | float(0) | round(3) }}"
+        state: "{{ state_attr('sensor.mikrotik_traffic_summary', 'kpi').year_rx_gib | float(0) | round(2) }}"
       - name: "MikroTik Traffic Year TX"
         unique_id: mikrotik_traffic_year_tx
         unit_of_measurement: "GiB"
-        state: "{{ state_attr('sensor.mikrotik_traffic_summary', 'kpi').year_tx_gib | float(0) | round(3) }}"
+        state: "{{ state_attr('sensor.mikrotik_traffic_summary', 'kpi').year_tx_gib | float(0) | round(2) }}"
       - name: "MikroTik Traffic Samples"
         unique_id: mikrotik_traffic_samples
         unit_of_measurement: "samples"
@@ -461,7 +461,7 @@ template:
       - name: "MikroTik DB Size"
         unique_id: mikrotik_traffic_db_size
         unit_of_measurement: "MB"
-        state: "{{ ((state_attr('sensor.mikrotik_traffic_summary', 'db_size_bytes') | float(0)) / 1048576) | round(3) }}"
+        state: "{{ ((state_attr('sensor.mikrotik_traffic_summary', 'db_size_bytes') | float(0)) / 1048576) | round(2) }}"
       - name: "MikroTik DB Size Bytes"
         unique_id: mikrotik_traffic_db_size_bytes
         unit_of_measurement: "B"
@@ -480,9 +480,9 @@ PY
 render_views() {
   sqlite3 -header -csv "$DB" "
     SELECT date(ts,'unixepoch','localtime') AS period,
-           ROUND(SUM(delta_bytes)/1073741824.0, 3) AS total_gib,
-           ROUND(SUM(delta_in_bytes)/1073741824.0, 3) AS rx_gib,
-           ROUND(SUM(delta_out_bytes)/1073741824.0, 3) AS tx_gib
+           ROUND(SUM(delta_bytes)/1073741824.0, 2) AS total_gib,
+           ROUND(SUM(delta_in_bytes)/1073741824.0, 2) AS rx_gib,
+           ROUND(SUM(delta_out_bytes)/1073741824.0, 2) AS tx_gib
     FROM samples
     WHERE ts >= strftime('%s','now','localtime','start of month','utc')
     GROUP BY period
@@ -492,9 +492,9 @@ render_views() {
 
   sqlite3 -header -csv "$DB" "
     SELECT strftime('%Y-%m', ts,'unixepoch','localtime') AS period,
-           ROUND(SUM(delta_bytes)/1073741824.0, 3) AS total_gib,
-           ROUND(SUM(delta_in_bytes)/1073741824.0, 3) AS rx_gib,
-           ROUND(SUM(delta_out_bytes)/1073741824.0, 3) AS tx_gib
+           ROUND(SUM(delta_bytes)/1073741824.0, 2) AS total_gib,
+           ROUND(SUM(delta_in_bytes)/1073741824.0, 2) AS rx_gib,
+           ROUND(SUM(delta_out_bytes)/1073741824.0, 2) AS tx_gib
     FROM samples
     WHERE ts >= strftime('%s','now','localtime','start of year','utc')
     GROUP BY period
@@ -504,9 +504,9 @@ render_views() {
 
   sqlite3 -header -csv "$DB" "
     SELECT strftime('%Y', ts,'unixepoch','localtime') AS period,
-           ROUND(SUM(delta_bytes)/1073741824.0, 3) AS total_gib,
-           ROUND(SUM(delta_in_bytes)/1073741824.0, 3) AS rx_gib,
-           ROUND(SUM(delta_out_bytes)/1073741824.0, 3) AS tx_gib
+           ROUND(SUM(delta_bytes)/1073741824.0, 2) AS total_gib,
+           ROUND(SUM(delta_in_bytes)/1073741824.0, 2) AS rx_gib,
+           ROUND(SUM(delta_out_bytes)/1073741824.0, 2) AS tx_gib
     FROM samples
     WHERE ts >= 0
     GROUP BY period
@@ -516,9 +516,9 @@ render_views() {
   sqlite3 -header -csv "$DB" "
     SELECT date(ts,'unixepoch','localtime') AS period,
            strftime('%Y-%m', ts,'unixepoch','localtime') AS month_key,
-           ROUND(SUM(delta_bytes)/1073741824.0, 3) AS total_gib,
-           ROUND(SUM(delta_in_bytes)/1073741824.0, 3) AS rx_gib,
-           ROUND(SUM(delta_out_bytes)/1073741824.0, 3) AS tx_gib
+           ROUND(SUM(delta_bytes)/1073741824.0, 2) AS total_gib,
+           ROUND(SUM(delta_in_bytes)/1073741824.0, 2) AS rx_gib,
+           ROUND(SUM(delta_out_bytes)/1073741824.0, 2) AS tx_gib
     FROM samples
     WHERE ts >= strftime('%s','now','localtime','start of year','utc')
     GROUP BY period
@@ -528,9 +528,9 @@ render_views() {
   sqlite3 -header -csv "$DB" "
     SELECT strftime('%Y-%m', ts,'unixepoch','localtime') AS period,
            strftime('%Y', ts,'unixepoch','localtime') AS year_key,
-           ROUND(SUM(delta_bytes)/1073741824.0, 3) AS total_gib,
-           ROUND(SUM(delta_in_bytes)/1073741824.0, 3) AS rx_gib,
-           ROUND(SUM(delta_out_bytes)/1073741824.0, 3) AS tx_gib
+           ROUND(SUM(delta_bytes)/1073741824.0, 2) AS total_gib,
+           ROUND(SUM(delta_in_bytes)/1073741824.0, 2) AS rx_gib,
+           ROUND(SUM(delta_out_bytes)/1073741824.0, 2) AS tx_gib
     FROM samples
     WHERE ts >= 0
     GROUP BY period
@@ -539,15 +539,15 @@ render_views() {
 
   cp "$WWW/day.csv" "$WWW/daily.csv"
 
-  TODAY_TOTAL_GIB="$(sqlite_exec "SELECT COALESCE(ROUND(SUM(delta_bytes)/1073741824.0,3),0) FROM samples WHERE ts >= strftime('%s','now','localtime','start of day','utc');")"
-  TODAY_RX_GIB="$(sqlite_exec "SELECT COALESCE(ROUND(SUM(delta_in_bytes)/1073741824.0,3),0) FROM samples WHERE ts >= strftime('%s','now','localtime','start of day','utc');")"
-  TODAY_TX_GIB="$(sqlite_exec "SELECT COALESCE(ROUND(SUM(delta_out_bytes)/1073741824.0,3),0) FROM samples WHERE ts >= strftime('%s','now','localtime','start of day','utc');")"
-  MONTH_TOTAL_GIB="$(sqlite_exec "SELECT COALESCE(ROUND(SUM(delta_bytes)/1073741824.0,3),0) FROM samples WHERE ts >= strftime('%s','now','localtime','start of month','utc');")"
-  MONTH_RX_GIB="$(sqlite_exec "SELECT COALESCE(ROUND(SUM(delta_in_bytes)/1073741824.0,3),0) FROM samples WHERE ts >= strftime('%s','now','localtime','start of month','utc');")"
-  MONTH_TX_GIB="$(sqlite_exec "SELECT COALESCE(ROUND(SUM(delta_out_bytes)/1073741824.0,3),0) FROM samples WHERE ts >= strftime('%s','now','localtime','start of month','utc');")"
-  YEAR_TOTAL_GIB="$(sqlite_exec "SELECT COALESCE(ROUND(SUM(delta_bytes)/1073741824.0,3),0) FROM samples WHERE ts >= strftime('%s','now','localtime','start of year','utc');")"
-  YEAR_RX_GIB="$(sqlite_exec "SELECT COALESCE(ROUND(SUM(delta_in_bytes)/1073741824.0,3),0) FROM samples WHERE ts >= strftime('%s','now','localtime','start of year','utc');")"
-  YEAR_TX_GIB="$(sqlite_exec "SELECT COALESCE(ROUND(SUM(delta_out_bytes)/1073741824.0,3),0) FROM samples WHERE ts >= strftime('%s','now','localtime','start of year','utc');")"
+  TODAY_TOTAL_GIB="$(sqlite_exec "SELECT COALESCE(ROUND(SUM(delta_bytes)/1073741824.0,2),0) FROM samples WHERE ts >= strftime('%s','now','localtime','start of day','utc');")"
+  TODAY_RX_GIB="$(sqlite_exec "SELECT COALESCE(ROUND(SUM(delta_in_bytes)/1073741824.0,2),0) FROM samples WHERE ts >= strftime('%s','now','localtime','start of day','utc');")"
+  TODAY_TX_GIB="$(sqlite_exec "SELECT COALESCE(ROUND(SUM(delta_out_bytes)/1073741824.0,2),0) FROM samples WHERE ts >= strftime('%s','now','localtime','start of day','utc');")"
+  MONTH_TOTAL_GIB="$(sqlite_exec "SELECT COALESCE(ROUND(SUM(delta_bytes)/1073741824.0,2),0) FROM samples WHERE ts >= strftime('%s','now','localtime','start of month','utc');")"
+  MONTH_RX_GIB="$(sqlite_exec "SELECT COALESCE(ROUND(SUM(delta_in_bytes)/1073741824.0,2),0) FROM samples WHERE ts >= strftime('%s','now','localtime','start of month','utc');")"
+  MONTH_TX_GIB="$(sqlite_exec "SELECT COALESCE(ROUND(SUM(delta_out_bytes)/1073741824.0,2),0) FROM samples WHERE ts >= strftime('%s','now','localtime','start of month','utc');")"
+  YEAR_TOTAL_GIB="$(sqlite_exec "SELECT COALESCE(ROUND(SUM(delta_bytes)/1073741824.0,2),0) FROM samples WHERE ts >= strftime('%s','now','localtime','start of year','utc');")"
+  YEAR_RX_GIB="$(sqlite_exec "SELECT COALESCE(ROUND(SUM(delta_in_bytes)/1073741824.0,2),0) FROM samples WHERE ts >= strftime('%s','now','localtime','start of year','utc');")"
+  YEAR_TX_GIB="$(sqlite_exec "SELECT COALESCE(ROUND(SUM(delta_out_bytes)/1073741824.0,2),0) FROM samples WHERE ts >= strftime('%s','now','localtime','start of year','utc');")"
   SAMPLES="$(sqlite_exec "SELECT COUNT(*) FROM samples;")"
   SAMPLES_DAY="$(sqlite_exec "SELECT COUNT(*) FROM samples WHERE ts >= strftime('%s','now','localtime','start of day','utc');")"
   SAMPLES_MONTH="$(sqlite_exec "SELECT COUNT(*) FROM samples WHERE ts >= strftime('%s','now','localtime','start of month','utc');")"
