@@ -7,6 +7,9 @@ Containerized MikroTik WAN traffic monitor with:
 - EN default UI with RO selector (translations loaded from JSON files)
 - JSON API for Home Assistant integration
 
+## UI preview (Light + Dark)
+![MikroTik Traffic Monitor UI (Light and Dark)](docs/ui-light-dark.png)
+
 ## What it exposes
 - UI: `http://<router-lan-ip>:8088/`
 - CSV: `/day.csv`, `/month.csv`, `/year.csv`, `/info.txt`
