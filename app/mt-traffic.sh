@@ -614,7 +614,7 @@ function renderPollMenu() {
     item.className = 'theme-item';
     item.setAttribute('role', 'option');
     item.setAttribute('data-poll', x.value);
-    item.innerHTML = `<img src="/images/ui/interval.svg" alt="" /><span>${x.value}</span>`;
+    item.innerHTML = `<img src="/images/ui/interval.svg" alt="" /><span>${formatPollInterval(x.value)}</span>`;
     item.addEventListener('click', () => {
       closePollMenu();
       savePollInterval(x.value).catch(() => {});
@@ -627,7 +627,7 @@ function renderPollMenu() {
 function updatePollButton() {
   const label = document.getElementById('poll-current-label');
   if (!label) return;
-  label.textContent = normalizePollIntervalOption(state.pollInterval || '1h');
+  label.textContent = formatPollInterval(state.pollInterval || '1h');
 }
 
 function closePollMenu() {
