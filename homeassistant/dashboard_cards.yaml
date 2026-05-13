@@ -23,6 +23,16 @@ cards:
         name: Year Download (RX)
       - entity: sensor.mikrotik_traffic_year_tx
         name: Year Upload (TX)
+      - entity: sensor.mikrotik_traffic_samples
+        name: Samples
+      - entity: sensor.mikrotik_db_size
+        name: DB Size (MB)
+      - entity: sensor.mikrotik_db_size_bytes
+        name: DB Size (Bytes)
+      - entity: sensor.mikrotik_poll_interval
+        name: Poll interval
+      - entity: sensor.mikrotik_last_update
+        name: Last update
 
   - type: gauge
     entity: sensor.mikrotik_traffic_today
