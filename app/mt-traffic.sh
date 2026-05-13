@@ -1,4 +1,4 @@
-﻿#!/bin/sh
+#!/bin/sh
 set -eu
 
 : "${MT_HOST:?MT_HOST is required}"
