@@ -254,15 +254,23 @@ cat > "$WWW/index.html" <<'HTML'
     .control { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--muted); }
     .control-icon { width: 14px; height: 14px; display: inline-flex; align-items: center; justify-content: center; color: var(--muted); }
     .control-icon img { width: 14px; height: 14px; display: block; opacity: .85; }
-    .lang-dropdown { position: relative; min-width: 92px; }
-    .lang-toggle { display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--border); border-radius: 8px; background: var(--card); color: var(--text); padding: 4px 8px; font-size: 12px; cursor: pointer; }
+    .lang-dropdown { position: relative; width: fit-content; min-width: 0; }
+    .lang-toggle { display: inline-flex; align-items: center; gap: 4px; border: 1px solid var(--border); border-radius: 8px; background: var(--card); color: var(--text); padding: 2px 7px; min-height: 26px; font-size: 12px; cursor: pointer; }
     .lang-toggle img { width: 14px; height: 14px; display: block; }
     .lang-caret { color: var(--muted); font-size: 10px; }
-    .lang-menu { position: absolute; right: 0; top: calc(100% + 6px); min-width: 120px; border: 1px solid var(--border); border-radius: 8px; background: var(--card); box-shadow: 0 6px 20px rgba(0,0,0,.12); display: none; z-index: 30; padding: 4px; }
+    .lang-menu { position: absolute; right: 0; top: calc(100% + 6px); min-width: 0; border: 1px solid var(--border); border-radius: 8px; background: var(--card); box-shadow: 0 6px 20px rgba(0,0,0,.12); display: none; z-index: 30; padding: 3px; }
     .lang-menu.open { display: block; }
-    .lang-item { width: 100%; display: flex; align-items: center; gap: 8px; border: 0; background: transparent; color: var(--text); border-radius: 6px; padding: 6px 8px; font-size: 12px; text-align: left; cursor: pointer; }
+    .lang-item { width: 100%; display: flex; align-items: center; gap: 6px; border: 0; background: transparent; color: var(--text); border-radius: 6px; padding: 4px 6px; font-size: 12px; text-align: left; cursor: pointer; }
     .lang-item:hover { background: var(--table-head); }
     .lang-item img { width: 14px; height: 14px; display: block; }
+    .theme-dropdown { position: relative; width: fit-content; min-width: 0; }
+    .theme-toggle { display: inline-flex; align-items: center; gap: 4px; border: 1px solid var(--border); border-radius: 8px; background: var(--card); color: var(--text); padding: 2px 7px; min-height: 26px; font-size: 12px; cursor: pointer; }
+    .theme-toggle img { width: 14px; height: 14px; display: block; }
+    .theme-menu { position: absolute; right: 0; top: calc(100% + 6px); min-width: 0; border: 1px solid var(--border); border-radius: 8px; background: var(--card); box-shadow: 0 6px 20px rgba(0,0,0,.12); display: none; z-index: 30; padding: 3px; }
+    .theme-menu.open { display: block; }
+    .theme-item { width: 100%; white-space: nowrap; display: flex; align-items: center; gap: 6px; border: 0; background: transparent; color: var(--text); border-radius: 6px; padding: 4px 6px; font-size: 12px; text-align: left; cursor: pointer; }
+    .theme-item:hover { background: var(--table-head); }
+    .theme-item img { width: 14px; height: 14px; display: block; }
     .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); border: 0; }
     .ico-inline { width: 14px; height: 14px; vertical-align: -2px; margin-right: 4px; opacity: .95; }
     .th-hint { color: var(--muted); font-size: 11px; font-weight: normal; }
@@ -289,21 +297,34 @@ cat > "$WWW/index.html" <<'HTML'
           <img id="theme-icon-img" src="/images/ui/theme-auto.svg" alt="" />
         </span>
         <span id="theme-label">Theme</span>
-        <select id="theme">
-          <option value="auto" id="theme-opt-auto">Auto</option>
-          <option value="light" id="theme-opt-light">Light</option>
-          <option value="dark" id="theme-opt-dark">Dark</option>
-        </select>
+        <div class="theme-dropdown" id="theme-dropdown">
+          <button type="button" class="theme-toggle" id="theme-toggle" aria-haspopup="listbox" aria-expanded="false">
+            <img id="theme-current-icon" src="/images/ui/theme-auto.svg" alt="" />
+            <span id="theme-current-label">Auto</span>
+          </button>
+          <div class="theme-menu" id="theme-menu" role="listbox" aria-label="Theme options"></div>
+          <select id="theme" class="sr-only" tabindex="-1" aria-hidden="true">
+            <option value="auto" id="theme-opt-auto">Auto</option>
+            <option value="light" id="theme-opt-light">Light</option>
+            <option value="dark" id="theme-opt-dark">Dark</option>
+          </select>
+        </div>
       </label>
       <label class="control" for="poll-interval">
         <span id="poll-label">Poll</span>
-        <select id="poll-interval">
-          <option value="1h" id="poll-interval-1h">1 hour</option>
-          <option value="3h" id="poll-interval-3h">3 hours</option>
-          <option value="6h" id="poll-interval-6h">6 hours</option>
-          <option value="12h" id="poll-interval-12h">12 hours</option>
-        </select>
-        <button id="poll-save" type="button">Save</button>
+        <div class="theme-dropdown" id="poll-dropdown">
+          <button type="button" class="theme-toggle" id="poll-toggle" aria-haspopup="listbox" aria-expanded="false">
+            <img src="/images/ui/interval.svg" alt="" />
+            <span id="poll-current-label">1 hour</span>
+          </button>
+          <div class="theme-menu" id="poll-menu" role="listbox" aria-label="Poll interval options"></div>
+          <select id="poll-interval" class="sr-only" tabindex="-1" aria-hidden="true">
+            <option value="1h" id="poll-interval-1h">1 hour</option>
+            <option value="3h" id="poll-interval-3h">3 hours</option>
+            <option value="6h" id="poll-interval-6h">6 hours</option>
+            <option value="12h" id="poll-interval-12h">12 hours</option>
+          </select>
+        </div>
       </label>
       <label class="control" for="lang">
         <span class="control-icon" aria-hidden="true">
@@ -314,7 +335,6 @@ cat > "$WWW/index.html" <<'HTML'
           <button type="button" class="lang-toggle" id="lang-toggle" aria-haspopup="listbox" aria-expanded="false">
             <img id="lang-current-icon" src="/images/lang/en.svg" alt="" />
             <span id="lang-current-label">EN</span>
-            <span class="lang-caret">▼</span>
           </button>
           <div class="lang-menu" id="lang-menu" role="listbox" aria-label="Language options"></div>
           <select id="lang" class="sr-only" tabindex="-1" aria-hidden="true">
@@ -427,6 +447,17 @@ const MONTH_NAMES = {
   en: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
   ro: ['Ian', 'Feb', 'Mar', 'Apr', 'Mai', 'Iun', 'Iul', 'Aug', 'Sep', 'Oct', 'Noi', 'Dec']
 };
+const THEME_ITEMS = [
+  { value: 'auto', labelKey: 'auto', icon: '/images/ui/theme-auto.svg' },
+  { value: 'light', labelKey: 'light', icon: '/images/ui/theme-light.svg' },
+  { value: 'dark', labelKey: 'dark', icon: '/images/ui/theme-dark.svg' }
+];
+const POLL_ITEMS = [
+  { value: '1h', amount: 1 },
+  { value: '3h', amount: 3 },
+  { value: '6h', amount: 6 },
+  { value: '12h', amount: 12 }
+];
 
 function themeIconSvg(mode, resolved) {
   if (mode === 'auto') return '/images/ui/theme-auto.svg';
@@ -502,6 +533,11 @@ function renderLanguageOptions() {
   });
   updateLanguageButton();
 }
+function themeIconByMode(mode) {
+  if (mode === 'light') return '/images/ui/theme-light.svg';
+  if (mode === 'dark') return '/images/ui/theme-dark.svg';
+  return '/images/ui/theme-auto.svg';
+}
 
 function updateLanguageButton() {
   const langDef = getLanguageDef(state.lang) || getLanguageDef('en');
@@ -521,6 +557,89 @@ function closeLanguageMenu() {
 function toggleLanguageMenu() {
   const menu = document.getElementById('lang-menu');
   const toggle = document.getElementById('lang-toggle');
+  if (!menu || !toggle) return;
+  const open = menu.classList.toggle('open');
+  toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+}
+
+function renderThemeMenu() {
+  const menu = document.getElementById('theme-menu');
+  if (!menu) return;
+  menu.innerHTML = '';
+  THEME_ITEMS.forEach((x) => {
+    const item = document.createElement('button');
+    item.type = 'button';
+    item.className = 'theme-item';
+    item.setAttribute('role', 'option');
+    item.setAttribute('data-theme', x.value);
+    item.innerHTML = `<img src="${x.icon}" alt="" /><span>${t(x.labelKey)}</span>`;
+    item.addEventListener('click', () => {
+      closeThemeMenu();
+      setTheme(x.value);
+    });
+    menu.appendChild(item);
+  });
+  updateThemeButton();
+}
+
+function updateThemeButton() {
+  const icon = document.getElementById('theme-current-icon');
+  const label = document.getElementById('theme-current-label');
+  if (icon) icon.setAttribute('src', themeIconByMode(state.theme));
+  if (label) label.textContent = t(state.theme === 'light' ? 'light' : state.theme === 'dark' ? 'dark' : 'auto');
+}
+
+function closeThemeMenu() {
+  const menu = document.getElementById('theme-menu');
+  const toggle = document.getElementById('theme-toggle');
+  if (menu) menu.classList.remove('open');
+  if (toggle) toggle.setAttribute('aria-expanded', 'false');
+}
+
+function toggleThemeMenu() {
+  const menu = document.getElementById('theme-menu');
+  const toggle = document.getElementById('theme-toggle');
+  if (!menu || !toggle) return;
+  const open = menu.classList.toggle('open');
+  toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+}
+
+function renderPollMenu() {
+  const menu = document.getElementById('poll-menu');
+  if (!menu) return;
+  menu.innerHTML = '';
+  POLL_ITEMS.forEach((x) => {
+    const item = document.createElement('button');
+    item.type = 'button';
+    item.className = 'theme-item';
+    item.setAttribute('role', 'option');
+    item.setAttribute('data-poll', x.value);
+    item.innerHTML = `<img src="/images/ui/interval.svg" alt="" /><span>${x.value}</span>`;
+    item.addEventListener('click', () => {
+      closePollMenu();
+      savePollInterval(x.value).catch(() => {});
+    });
+    menu.appendChild(item);
+  });
+  updatePollButton();
+}
+
+function updatePollButton() {
+  const label = document.getElementById('poll-current-label');
+  if (!label) return;
+  label.textContent = normalizePollIntervalOption(state.pollInterval || '1h');
+}
+
+function closePollMenu() {
+  const menu = document.getElementById('poll-menu');
+  const toggle = document.getElementById('poll-toggle');
+  if (menu) menu.classList.remove('open');
+  if (toggle) toggle.setAttribute('aria-expanded', 'false');
+}
+
+function togglePollMenu() {
+  const menu = document.getElementById('poll-menu');
+  const toggle = document.getElementById('poll-toggle');
   if (!menu || !toggle) return;
   const open = menu.classList.toggle('open');
   toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
@@ -653,18 +772,19 @@ function applyLanguage() {
   const langDef = getLanguageDef(state.lang) || getLanguageDef('en');
   document.getElementById('lang-icon-img').setAttribute('src', (langDef && langDef.icon) ? langDef.icon : '/images/lang/en.svg');
   document.getElementById('theme-label').textContent = t('theme');
-  document.getElementById('theme-opt-auto').textContent = `🖥️ ${t('auto')}`;
-  document.getElementById('theme-opt-light').textContent = `☀️ ${t('light')}`;
-  document.getElementById('theme-opt-dark').textContent = `🌙 ${t('dark')}`;
+  document.getElementById('theme-opt-auto').textContent = t('auto');
+  document.getElementById('theme-opt-light').textContent = t('light');
+  document.getElementById('theme-opt-dark').textContent = t('dark');
   document.getElementById('poll-label').textContent = t('poll');
   document.getElementById('poll-interval-1h').textContent = `1 ${t('hoursSingular')}`;
   document.getElementById('poll-interval-3h').textContent = `3 ${t('hoursPlural')}`;
   document.getElementById('poll-interval-6h').textContent = `6 ${t('hoursPlural')}`;
   document.getElementById('poll-interval-12h').textContent = `12 ${t('hoursPlural')}`;
-  document.getElementById('poll-save').textContent = t('save');
   document.getElementById('lang').value = state.lang;
   document.getElementById('lang-label').textContent = t('language');
   updateLanguageButton();
+  renderThemeMenu();
+  renderPollMenu();
   renderSubtitle();
   document.getElementById('label-day').textContent = t('totalToday');
   document.getElementById('label-month').textContent = t('totalMonth');
@@ -684,6 +804,7 @@ function applyTheme() {
   document.documentElement.setAttribute('data-theme', resolved);
   document.getElementById('theme').value = state.theme;
   document.getElementById('theme-icon-img').setAttribute('src', themeIconSvg(state.theme, resolved));
+  updateThemeButton();
 }
 
 function renderKpis() {
@@ -838,6 +959,7 @@ async function loadSettings() {
     const lang = (d && getLanguageDef(String(d.language || '').toLowerCase())) ? String(d.language || '').toLowerCase() : '';
     state.pollInterval = p;
     document.getElementById('poll-interval').value = isAllowedPollInterval(p) ? p : '1h';
+    updatePollButton();
     if (theme) {
       state.theme = theme;
       localStorage.setItem('mtm_theme', theme);
@@ -890,9 +1012,9 @@ async function loadLanguageConfig() {
   document.getElementById('lang').value = state.lang;
 }
 
-async function savePollInterval() {
+async function savePollInterval(value) {
   const sel = document.getElementById('poll-interval');
-  const v = normalizePollIntervalOption(sel.value || '');
+  const v = normalizePollIntervalOption(value || sel.value || '');
   if (!isAllowedPollInterval(v)) {
     document.getElementById('meta').textContent = t('pollInvalid');
     return;
@@ -906,10 +1028,10 @@ async function savePollInterval() {
   }
   state.pollInterval = v;
   sel.value = v;
+  updatePollButton();
   renderSubtitle();
   renderRows();
   document.getElementById('meta').textContent = `${t('pollSaved')}: ${formatPollInterval(v)}`;
-  setTimeout(() => { window.location.reload(); }, 900);
 }
 
 const storedLang = localStorage.getItem('mtm_lang');
@@ -925,13 +1047,17 @@ if (prefersDarkQuery) {
   else if (prefersDarkQuery.addListener) prefersDarkQuery.addListener(onThemePrefChange);
 }
 document.getElementById('meta').textContent = t('loading');
-document.getElementById('theme').addEventListener('change', (e) => setTheme(e.target.value));
+document.getElementById('theme-toggle').addEventListener('click', () => toggleThemeMenu());
+document.getElementById('poll-toggle').addEventListener('click', () => togglePollMenu());
 document.getElementById('lang-toggle').addEventListener('click', () => toggleLanguageMenu());
 document.addEventListener('click', (e) => {
+  const themeWrap = document.getElementById('theme-dropdown');
+  if (!themeWrap || !themeWrap.contains(e.target)) closeThemeMenu();
+  const pollWrap = document.getElementById('poll-dropdown');
+  if (!pollWrap || !pollWrap.contains(e.target)) closePollMenu();
   const wrap = document.getElementById('lang-dropdown');
   if (!wrap || !wrap.contains(e.target)) closeLanguageMenu();
 });
-document.getElementById('poll-save').addEventListener('click', () => { savePollInterval().catch(() => {}); });
 document.querySelectorAll('.tab').forEach(btn => btn.addEventListener('click', () => setActiveTab(btn.dataset.tab)));
 loadAll().catch(e => { document.getElementById('meta').textContent = `${t('loadError')}: ${e}`; });
 loadLanguageConfig().then(() => {
