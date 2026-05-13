@@ -235,9 +235,9 @@ const I18N_FALLBACK = {
   pollSaved: 'Poll interval saved',
   pollInvalid: 'Invalid interval (allowed: 1h, 3h, 6h, 12h)',
   fontSize: 'Font size',
-  fontLegacy: '25%',
-  fontCurrent: '50%',
-  fontLarge: '100%',
+  fontLegacy: 'Compact',
+  fontCurrent: 'Standard',
+  fontLarge: 'Large',
   fontSaved: 'Font size saved',
   save: 'Save',
   language: 'Language',
@@ -258,6 +258,7 @@ const I18N_FALLBACK = {
   tab: 'Tab',
   samples: 'Samples',
   lastUpdate: 'Last update',
+  dbSize: 'DB size',
   loadError: 'Load error'
 };
 
@@ -304,6 +305,14 @@ function themeIconSvg(mode, resolved) {
 
 function toNum(v) { const n = parseFloat(v || '0'); return Number.isFinite(n) ? n : 0; }
 function fmtGiB(v) { return `${toNum(v).toFixed(3)} GiB`; }
+function fmtBytes(v) {
+  const n = Math.max(0, Number(v || 0));
+  if (!Number.isFinite(n)) return '0 B';
+  if (n < 1024) return `${Math.round(n)} B`;
+  if (n < 1024 * 1024) return `${(n / 1024).toFixed(1)} KB`;
+  if (n < 1024 * 1024 * 1024) return `${(n / (1024 * 1024)).toFixed(1)} MB`;
+  return `${(n / (1024 * 1024 * 1024)).toFixed(2)} GB`;
+}
 function t(key) {
   return (I18N[state.lang] && I18N[state.lang][key]) || (I18N.en && I18N.en[key]) || I18N_FALLBACK[key] || key;
 }
@@ -794,7 +803,8 @@ function renderRows() {
   const updated = formatUpdatedLocal(state.info.updated_local || '');
   const activeLabel = t(TAB_LABEL_KEY[state.activeTab] || state.activeTab);
   const poll = formatPollInterval(state.pollInterval);
-  document.getElementById('meta').innerHTML = `${t('tab')}: ${esc(activeLabel)} | ${uiIcon('samples')}${t('samples')}: ${esc(samples)} | ${uiIcon('updated')}${t('lastUpdate')}: ${esc(updated)} | ${uiIcon('interval')}${t('pollInterval')}: ${esc(poll)}`;
+  const dbSize = fmtBytes(state.info.db_size_bytes || '0');
+  document.getElementById('meta').innerHTML = `${t('tab')}: ${esc(activeLabel)} | ${uiIcon('samples')}${t('samples')}: ${esc(samples)} | ${uiIcon('updated')}${t('lastUpdate')}: ${esc(updated)} | ${t('dbSize')}: ${esc(dbSize)} | ${uiIcon('interval')}${t('pollInterval')}: ${esc(poll)}`;
 }
 
 function setActiveTab(tab) {

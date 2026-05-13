@@ -1215,6 +1215,13 @@ def to_num(v):
     except Exception:
         return 0.0
 
+
+def to_int(v):
+    try:
+        return int(float(v))
+    except Exception:
+        return 0
+
 info = load_info()
 day = load_csv("day.csv")
 month = load_csv("month.csv")
@@ -1225,6 +1232,7 @@ year_months = load_detail_csv("year_months.csv")
 summary = {
     "updated_local": info.get("updated_local", ""),
     "samples": int(to_num(info.get("samples", "0"))),
+    "db_size_bytes": to_int(info.get("db_size_bytes", "0")),
     "kpi": {
         "today_total_gib": to_num(info.get("today_total_gib", "0")),
         "today_rx_gib": to_num(info.get("today_rx_gib", "0")),
@@ -1359,6 +1367,9 @@ render_views() {
   SAMPLES_DAY="$(sqlite_exec "SELECT COUNT(*) FROM samples WHERE ts >= strftime('%s','now','localtime','start of day','utc');")"
   SAMPLES_MONTH="$(sqlite_exec "SELECT COUNT(*) FROM samples WHERE ts >= strftime('%s','now','localtime','start of month','utc');")"
   SAMPLES_YEAR="$(sqlite_exec "SELECT COUNT(*) FROM samples WHERE ts >= strftime('%s','now','localtime','start of year','utc');")"
+  DB_SIZE_BYTES="$(wc -c < "$DB" 2>/dev/null || echo 0)"
+  DB_SIZE_BYTES="${DB_SIZE_BYTES//[!0-9]/}"
+  [ -n "$DB_SIZE_BYTES" ] || DB_SIZE_BYTES=0
   UPDATED_LOCAL="$(date '+%Y-%m-%d %H:%M:%S %z')"
 
   {
@@ -1375,6 +1386,7 @@ render_views() {
     echo "samples_day=$SAMPLES_DAY"
     echo "samples_month=$SAMPLES_MONTH"
     echo "samples_year=$SAMPLES_YEAR"
+    echo "db_size_bytes=$DB_SIZE_BYTES"
     echo "updated_local=$UPDATED_LOCAL"
   } > "$WWW/info.txt"
 
