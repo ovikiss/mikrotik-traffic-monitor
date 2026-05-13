@@ -804,7 +804,7 @@ function renderRows() {
   const activeLabel = t(TAB_LABEL_KEY[state.activeTab] || state.activeTab);
   const poll = formatPollInterval(state.pollInterval);
   const dbSize = fmtBytes(state.info.db_size_bytes || '0');
-  document.getElementById('meta').innerHTML = `${t('tab')}: ${esc(activeLabel)} | ${uiIcon('samples')}${t('samples')}: ${esc(samples)} | ${uiIcon('updated')}${t('lastUpdate')}: ${esc(updated)} | ${t('dbSize')}: ${esc(dbSize)} | ${uiIcon('interval')}${t('pollInterval')}: ${esc(poll)}`;
+  document.getElementById('meta').innerHTML = `${t('tab')}: ${esc(activeLabel)} | ${uiIcon('samples')}${t('samples')}: ${esc(samples)} | ${uiIcon('updated')}${t('lastUpdate')}: ${esc(updated)} | ${uiIcon('db-size')}${t('dbSize')}: ${esc(dbSize)} | ${uiIcon('interval')}${t('pollInterval')}: ${esc(poll)}`;
 }
 
 function setActiveTab(tab) {
