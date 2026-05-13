@@ -301,8 +301,8 @@ cat > "$WWW/index.html" <<'HTML'
         </span>
         <span id="lang-label">Language</span>
         <select id="lang">
-          <option value="en">🇺🇸 EN</option>
-          <option value="ro">🇷🇴 RO</option>
+          <option value="en">EN</option>
+          <option value="ro">RO</option>
         </select>
       </label>
     </div>
@@ -465,7 +465,7 @@ function renderLanguageOptions() {
   (state.languages || []).forEach((l) => {
     const opt = document.createElement('option');
     opt.value = l.code;
-    opt.textContent = `${l.flag ? `${l.flag} ` : ''}${l.label}`;
+    opt.textContent = l.label;
     sel.appendChild(opt);
   });
 }
