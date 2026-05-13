@@ -16,12 +16,22 @@ Containerized MikroTik WAN traffic monitor with:
 - API: `/api/summary.json`, `/api/day.json`, `/api/month.json`, `/api/year.json`
 
 ## Repo structure
-- `app/mt-traffic.sh` - collector + API generator + static UI server
-- `mikrotik/install.rsc` - importable RouterOS install script
-- `scripts/install-to-router.sh` - helper upload/import script
-- `homeassistant/mikrotik_traffic_package.yaml` - REST + template sensors
-- `homeassistant/dashboard_cards.yaml` - Lovelace card example
-- `.github/workflows/docker-publish.yml` - build/push image to GHCR
+- `app/mt-traffic.sh` - runtime entrypoint: SNMP collector, SQLite writer, CSV/API generator, static UI server
+- `app/www/index.html` - static frontend (glass UI, tabs Day/Month/Year, settings persistence)
+- `app/i18n/languages.json` - language registry used by the UI selector
+- `app/i18n/en.json` - English translations
+- `app/i18n/ro.json` - Romanian translations
+- `app/images/lang/en.svg` - language icon (EN)
+- `app/images/lang/ro.svg` - language icon (RO)
+- `app/images/ui/*.svg` - UI icons (theme, poll interval, metrics, status row)
+- `mikrotik/install.rsc` - RouterOS install/deploy script (container, env, mount, NAT)
+- `scripts/install-to-router.sh` - helper that uploads/imports `install.rsc` over SSH
+- `homeassistant/mikrotik_traffic_package.yaml` - Home Assistant REST + template entities
+- `homeassistant/dashboard_cards.yaml` - Lovelace example cards for stats view
+- `docs/ui-light-dark.png` - README UI preview screenshot
+- `.github/workflows/ci.yml` - CI checks
+- `.github/workflows/docker-publish.yml` - multi-arch Docker build/publish to GHCR
+- `.github/workflows/housekeeping.yml` - cleanup workflow for old runs/images
 
 ## Build image locally
 ```bash
