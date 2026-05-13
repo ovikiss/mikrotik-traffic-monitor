@@ -77,3 +77,8 @@ On push to `main` (or tag `v*`), workflow publishes:
 - RouterOS container package must be installed and enabled.
 - Use external USB storage for `root-dir` and DB path.
 - SNMP community is scoped to container IP (`/32`) by install script.
+
+## DB size estimate (1h polling)
+- Practical example: `74 samples -> 16.0 KB` SQLite DB.
+- At `1 sample/hour` (`~8760 samples/year`), linear estimate is about `~1.8-2.0 MB/year`.
+- With SQLite overhead and normal growth variance, a safe planning range is `~2-5 MB/year`.
