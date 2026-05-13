@@ -7,7 +7,7 @@ Containerized MikroTik WAN traffic monitor with:
 - EN default UI with RO selector (translations loaded from JSON files)
 - JSON API for Home Assistant integration
 
-## UI preview (Dark + Light)
+## UI preview (Light + Dark)
 ![MikroTik Traffic Monitor UI (Light and Dark)](docs/ui-dark-light.png)
 
 ## What it exposes
