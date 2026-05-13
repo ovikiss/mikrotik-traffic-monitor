@@ -1032,6 +1032,7 @@ async function savePollInterval(value) {
   renderSubtitle();
   renderRows();
   document.getElementById('meta').textContent = `${t('pollSaved')}: ${formatPollInterval(v)}`;
+  setTimeout(() => { renderRows(); }, 1200);
 }
 
 const storedLang = localStorage.getItem('mtm_lang');
@@ -1355,9 +1356,9 @@ render_views() {
   YEAR_RX_GIB="$(sqlite_exec "SELECT COALESCE(ROUND(SUM(delta_in_bytes)/1073741824.0,3),0) FROM samples WHERE ts >= strftime('%s','now','localtime','start of year','utc');")"
   YEAR_TX_GIB="$(sqlite_exec "SELECT COALESCE(ROUND(SUM(delta_out_bytes)/1073741824.0,3),0) FROM samples WHERE ts >= strftime('%s','now','localtime','start of year','utc');")"
   SAMPLES="$(sqlite_exec "SELECT COUNT(*) FROM samples;")"
-  SAMPLES_DAY="$(sqlite_exec "SELECT COUNT(*) FROM samples WHERE ts >= strftime('%s','now','localtime','start of month','utc');")"
-  SAMPLES_MONTH="$(sqlite_exec "SELECT COUNT(*) FROM samples WHERE ts >= strftime('%s','now','localtime','start of year','utc');")"
-  SAMPLES_YEAR="$SAMPLES"
+  SAMPLES_DAY="$(sqlite_exec "SELECT COUNT(*) FROM samples WHERE ts >= strftime('%s','now','localtime','start of day','utc');")"
+  SAMPLES_MONTH="$(sqlite_exec "SELECT COUNT(*) FROM samples WHERE ts >= strftime('%s','now','localtime','start of month','utc');")"
+  SAMPLES_YEAR="$(sqlite_exec "SELECT COUNT(*) FROM samples WHERE ts >= strftime('%s','now','localtime','start of year','utc');")"
   UPDATED_LOCAL="$(date '+%Y-%m-%d %H:%M:%S %z')"
 
   {
