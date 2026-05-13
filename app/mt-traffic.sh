@@ -351,8 +351,8 @@ cat > "$WWW/index.html" <<'HTML'
 
 <script>
 const DEFAULT_LANGUAGES = [
-  { code: 'en', label: 'EN', flag: '🇺🇸', file: '/i18n/en.json', icon: '/images/lang/en.svg' },
-  { code: 'ro', label: 'RO', flag: '🇷🇴', file: '/i18n/ro.json', icon: '/images/lang/ro.svg' }
+  { code: 'en', label: 'EN', flag: '\u{1F1FA}\u{1F1F8}', file: '/i18n/en.json', icon: '/images/lang/en.svg' },
+  { code: 'ro', label: 'RO', flag: '\u{1F1F7}\u{1F1F4}', file: '/i18n/ro.json', icon: '/images/lang/ro.svg' }
 ];
 const I18N = {};
 const I18N_FALLBACK = {
@@ -900,7 +900,7 @@ fi
 if [ -f "$SCRIPT_DIR/i18n/languages.json" ]; then
   cp "$SCRIPT_DIR/i18n/languages.json" "$WWW/i18n/languages.json"
 else
-  printf '%s\n' '[{"code":"en","label":"EN","flag":"🇺🇸","file":"/i18n/en.json","icon":"/images/lang/en.svg"},{"code":"ro","label":"RO","flag":"🇷🇴","file":"/i18n/ro.json","icon":"/images/lang/ro.svg"}]' > "$WWW/i18n/languages.json"
+  printf '%s\n' '[{"code":"en","label":"EN","flag":"\ud83c\uddfa\ud83c\uddf8","file":"/i18n/en.json","icon":"/images/lang/en.svg"},{"code":"ro","label":"RO","flag":"\ud83c\uddf7\ud83c\uddf4","file":"/i18n/ro.json","icon":"/images/lang/ro.svg"}]' > "$WWW/i18n/languages.json"
 fi
 
 mkdir -p "$WWW/images"
