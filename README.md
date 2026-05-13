@@ -50,8 +50,7 @@ docker run --rm -p 8080:8080 \
 - `mtmIfIndex` (WAN ifIndex, default `auto` for PPPoE autodetect)
 - `mtmIfNamePattern` (interface-name pattern for autodetect, default `pppoe`)
 - `mtmPollInterval` (poll interval, default `1h`; UI allows `1h`, `3h`, `6h`, `12h`)
-- `mtmHttpContainerPort` (HTTP port inside container, default `8080`, exported as env `HTTP_PORT`)
-- `mtmHttpLanPort` (LAN exposed port on router, default `8088`, exported as env `HTTP_LAN_PORT`)
+- `mtmHttpLanPort` (UI/API port, default `8088`, exported as env `HTTP_PORT`)
 
 2. Import script:
 ```bash
