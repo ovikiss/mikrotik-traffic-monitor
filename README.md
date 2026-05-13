@@ -31,6 +31,7 @@ docker build -t ghcr.io/ovikiss/mikrotik-traffic-monitor:local .
 ## Run locally
 ```bash
 docker run --rm -p 8080:8080 \
+  -e HTTP_PORT=8080 \
   -e MT_HOST=192.168.88.1 \
   -e MT_COMMUNITY=trafficdb \
   -e IFINDEX=auto \
@@ -64,10 +65,17 @@ ssh admin@192.168.88.1 '/import file-name=install-traffic-monitor.rsc'
 ```
 
 ## GitHub Actions container publish
-On push to `main` (or tag `v*`), workflow publishes:
-- `ghcr.io/ovikiss/mikrotik-traffic-monitor:latest` (main)
-- `ghcr.io/ovikiss/mikrotik-traffic-monitor:sha-...`
-- `ghcr.io/ovikiss/mikrotik-traffic-monitor:vX.Y.Z` (tags)
+Workflow triggers on:
+- push tags `v*`
+- manual `workflow_dispatch`
+
+Published tags:
+- on `v*` tag push: `ghcr.io/ovikiss/mikrotik-traffic-monitor:vX.Y.Z` and `ghcr.io/ovikiss/mikrotik-traffic-monitor:sha-...`
+- on manual run from `main`: `ghcr.io/ovikiss/mikrotik-traffic-monitor:latest` and `ghcr.io/ovikiss/mikrotik-traffic-monitor:sha-...`
+
+Build platforms:
+- `linux/arm/v7`
+- `linux/arm64`
 
 ## Home Assistant integration
 - Runtime API sample: `/api/home_assistant_rest_example.yaml`
