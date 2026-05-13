@@ -19,10 +19,8 @@ Containerized MikroTik WAN traffic monitor with:
 - `app/mt-traffic.sh` - runtime entrypoint: SNMP collector, SQLite writer, CSV/API generator, static UI server
 - `app/www/index.html` - static frontend (glass UI, tabs Day/Month/Year, settings persistence)
 - `app/i18n/languages.json` - language registry used by the UI selector
-- `app/i18n/en.json` - English translations
-- `app/i18n/ro.json` - Romanian translations
-- `app/images/lang/en.svg` - language icon (EN)
-- `app/images/lang/ro.svg` - language icon (RO)
+- `app/i18n/*.json` - translations
+- `app/images/lang/*.svg` - language icons
 - `app/images/ui/*.svg` - UI icons (theme, poll interval, metrics, status row)
 - `mikrotik/install.rsc` - RouterOS install/deploy script (container, env, mount, NAT)
 - `scripts/install-to-router.sh` - helper that uploads/imports `install.rsc` over SSH
