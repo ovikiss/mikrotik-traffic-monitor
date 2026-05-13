@@ -16,7 +16,7 @@ Containerized MikroTik WAN traffic monitor with:
 - API: `/api/summary.json`, `/api/day.json`, `/api/month.json`, `/api/year.json`
 
 ## Repo structure
-- `app/mt-traffic.sh` - collector + UI/API generator
+- `app/mt-traffic.sh` - collector + API generator + static UI server
 - `mikrotik/install.rsc` - importable RouterOS install script
 - `scripts/install-to-router.sh` - helper upload/import script
 - `homeassistant/mikrotik_traffic_package.yaml` - REST + template sensors
