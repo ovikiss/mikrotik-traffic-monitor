@@ -254,6 +254,16 @@ cat > "$WWW/index.html" <<'HTML'
     .control { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--muted); }
     .control-icon { width: 14px; height: 14px; display: inline-flex; align-items: center; justify-content: center; color: var(--muted); }
     .control-icon img { width: 14px; height: 14px; display: block; opacity: .85; }
+    .lang-dropdown { position: relative; min-width: 92px; }
+    .lang-toggle { display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--border); border-radius: 8px; background: var(--card); color: var(--text); padding: 4px 8px; font-size: 12px; cursor: pointer; }
+    .lang-toggle img { width: 14px; height: 14px; display: block; }
+    .lang-caret { color: var(--muted); font-size: 10px; }
+    .lang-menu { position: absolute; right: 0; top: calc(100% + 6px); min-width: 120px; border: 1px solid var(--border); border-radius: 8px; background: var(--card); box-shadow: 0 6px 20px rgba(0,0,0,.12); display: none; z-index: 30; padding: 4px; }
+    .lang-menu.open { display: block; }
+    .lang-item { width: 100%; display: flex; align-items: center; gap: 8px; border: 0; background: transparent; color: var(--text); border-radius: 6px; padding: 6px 8px; font-size: 12px; text-align: left; cursor: pointer; }
+    .lang-item:hover { background: var(--table-head); }
+    .lang-item img { width: 14px; height: 14px; display: block; }
+    .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); border: 0; }
     .ico-inline { width: 14px; height: 14px; vertical-align: -2px; margin-right: 4px; opacity: .95; }
     .th-hint { color: var(--muted); font-size: 11px; font-weight: normal; }
     .control select { border: 1px solid var(--border); border-radius: 8px; background: var(--card); color: var(--text); padding: 4px 8px; font-size: 12px; }
@@ -300,10 +310,18 @@ cat > "$WWW/index.html" <<'HTML'
           <img id="lang-icon-img" src="/images/lang/en.svg" alt="" />
         </span>
         <span id="lang-label">Language</span>
-        <select id="lang">
-          <option value="en">EN</option>
-          <option value="ro">RO</option>
-        </select>
+        <div class="lang-dropdown" id="lang-dropdown">
+          <button type="button" class="lang-toggle" id="lang-toggle" aria-haspopup="listbox" aria-expanded="false">
+            <img id="lang-current-icon" src="/images/lang/en.svg" alt="" />
+            <span id="lang-current-label">EN</span>
+            <span class="lang-caret">▼</span>
+          </button>
+          <div class="lang-menu" id="lang-menu" role="listbox" aria-label="Language options"></div>
+          <select id="lang" class="sr-only" tabindex="-1" aria-hidden="true">
+            <option value="en">EN</option>
+            <option value="ro">RO</option>
+          </select>
+        </div>
       </label>
     </div>
   </div>
@@ -461,13 +479,51 @@ function normalizeLanguageList(items) {
 
 function renderLanguageOptions() {
   const sel = document.getElementById('lang');
+  const menu = document.getElementById('lang-menu');
   sel.innerHTML = '';
+  menu.innerHTML = '';
   (state.languages || []).forEach((l) => {
     const opt = document.createElement('option');
     opt.value = l.code;
     opt.textContent = l.label;
     sel.appendChild(opt);
+
+    const item = document.createElement('button');
+    item.type = 'button';
+    item.className = 'lang-item';
+    item.setAttribute('role', 'option');
+    item.setAttribute('data-lang', l.code);
+    item.innerHTML = `<img src="${l.icon}" alt="" /><span>${l.label}</span>`;
+    item.addEventListener('click', () => {
+      closeLanguageMenu();
+      setLanguage(l.code);
+    });
+    menu.appendChild(item);
   });
+  updateLanguageButton();
+}
+
+function updateLanguageButton() {
+  const langDef = getLanguageDef(state.lang) || getLanguageDef('en');
+  const icon = document.getElementById('lang-current-icon');
+  const label = document.getElementById('lang-current-label');
+  if (icon) icon.setAttribute('src', (langDef && langDef.icon) ? langDef.icon : '/images/lang/en.svg');
+  if (label) label.textContent = (langDef && langDef.label) ? langDef.label : 'EN';
+}
+
+function closeLanguageMenu() {
+  const menu = document.getElementById('lang-menu');
+  const toggle = document.getElementById('lang-toggle');
+  if (menu) menu.classList.remove('open');
+  if (toggle) toggle.setAttribute('aria-expanded', 'false');
+}
+
+function toggleLanguageMenu() {
+  const menu = document.getElementById('lang-menu');
+  const toggle = document.getElementById('lang-toggle');
+  if (!menu || !toggle) return;
+  const open = menu.classList.toggle('open');
+  toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
 }
 
 function formatPollInterval(v) {
@@ -608,6 +664,7 @@ function applyLanguage() {
   document.getElementById('poll-save').textContent = t('save');
   document.getElementById('lang').value = state.lang;
   document.getElementById('lang-label').textContent = t('language');
+  updateLanguageButton();
   renderSubtitle();
   document.getElementById('label-day').textContent = t('totalToday');
   document.getElementById('label-month').textContent = t('totalMonth');
@@ -869,7 +926,11 @@ if (prefersDarkQuery) {
 }
 document.getElementById('meta').textContent = t('loading');
 document.getElementById('theme').addEventListener('change', (e) => setTheme(e.target.value));
-document.getElementById('lang').addEventListener('change', (e) => setLanguage(e.target.value));
+document.getElementById('lang-toggle').addEventListener('click', () => toggleLanguageMenu());
+document.addEventListener('click', (e) => {
+  const wrap = document.getElementById('lang-dropdown');
+  if (!wrap || !wrap.contains(e.target)) closeLanguageMenu();
+});
 document.getElementById('poll-save').addEventListener('click', () => { savePollInterval().catch(() => {}); });
 document.querySelectorAll('.tab').forEach(btn => btn.addEventListener('click', () => setActiveTab(btn.dataset.tab)));
 loadAll().catch(e => { document.getElementById('meta').textContent = `${t('loadError')}: ${e}`; });
