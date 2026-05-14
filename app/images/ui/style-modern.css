@@ -24,24 +24,24 @@
     }
     html[data-theme="dark"] {
       --bg: #15263d;
-      --card: rgba(45, 58, 77, 0.82);
-      --card-strong: rgba(48, 62, 84, 0.88);
-      --border: rgba(116, 140, 173, 0.46);
+      --card: rgba(27, 39, 61, 0.42);
+      --card-strong: rgba(31, 45, 70, 0.52);
+      --border: rgba(140, 168, 207, 0.28);
       --text: rgba(232, 239, 248, 0.98);
-      --muted: rgba(170, 186, 208, 0.92);
+      --muted: rgba(186, 202, 226, 0.86);
       --blue: #4f86e8;
       --bar-max: #5ec56f;
-      --table-head: rgba(50, 66, 92, 0.88);
-      --table-border: rgba(86, 108, 139, 0.74);
-      --bar-bg: rgba(65, 79, 104, 0.88);
-      --glass-blur: blur(10px) saturate(1.05);
-      --glass-shadow: 0 12px 24px rgba(6, 14, 26, 0.46);
+      --table-head: rgba(49, 70, 102, 0.48);
+      --table-border: rgba(103, 131, 171, 0.38);
+      --bar-bg: rgba(20, 35, 58, 0.48);
+      --glass-blur: blur(12px) saturate(1.16);
+      --glass-shadow: 0 14px 30px rgba(4, 10, 20, 0.36);
       --glass-inset:
-        2px 2px 0.5px -2px rgba(255, 255, 255, 0.12) inset,
-        -2px -2px 0.5px -2px rgba(255, 255, 255, 0.05) inset;
-      --overlay-dim: rgba(13, 24, 39, 0.76);
-      --overlay-a: rgba(23, 60, 118, 0.26);
-      --overlay-b: rgba(18, 49, 96, 0.22);
+        2px 2px 0.5px -2px rgba(255, 255, 255, 0.16) inset,
+        -2px -2px 0.5px -2px rgba(255, 255, 255, 0.08) inset;
+      --overlay-dim: rgba(11, 21, 35, 0.26);
+      --overlay-a: rgba(25, 67, 131, 0.24);
+      --overlay-b: rgba(21, 56, 109, 0.20);
       --wallpaper-url: url('https://cdn.jsdelivr.net/gh/wessamlauf/homeassistant-frosted-glass-themes@refs/heads/main/themes/frosted-glass-dark-background.jpg');
     }
     html[data-font-size="25"] { --base-font-size: 14px; --font-scale: 0.8; }
