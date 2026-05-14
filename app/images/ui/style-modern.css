@@ -1,39 +1,47 @@
     :root {
       --bg: #eef1f8;
-      --card: rgba(254, 255, 255, 0.2);
-      --card-strong: rgba(254, 255, 255, 0.28);
+      --card: rgba(244, 249, 255, 0.24);
+      --card-strong: rgba(240, 247, 255, 0.34);
       --border: rgba(255, 255, 255, 0.35);
       --text: rgba(18, 24, 54, 0.98);
       --muted: rgba(18, 24, 54, 0.72);
-      --blue: #6a74d3;
-      --table-head: rgba(255, 255, 255, 0.14);
-      --table-border: rgba(255, 255, 255, 0.28);
-      --bar-bg: rgba(30, 43, 79, 0.24);
+      --blue: #3f8cff;
+      --bar-max: #53c16f;
+      --table-head: rgba(98, 154, 230, 0.16);
+      --table-border: rgba(93, 148, 223, 0.30);
+      --bar-bg: rgba(28, 63, 118, 0.24);
       --glass-blur: blur(12px) saturate(1.18);
       --glass-shadow: 0 14px 30px rgba(13, 17, 39, 0.16);
       --glass-inset:
         2px 2px 0.5px -2px rgba(255, 255, 255, 0.45) inset,
         -2px -2px 0.5px -2px rgba(255, 255, 255, 0.22) inset;
+      --overlay-dim: rgba(238, 245, 255, 0.08);
+      --overlay-a: rgba(31, 84, 160, 0.20);
+      --overlay-b: rgba(23, 62, 126, 0.16);
       --wallpaper-url: url('https://cdn.jsdelivr.net/gh/wessamlauf/homeassistant-frosted-glass-themes@refs/heads/main/themes/frosted-glass-light-background.jpg');
       --base-font-size: clamp(14px, .35vw + 12px, 18px);
       --font-scale: 1;
     }
     html[data-theme="dark"] {
-      --bg: #11162a;
-      --card: rgba(22, 27, 46, 0.34);
-      --card-strong: rgba(22, 27, 46, 0.48);
-      --border: rgba(220, 230, 255, 0.16);
-      --text: rgba(234, 238, 248, 0.98);
-      --muted: rgba(214, 221, 243, 0.75);
-      --blue: #7a87ea;
-      --table-head: rgba(255, 255, 255, 0.06);
-      --table-border: rgba(210, 221, 255, 0.13);
-      --bar-bg: rgba(9, 12, 26, 0.4);
-      --glass-blur: blur(12px) saturate(1.2);
-      --glass-shadow: 0 14px 30px rgba(0, 0, 0, 0.38);
+      --bg: #15263d;
+      --card: rgba(45, 58, 77, 0.82);
+      --card-strong: rgba(48, 62, 84, 0.88);
+      --border: rgba(116, 140, 173, 0.46);
+      --text: rgba(232, 239, 248, 0.98);
+      --muted: rgba(170, 186, 208, 0.92);
+      --blue: #4f86e8;
+      --bar-max: #5ec56f;
+      --table-head: rgba(50, 66, 92, 0.88);
+      --table-border: rgba(86, 108, 139, 0.74);
+      --bar-bg: rgba(65, 79, 104, 0.88);
+      --glass-blur: blur(10px) saturate(1.05);
+      --glass-shadow: 0 12px 24px rgba(6, 14, 26, 0.46);
       --glass-inset:
-        2px 2px 0.5px -2px rgba(255, 255, 255, 0.16) inset,
-        -2px -2px 0.5px -2px rgba(255, 255, 255, 0.08) inset;
+        2px 2px 0.5px -2px rgba(255, 255, 255, 0.12) inset,
+        -2px -2px 0.5px -2px rgba(255, 255, 255, 0.05) inset;
+      --overlay-dim: rgba(13, 24, 39, 0.76);
+      --overlay-a: rgba(23, 60, 118, 0.26);
+      --overlay-b: rgba(18, 49, 96, 0.22);
       --wallpaper-url: url('https://cdn.jsdelivr.net/gh/wessamlauf/homeassistant-frosted-glass-themes@refs/heads/main/themes/frosted-glass-dark-background.jpg');
     }
     html[data-font-size="25"] { --base-font-size: 14px; --font-scale: 0.8; }
@@ -44,8 +52,9 @@
       padding: 20px;
       min-height: 100vh;
       background:
-        radial-gradient(130% 120% at 0% 0%, rgba(106, 116, 211, 0.26), rgba(106, 116, 211, 0) 48%),
-        radial-gradient(120% 120% at 100% 100%, rgba(122, 135, 234, 0.22), rgba(122, 135, 234, 0) 44%),
+        linear-gradient(180deg, var(--overlay-dim), var(--overlay-dim)),
+        radial-gradient(130% 120% at 0% 0%, var(--overlay-a), rgba(31, 84, 160, 0) 54%),
+        radial-gradient(120% 120% at 100% 100%, var(--overlay-b), rgba(23, 62, 126, 0) 50%),
         var(--wallpaper-url) center / cover no-repeat fixed,
         var(--bg);
       color: var(--text);
@@ -91,10 +100,10 @@
       box-shadow: var(--glass-inset);
     }
     .tab.active {
-      background: linear-gradient(135deg, rgba(106, 116, 211, 0.92), rgba(133, 141, 236, 0.9));
+      background: linear-gradient(135deg, rgba(71, 126, 224, 0.95), rgba(89, 141, 233, 0.95));
       color: #fff;
       border-color: rgba(182, 196, 255, 0.55);
-      box-shadow: 0 8px 20px rgba(96, 104, 198, 0.42);
+      box-shadow: 0 8px 20px rgba(40, 86, 168, 0.4);
     }
     .table-scroll {
       width: 100%;

@@ -1,14 +1,15 @@
     :root {
       --bg: #eef1f8;
-      --card: #f5f7fc;
-      --card-strong: #edf1fb;
+      --card: #f2f7ff;
+      --card-strong: #e9f2ff;
       --border: #d6deef;
       --text: #1a2648;
       --muted: #536081;
-      --blue: #6a74d3;
-      --table-head: #edf2ff;
-      --table-border: #d7dfef;
-      --bar-bg: #d3dcf2;
+      --blue: #3f8cff;
+      --bar-max: #53c16f;
+      --table-head: #e1edff;
+      --table-border: #bfd4f6;
+      --bar-bg: #ccdff8;
       --glass-blur: none;
       --glass-shadow: none;
       --glass-inset: none;
@@ -17,16 +18,17 @@
       --font-scale: 1;
     }
     html[data-theme="dark"] {
-      --bg: #151a2b;
-      --card: #1d2338;
-      --card-strong: #232b42;
-      --border: #3a4566;
-      --text: #eaf0ff;
-      --muted: #aeb9d4;
-      --blue: #7a87ea;
-      --table-head: #2a334d;
-      --table-border: #3b4768;
-      --bar-bg: #1a223a;
+      --bg: #15263d;
+      --card: #2d3a4d;
+      --card-strong: #2d3a4d;
+      --border: #586d89;
+      --text: #e8eff8;
+      --muted: #aabacd;
+      --blue: #4f86e8;
+      --bar-max: #5ec56f;
+      --table-head: #32425c;
+      --table-border: #566c8b;
+      --bar-bg: #414f68;
       --glass-blur: none;
       --glass-shadow: none;
       --glass-inset: none;
@@ -83,7 +85,7 @@
       box-shadow: var(--glass-inset);
     }
     .tab.active {
-      background: #6f7be3;
+      background: #4f86e8;
       color: #fff;
       border-color: rgba(182, 196, 255, 0.55);
       box-shadow: none;

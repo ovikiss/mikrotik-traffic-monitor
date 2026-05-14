@@ -721,6 +721,8 @@ function renderRows() {
 
   rows.forEach(r => {
     const pct = maxTotal > 0 ? (r.total_gib / maxTotal) * 100 : 0;
+    const isMax = maxTotal > 0 && Math.abs(r.total_gib - maxTotal) < 1e-9;
+    const barColor = isMax ? 'var(--bar-max, #53c16f)' : 'var(--blue, #3f8cff)';
     const rowKey = String(r.period || '');
     const isMonthTab = state.activeTab === 'month';
     const isYearTab = state.activeTab === 'year';
@@ -741,7 +743,7 @@ function renderRows() {
       <td class="num">${esc(fmtTraffic(r.total_gib))}</td>
       <td class="num">${esc(fmtTraffic(r.rx_gib))}</td>
       <td class="num">${esc(fmtTraffic(r.tx_gib))}</td>
-      <td><div class="bar-wrap"><div class="bar" style="width:${pct.toFixed(2)}%"></div></div></td>
+      <td><div class="bar-wrap"><div class="bar" style="width:${pct.toFixed(2)}%; background:${barColor};"></div></div></td>
     `;
     tbody.appendChild(tr);
 
@@ -773,6 +775,8 @@ function renderRows() {
     if (isExpanded) {
       detailRows.forEach((d, idx) => {
         const dpct = maxTotal > 0 ? (d.total_gib / maxTotal) * 100 : 0;
+        const detailIsMax = maxTotal > 0 && Math.abs(d.total_gib - maxTotal) < 1e-9;
+        const detailBarColor = detailIsMax ? 'var(--bar-max, #53c16f)' : 'var(--blue, #3f8cff)';
         const dtr = document.createElement('tr');
         const isFirstDetail = idx === 0;
         const isLastDetail = idx === detailRows.length - 1;
@@ -782,7 +786,7 @@ function renderRows() {
           <td class="num">${esc(fmtTraffic(d.total_gib))}</td>
           <td class="num">${esc(fmtTraffic(d.rx_gib))}</td>
           <td class="num">${esc(fmtTraffic(d.tx_gib))}</td>
-          <td><div class="bar-wrap"><div class="bar" style="width:${dpct.toFixed(2)}%"></div></div></td>
+          <td><div class="bar-wrap"><div class="bar" style="width:${dpct.toFixed(2)}%; background:${detailBarColor};"></div></div></td>
         `;
         tbody.appendChild(dtr);
       });
