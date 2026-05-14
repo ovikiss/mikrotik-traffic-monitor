@@ -38,7 +38,7 @@ jobs:
         with:
           images: ghcr.io/${{ github.repository }}
           tags: |
-            type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' }}
+            type=raw,value=latest,enable=${{ github.ref_type == 'branch' && github.ref_name == 'main' }}
             type=sha
             type=ref,event=tag
 
@@ -55,7 +55,7 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
 
       - name: Cleanup old GHCR versions (keep latest + semver tags)
-        if: github.ref == 'refs/heads/main'
+        if: github.ref_type == 'branch' && github.ref_name == 'main'
         env:
           GH_TOKEN: ${{ secrets.GHCR_DELETE_TOKEN || secrets.GITHUB_TOKEN }}
           OWNER: ${{ github.repository_owner }}
@@ -101,9 +101,7 @@ jobs:
             [ -n "$RAW" ] || continue
             TAG_DIGESTS="$(printf '%s' "$RAW" | jq -r '.manifests[]?.digest // empty')"
             KEEP_DIGESTS="$(printf '%s\n%s\n' "$KEEP_DIGESTS" "$TAG_DIGESTS" | awk 'NF' | sort -u)"
-          done <<EOF
-${KEEP_TAGS}
-EOF
+          done <<< "$KEEP_TAGS"
 
           if [ -n "${KEEP_DIGESTS}" ]; then
             EXTRA_KEEP_IDS="$(printf '%s' "$ALL" | jq -r --arg digests "$KEEP_DIGESTS" '
