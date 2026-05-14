@@ -1,8 +1,11 @@
 ﻿{
-  "theme": "Theme",
+  "themeStyle": "Theme",
+  "theme": "Mode",
   "auto": "Auto",
   "light": "Light",
   "dark": "Dark",
+  "styleModern": "Modern",
+  "styleClassic": "Classic",
   "poll": "Poll",
   "pollInterval": "Poll interval",
   "secondsSingular": "second",

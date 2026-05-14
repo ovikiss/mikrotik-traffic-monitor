@@ -4,7 +4,10 @@ Containerized MikroTik WAN traffic monitor with:
 - hourly collection via SNMP
 - SQLite persistence (recommended on USB storage)
 - mini UI with day/month/year tabs (Total, RX, TX)
+- Theme dropdown (`Modern` / `Classic`) and Mode dropdown (`Auto` / `Light` / `Dark`)
 - UI with Language selector EN/RO (translations loaded from JSON files)
+- mobile-friendly table: horizontal swipe to keep `Visual` column visible
+- Month/Year expand works from arrow or period-cell tap (easier on mobile)
 - JSON API for Home Assistant integration
 
 ## UI preview (Light + Dark)
@@ -22,6 +25,8 @@ Containerized MikroTik WAN traffic monitor with:
 - `app/i18n/*.json` - translations
 - `app/images/lang/*.svg` - language icons
 - `app/images/ui/*.svg` - UI icons (theme, poll interval, metrics, status row)
+- `app/images/ui/style-modern.css` - Modern (glass) theme stylesheet
+- `app/images/ui/style-classic.css` - Classic theme stylesheet
 - `mikrotik/install.rsc` - RouterOS install/deploy script (container, env, mount, NAT)
 - `scripts/install-to-router.sh` - helper that uploads/imports `install.rsc` over SSH
 - `homeassistant/mikrotik_traffic_package.yaml` - Home Assistant REST + template entities

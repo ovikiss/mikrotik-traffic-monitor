@@ -4,199 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>MikroTik Traffic Monitor</title>
-  <style>
-    :root {
-      --bg: #eef1f8;
-      --card: rgba(254, 255, 255, 0.2);
-      --card-strong: rgba(254, 255, 255, 0.28);
-      --border: rgba(255, 255, 255, 0.35);
-      --text: rgba(18, 24, 54, 0.98);
-      --muted: rgba(18, 24, 54, 0.72);
-      --blue: #6a74d3;
-      --table-head: rgba(255, 255, 255, 0.14);
-      --table-border: rgba(255, 255, 255, 0.28);
-      --bar-bg: rgba(30, 43, 79, 0.24);
-      --glass-blur: blur(12px) saturate(1.18);
-      --glass-shadow: 0 14px 30px rgba(13, 17, 39, 0.16);
-      --glass-inset:
-        2px 2px 0.5px -2px rgba(255, 255, 255, 0.45) inset,
-        -2px -2px 0.5px -2px rgba(255, 255, 255, 0.22) inset;
-      --wallpaper-url: url('https://cdn.jsdelivr.net/gh/wessamlauf/homeassistant-frosted-glass-themes@refs/heads/main/themes/frosted-glass-light-background.jpg');
-      --base-font-size: clamp(14px, .35vw + 12px, 18px);
-      --font-scale: 1;
-    }
-    html[data-theme="dark"] {
-      --bg: #11162a;
-      --card: rgba(22, 27, 46, 0.34);
-      --card-strong: rgba(22, 27, 46, 0.48);
-      --border: rgba(220, 230, 255, 0.16);
-      --text: rgba(234, 238, 248, 0.98);
-      --muted: rgba(214, 221, 243, 0.75);
-      --blue: #7a87ea;
-      --table-head: rgba(255, 255, 255, 0.06);
-      --table-border: rgba(210, 221, 255, 0.13);
-      --bar-bg: rgba(9, 12, 26, 0.4);
-      --glass-blur: blur(12px) saturate(1.2);
-      --glass-shadow: 0 14px 30px rgba(0, 0, 0, 0.38);
-      --glass-inset:
-        2px 2px 0.5px -2px rgba(255, 255, 255, 0.16) inset,
-        -2px -2px 0.5px -2px rgba(255, 255, 255, 0.08) inset;
-      --wallpaper-url: url('https://cdn.jsdelivr.net/gh/wessamlauf/homeassistant-frosted-glass-themes@refs/heads/main/themes/frosted-glass-dark-background.jpg');
-    }
-    html[data-font-size="25"] { --base-font-size: 14px; --font-scale: 0.8; }
-    html[data-font-size="50"] { --base-font-size: 14px; --font-scale: 1; }
-    html[data-font-size="100"] { --base-font-size: 14px; --font-scale: 1.25; }
-    body {
-      margin: 0;
-      padding: 20px;
-      min-height: 100vh;
-      background:
-        radial-gradient(130% 120% at 0% 0%, rgba(106, 116, 211, 0.26), rgba(106, 116, 211, 0) 48%),
-        radial-gradient(120% 120% at 100% 100%, rgba(122, 135, 234, 0.22), rgba(122, 135, 234, 0) 44%),
-        var(--wallpaper-url) center / cover no-repeat fixed,
-        var(--bg);
-      color: var(--text);
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      font-size: calc(var(--base-font-size) * var(--font-scale));
-    }
-    h1 { margin: 0 0 6px; font-size: 1.7em; }
-    .subtitle { color: var(--muted); margin-bottom: 12px; font-size: 0.95em; }
-    .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; margin-bottom: 14px; }
-    .kpi {
-      background: var(--card);
-      border: 0.5px solid var(--border);
-      border-radius: 18px;
-      padding: 12px;
-      backdrop-filter: var(--glass-blur);
-      -webkit-backdrop-filter: var(--glass-blur);
-      box-shadow: var(--glass-shadow), var(--glass-inset);
-    }
-    .kpi .label { font-size: 0.92em; color: var(--muted); margin-bottom: 4px; }
-    .kpi .val { font-size: 1.75em; font-weight: bold; }
-    .kpi .sub { font-size: 0.92em; color: var(--muted); margin-top: 6px; }
-    .card {
-      background: var(--card);
-      border: 0.5px solid var(--border);
-      border-radius: 20px;
-      padding: 12px;
-      backdrop-filter: var(--glass-blur);
-      -webkit-backdrop-filter: var(--glass-blur);
-      box-shadow: var(--glass-shadow), var(--glass-inset);
-    }
-    .tabs { display: flex; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; }
-    .tab {
-      border: 0.5px solid var(--border);
-      background: color-mix(in srgb, var(--card-strong) 80%, transparent);
-      color: var(--text);
-      border-radius: 999px;
-      padding: 8px 14px;
-      min-height: 38px;
-      font-size: 1em;
-      cursor: pointer;
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
-      box-shadow: var(--glass-inset);
-    }
-    .tab.active {
-      background: linear-gradient(135deg, rgba(106, 116, 211, 0.92), rgba(133, 141, 236, 0.9));
-      color: #fff;
-      border-color: rgba(182, 196, 255, 0.55);
-      box-shadow: 0 8px 20px rgba(96, 104, 198, 0.42);
-    }
-    table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 1em; }
-    th, td { text-align: left; border-bottom: 1px solid var(--table-border); padding: 7px; }
-    th { background: var(--table-head); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
-    thead th:first-child {
-      border-top-left-radius: 14px;
-      border-bottom-left-radius: 14px;
-    }
-    thead th:last-child {
-      border-top-right-radius: 14px;
-      border-bottom-right-radius: 14px;
-    }
-    .expander { border: 0; background: transparent; color: var(--muted); cursor: pointer; padding: 0 6px 0 0; font-size: 12px; }
-    .expander-empty { display: inline-block; width: 12px; margin-right: 6px; }
-    .detail-row td {
-      background: color-mix(in srgb, var(--table-head) 78%, transparent);
-      border-bottom: 0;
-    }
-    .group-parent-expanded td {
-      border-bottom: 0;
-    }
-    .detail-row + .detail-row td {
-      border-top: 1px solid var(--table-border);
-    }
-    .detail-row-first td:first-child {
-      border-top-left-radius: 12px;
-      overflow: hidden;
-    }
-    .detail-row-first td:last-child {
-      border-top-right-radius: 12px;
-      overflow: hidden;
-    }
-    .detail-row-last td:first-child {
-      border-bottom-left-radius: 12px;
-      overflow: hidden;
-    }
-    .detail-row-last td:last-child {
-      border-bottom-right-radius: 12px;
-      overflow: hidden;
-    }
-    .detail-period { padding-left: 24px; color: var(--muted); }
-    .num { text-align: right; font-variant-numeric: tabular-nums; }
-    .bar-wrap { width: 140px; max-width: 100%; height: 8px; border-radius: 999px; background: var(--bar-bg); overflow: hidden; }
-    .bar { height: 8px; background: var(--blue); }
-    .meta {
-      margin-top: 8px;
-      color: var(--text);
-      font-size: 0.95em;
-      background: var(--table-head);
-      border: 0.5px solid var(--table-border);
-      border-radius: 12px;
-      padding: 8px 10px;
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
-      box-shadow: var(--glass-inset);
-    }
-    .topbar { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
-    .controls { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; justify-content: flex-end; }
-    .control { display: flex; align-items: center; gap: 6px; font: inherit; color: var(--text); }
-    .control-icon { width: 18px; height: 18px; display: inline-flex; align-items: center; justify-content: center; color: var(--muted); }
-    .control-icon img { width: 18px; height: 18px; display: block; opacity: .85; }
-    .lang-dropdown { position: relative; width: fit-content; min-width: 0; }
-    .lang-toggle { display: inline-flex; align-items: center; gap: 6px; border: 0.5px solid var(--border); border-radius: 12px; background: var(--card-strong); color: var(--text); padding: 5px 9px; min-height: 38px; font: inherit; cursor: pointer; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); box-shadow: var(--glass-inset); }
-    .lang-toggle img { width: 16px; height: 16px; display: block; }
-    .lang-caret { color: var(--muted); font-size: 10px; }
-    .lang-menu { position: absolute; right: 0; top: calc(100% + 6px); min-width: 0; border: 0.5px solid var(--border); border-radius: 10px; background: var(--card-strong); box-shadow: var(--glass-shadow); display: none; z-index: 30; padding: 3px; backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
-    .lang-menu.open { display: block; }
-    .lang-item { width: 100%; display: flex; align-items: center; gap: 8px; border: 0; background: transparent; color: var(--text); border-radius: 8px; padding: 7px 9px; min-height: 38px; font: inherit; text-align: left; cursor: pointer; }
-    .lang-item:hover { background: var(--table-head); }
-    .lang-item img { width: 16px; height: 16px; display: block; }
-    .theme-dropdown { position: relative; width: fit-content; min-width: 0; }
-    .theme-toggle { display: inline-flex; align-items: center; gap: 6px; border: 0.5px solid var(--border); border-radius: 12px; background: var(--card-strong); color: var(--text); padding: 5px 9px; min-height: 38px; font: inherit; cursor: pointer; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); box-shadow: var(--glass-inset); }
-    .theme-toggle img { width: 16px; height: 16px; display: block; }
-    .theme-menu { position: absolute; right: 0; top: calc(100% + 6px); min-width: 0; border: 0.5px solid var(--border); border-radius: 10px; background: var(--card-strong); box-shadow: var(--glass-shadow); display: none; z-index: 30; padding: 3px; backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
-    .theme-menu.open { display: block; }
-    .theme-item { width: 100%; white-space: nowrap; display: flex; align-items: center; gap: 8px; border: 0; background: transparent; color: var(--text); border-radius: 8px; padding: 7px 9px; min-height: 38px; font: inherit; text-align: left; cursor: pointer; }
-    .theme-item:hover { background: var(--table-head); }
-    .theme-item img { width: 16px; height: 16px; display: block; }
-    .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); border: 0; }
-    .ico-inline { width: 14px; height: 14px; vertical-align: -2px; margin-right: 4px; opacity: .95; }
-    .text-inherit { font: inherit; color: inherit; letter-spacing: inherit; }
-    .th-hint { color: var(--muted); font-weight: normal; }
-    .control select { border: 1px solid var(--border); border-radius: 8px; background: var(--card); color: var(--text); padding: 4px 8px; font-size: 12px; }
-    .control input { border: 1px solid var(--border); border-radius: 8px; background: var(--card); color: var(--text); padding: 4px 8px; font-size: 12px; width: 80px; }
-    .control button { border: 1px solid var(--border); border-radius: 8px; background: var(--card); color: var(--text); padding: 4px 8px; font-size: 12px; cursor: pointer; }
-    @media (max-width: 760px) {
-      th:nth-child(5), td:nth-child(5) { display: none; }
-      .bar-wrap { width: 80px; }
-      .topbar { flex-direction: column; }
-      .controls { justify-content: flex-start; }
-      .tab { min-height: 42px; padding: 9px 14px; }
-      .lang-toggle, .theme-toggle { min-height: 42px; padding: 7px 10px; }
-      .lang-item, .theme-item { min-height: 42px; padding: 8px 10px; }
-    }
-  </style>
+    <link rel="stylesheet" id="theme-style-css" href="/images/ui/style-modern.css" />
 </head>
 <body>
   <div class="topbar">
@@ -205,8 +13,22 @@
       <div class="subtitle" id="subtitle">Day / Month / Year aggregation, updated hourly.</div>
     </div>
     <div class="controls">
+      <label class="control" for="theme-style">
+        <span id="theme-style-label">Theme</span>
+        <div class="theme-dropdown" id="theme-style-dropdown">
+          <button type="button" class="theme-toggle" id="theme-style-toggle" aria-haspopup="listbox" aria-expanded="false">
+            <img src="/images/ui/theme-style.svg" alt="" />
+            <span id="theme-style-current-label">Modern</span>
+          </button>
+          <div class="theme-menu" id="theme-style-menu" role="listbox" aria-label="Theme style options"></div>
+          <select id="theme-style" class="sr-only" tabindex="-1" aria-hidden="true">
+            <option value="modern" id="style-opt-modern">Modern</option>
+            <option value="classic" id="style-opt-classic">Classic</option>
+          </select>
+        </div>
+      </label>
       <label class="control" for="theme">
-        <span id="theme-label">Theme</span>
+        <span id="theme-label">Mode</span>
         <div class="theme-dropdown" id="theme-dropdown">
           <button type="button" class="theme-toggle" id="theme-toggle" aria-haspopup="listbox" aria-expanded="false">
             <img id="theme-current-icon" src="/images/ui/theme-auto.svg" alt="" />
@@ -293,18 +115,20 @@
       <button class="tab" data-tab="year" id="tab-year">Year</button>
     </div>
 
-    <table>
-      <thead>
-        <tr>
-          <th id="th-period">Period</th>
-          <th class="num" id="th-total">Total</th>
-          <th class="num" id="th-rx">RX</th>
-          <th class="num" id="th-tx">TX</th>
-          <th id="th-visual">Visual</th>
-        </tr>
-      </thead>
-      <tbody id="rows"></tbody>
-    </table>
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr>
+            <th id="th-period">Period</th>
+            <th class="num" id="th-total">Total</th>
+            <th class="num" id="th-rx">RX</th>
+            <th class="num" id="th-tx">TX</th>
+            <th id="th-visual">Visual</th>
+          </tr>
+        </thead>
+        <tbody id="rows"></tbody>
+      </table>
+    </div>
 
     <div class="meta" id="meta">Loading...</div>
   </div>
@@ -316,7 +140,10 @@ const DEFAULT_LANGUAGES = [
 ];
 const I18N = {};
 const I18N_FALLBACK = {
-  theme: 'Theme',
+  themeStyle: 'Theme',
+  styleModern: 'Modern',
+  styleClassic: 'Classic',
+  theme: 'Mode',
   auto: 'Auto',
   light: 'Light',
   dark: 'Dark',
@@ -362,6 +189,7 @@ const TAB_LABEL_KEY = { day: 'day', month: 'month', year: 'year' };
 const state = {
   activeTab: 'day',
   lang: 'en',
+  themeStyle: 'modern',
   theme: 'auto',
   fontSize: '100',
   pollInterval: '',
@@ -381,6 +209,10 @@ const THEME_ITEMS = [
   { value: 'light', labelKey: 'light', icon: '/images/ui/theme-light.svg' },
   { value: 'dark', labelKey: 'dark', icon: '/images/ui/theme-dark.svg' }
 ];
+const THEME_STYLE_ITEMS = [
+  { value: 'modern', labelKey: 'styleModern' },
+  { value: 'classic', labelKey: 'styleClassic' }
+];
 const POLL_ITEMS = [
   { value: '1h', amount: 1 },
   { value: '3h', amount: 3 },
@@ -392,12 +224,6 @@ const FONT_ITEMS = [
   { value: '50', labelKey: 'fontCurrent' },
   { value: '100', labelKey: 'fontLarge' }
 ];
-
-function themeIconSvg(mode, resolved) {
-  if (mode === 'auto') return '/images/ui/theme-auto.svg';
-  if (resolved === 'dark') return '/images/ui/theme-dark.svg';
-  return '/images/ui/theme-light.svg';
-}
 
 function toNum(v) { const n = parseFloat(v || '0'); return Number.isFinite(n) ? n : 0; }
 function fmtTraffic(v) {
@@ -493,6 +319,47 @@ function updateLanguageButton() {
   const label = document.getElementById('lang-current-label');
   if (icon) icon.setAttribute('src', (langDef && langDef.icon) ? langDef.icon : '/images/lang/en.svg');
   if (label) label.textContent = (langDef && langDef.label) ? langDef.label : 'EN';
+}
+
+function renderThemeStyleMenu() {
+  const menu = document.getElementById('theme-style-menu');
+  if (!menu) return;
+  menu.innerHTML = '';
+  THEME_STYLE_ITEMS.forEach((x) => {
+    const item = document.createElement('button');
+    item.type = 'button';
+    item.className = 'theme-item';
+    item.setAttribute('role', 'option');
+    item.setAttribute('data-theme-style', x.value);
+    item.innerHTML = `<img src="/images/ui/theme-style.svg" alt="" /><span>${t(x.labelKey)}</span>`;
+    item.addEventListener('click', () => {
+      closeThemeStyleMenu();
+      setThemeStyle(x.value);
+    });
+    menu.appendChild(item);
+  });
+  updateThemeStyleButton();
+}
+
+function updateThemeStyleButton() {
+  const label = document.getElementById('theme-style-current-label');
+  if (!label) return;
+  label.textContent = t(state.themeStyle === 'classic' ? 'styleClassic' : 'styleModern');
+}
+
+function closeThemeStyleMenu() {
+  const menu = document.getElementById('theme-style-menu');
+  const toggle = document.getElementById('theme-style-toggle');
+  if (menu) menu.classList.remove('open');
+  if (toggle) toggle.setAttribute('aria-expanded', 'false');
+}
+
+function toggleThemeStyleMenu() {
+  const menu = document.getElementById('theme-style-menu');
+  const toggle = document.getElementById('theme-style-toggle');
+  if (!menu || !toggle) return;
+  const open = menu.classList.toggle('open');
+  toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
 }
 
 function closeLanguageMenu() {
@@ -759,6 +626,9 @@ function parseInfo(txt) {
 
 function applyLanguage() {
   document.documentElement.lang = state.lang;
+  document.getElementById('theme-style-label').textContent = t('themeStyle');
+  document.getElementById('style-opt-modern').textContent = t('styleModern');
+  document.getElementById('style-opt-classic').textContent = t('styleClassic');
   document.getElementById('theme-label').textContent = t('theme');
   document.getElementById('theme-opt-auto').textContent = t('auto');
   document.getElementById('theme-opt-light').textContent = t('light');
@@ -775,6 +645,7 @@ function applyLanguage() {
   document.getElementById('lang').value = state.lang;
   document.getElementById('lang-label').textContent = t('language');
   updateLanguageButton();
+  renderThemeStyleMenu();
   renderThemeMenu();
   renderFontMenu();
   renderPollMenu();
@@ -797,6 +668,14 @@ function applyTheme() {
   document.documentElement.setAttribute('data-theme', resolved);
   document.getElementById('theme').value = state.theme;
   updateThemeButton();
+}
+
+function applyThemeStyle() {
+  const mode = state.themeStyle === 'classic' ? 'classic' : 'modern';
+  const css = document.getElementById('theme-style-css');
+  if (css) css.setAttribute('href', mode === 'classic' ? '/images/ui/style-classic.css' : '/images/ui/style-modern.css');
+  document.getElementById('theme-style').value = mode;
+  updateThemeStyleButton();
 }
 
 function applyFontSize() {
@@ -867,12 +746,26 @@ function renderRows() {
     tbody.appendChild(tr);
 
     if (canExpand) {
+      const toggleGroup = () => {
+        if (isMonthTab) state.expanded.month = (state.expanded.month === rowKey) ? null : rowKey;
+        if (isYearTab) state.expanded.year = (state.expanded.year === rowKey) ? null : rowKey;
+        renderRows();
+      };
+
       const btn = tr.querySelector('.expander');
       if (btn) {
-        btn.addEventListener('click', () => {
-          if (isMonthTab) state.expanded.month = (state.expanded.month === rowKey) ? null : rowKey;
-          if (isYearTab) state.expanded.year = (state.expanded.year === rowKey) ? null : rowKey;
-          renderRows();
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          toggleGroup();
+        });
+      }
+
+      const firstCell = tr.querySelector('td');
+      if (firstCell) {
+        firstCell.style.cursor = 'pointer';
+        firstCell.addEventListener('click', (e) => {
+          if (e.target && e.target.closest && e.target.closest('.expander')) return;
+          toggleGroup();
         });
       }
     }
@@ -928,6 +821,13 @@ function setTheme(theme) {
   localStorage.setItem('mtm_theme', state.theme);
   applyTheme();
   saveSettings({ theme: state.theme }).catch(() => {});
+}
+
+function setThemeStyle(mode) {
+  state.themeStyle = (mode === 'classic' || mode === 'modern') ? mode : 'modern';
+  localStorage.setItem('mtm_theme_style', state.themeStyle);
+  applyThemeStyle();
+  renderRows();
 }
 
 function setFontSize(mode) {
@@ -1056,10 +956,13 @@ async function savePollInterval(value) {
 
 const storedLang = localStorage.getItem('mtm_lang');
 const storedTheme = localStorage.getItem('mtm_theme');
+const storedThemeStyle = localStorage.getItem('mtm_theme_style');
 const storedFontSize = localStorage.getItem('mtm_font_size');
 state.lang = (typeof storedLang === 'string' && storedLang) ? storedLang.toLowerCase() : 'en';
 state.theme = (storedTheme === 'dark' || storedTheme === 'light' || storedTheme === 'auto') ? storedTheme : 'auto';
+state.themeStyle = (storedThemeStyle === 'classic' || storedThemeStyle === 'modern') ? storedThemeStyle : 'modern';
 state.fontSize = (storedFontSize === '25' || storedFontSize === '50' || storedFontSize === '100') ? storedFontSize : '100';
+applyThemeStyle();
 applyTheme();
 applyFontSize();
 renderLanguageOptions();
@@ -1070,11 +973,14 @@ if (prefersDarkQuery) {
   else if (prefersDarkQuery.addListener) prefersDarkQuery.addListener(onThemePrefChange);
 }
 document.getElementById('meta').textContent = t('loading');
+document.getElementById('theme-style-toggle').addEventListener('click', () => toggleThemeStyleMenu());
 document.getElementById('theme-toggle').addEventListener('click', () => toggleThemeMenu());
 document.getElementById('font-toggle').addEventListener('click', () => toggleFontMenu());
 document.getElementById('poll-toggle').addEventListener('click', () => togglePollMenu());
 document.getElementById('lang-toggle').addEventListener('click', () => toggleLanguageMenu());
 document.addEventListener('click', (e) => {
+  const themeStyleWrap = document.getElementById('theme-style-dropdown');
+  if (!themeStyleWrap || !themeStyleWrap.contains(e.target)) closeThemeStyleMenu();
   const themeWrap = document.getElementById('theme-dropdown');
   if (!themeWrap || !themeWrap.contains(e.target)) closeThemeMenu();
   const fontWrap = document.getElementById('font-dropdown');

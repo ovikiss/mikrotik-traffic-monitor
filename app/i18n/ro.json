@@ -1,8 +1,11 @@
 ﻿{
-  "theme": "Temă",
+  "themeStyle": "Temă",
+  "theme": "Mod",
   "auto": "Auto",
   "light": "Luminos",
   "dark": "Întunecat",
+  "styleModern": "Modern",
+  "styleClassic": "Clasic",
   "poll": "Interval",
   "pollInterval": "Interval",
   "secondsSingular": "secundă",
