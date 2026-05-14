@@ -54,7 +54,7 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
 
-      - name: Cleanup old GHCR versions (keep latest only)
+      - name: Cleanup old GHCR versions (keep latest + semver tags)
         if: github.ref == 'refs/heads/main'
         env:
           GH_TOKEN: ${{ secrets.GHCR_DELETE_TOKEN || secrets.GITHUB_TOKEN }}
@@ -63,7 +63,6 @@ jobs:
         run: |
           set -euo pipefail
 
-          IMAGE="ghcr.io/${OWNER}/${PACKAGE}:latest"
           API="https://api.github.com/users/${OWNER}/packages/container/${PACKAGE}/versions?per_page=100"
           ALL="$(curl -fsSL \
             -H "Authorization: Bearer ${GH_TOKEN}" \
@@ -80,8 +79,12 @@ jobs:
             exit 0
           fi
 
-          RAW="$(docker buildx imagetools inspect --raw "${IMAGE}")"
-          KEEP_DIGESTS="$(printf '%s' "$RAW" | jq -r '.manifests[]?.digest // empty')"
+          KEEP_TAGS="$(printf '%s' "$ALL" | jq -r '
+            [
+              .[] | ((.metadata.container.tags // [] )[]?)
+              | select(. == "latest" or test("^v[0-9]+\\.[0-9]+(\\.[0-9]+)?$"))
+            ] | unique | .[]
+          ')"
 
           KEEP_IDS="$(printf '%s' "$ALL" | jq -r --argjson keep "$KEEP_ID" '
             (
@@ -90,6 +93,17 @@ jobs:
               [ .[] | select((.metadata.container.tags // []) | any(test("^v[0-9]+\\.[0-9]+(\\.[0-9]+)?$"))) | .id ]
             ) | .[]
           ')"
+
+          KEEP_DIGESTS=""
+          while read -r tag; do
+            [ -n "$tag" ] || continue
+            RAW="$(docker buildx imagetools inspect --raw "ghcr.io/${OWNER}/${PACKAGE}:${tag}" 2>/dev/null || true)"
+            [ -n "$RAW" ] || continue
+            TAG_DIGESTS="$(printf '%s' "$RAW" | jq -r '.manifests[]?.digest // empty')"
+            KEEP_DIGESTS="$(printf '%s\n%s\n' "$KEEP_DIGESTS" "$TAG_DIGESTS" | awk 'NF' | sort -u)"
+          done <<EOF
+${KEEP_TAGS}
+EOF
 
           if [ -n "${KEEP_DIGESTS}" ]; then
             EXTRA_KEEP_IDS="$(printf '%s' "$ALL" | jq -r --arg digests "$KEEP_DIGESTS" '
