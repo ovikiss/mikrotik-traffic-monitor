@@ -104,3 +104,6 @@ Build platforms:
 - Practical example: `74 samples -> 16.0 KB` SQLite DB.
 - At `1 sample/hour` (`~8760 samples/year`), linear estimate is about `~1.8-2.0 MB/year`.
 - With SQLite overhead and normal growth variance, a safe planning range is `~2-5 MB/year`.
+
+## Trademark Notice
+- MikroTik name and logo are official trademarks of MikroTik.

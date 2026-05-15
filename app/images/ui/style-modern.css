@@ -61,7 +61,38 @@
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
       font-size: calc(var(--base-font-size) * var(--font-scale));
     }
-    h1 { margin: 0 0 6px; font-size: 1.7em; }
+    h1 { margin: 0 0 6px; font-size: 1.7em; line-height: 1; }
+    .brand-title {
+      display: inline-flex;
+      align-items: center;
+      gap: .52em;
+      flex-wrap: nowrap;
+      white-space: nowrap;
+      line-height: 1;
+    }
+    .brand-title span {
+      white-space: nowrap;
+      flex: 0 0 auto;
+    }
+    .brand-text {
+      display: inline-block;
+      line-height: 1;
+      font-family: "Helvetica Neue", "Avenir Next", "Segoe UI", Arial, sans-serif;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.09em;
+      font-size: 0.83em;
+      transform: translateY(-0.07em);
+    }
+    .brand-mikrotik-mark {
+      display: block;
+      flex: 0 0 auto;
+      width: 7.88em;
+      height: 1.38em;
+      color: var(--text);
+      overflow: visible;
+      transform: translateY(0);
+    }
     .subtitle { color: var(--muted); margin-bottom: 12px; font-size: 0.95em; }
     .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; margin-bottom: 14px; }
     .kpi {
