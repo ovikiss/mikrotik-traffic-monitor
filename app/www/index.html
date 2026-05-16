@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>MikroTik Traffic Monitor</title>
-    <link rel="stylesheet" id="theme-style-css" href="/images/ui/style-modern.css?v=20260515u" />
+    <link rel="stylesheet" id="theme-style-css" href="/images/ui/style-modern.css?v=20260516f" />
 </head>
 <body>
   <div class="topbar">
@@ -241,7 +241,7 @@ const FONT_ITEMS = [
   { value: '50', labelKey: 'fontCurrent' },
   { value: '100', labelKey: 'fontLarge' }
 ];
-const THEME_CSS_VERSION = '20260515v';
+const THEME_CSS_VERSION = '20260516f';
 
 function toNum(v) { const n = parseFloat(v || '0'); return Number.isFinite(n) ? n : 0; }
 function fmtTraffic(v) {
@@ -791,9 +791,10 @@ function renderRows() {
     }
 
     if (isExpanded) {
+      const detailMaxTotal = Math.max(0, ...detailRows.map(d => d.total_gib));
       detailRows.forEach((d, idx) => {
-        const dpct = maxTotal > 0 ? (d.total_gib / maxTotal) * 100 : 0;
-        const detailIsMax = maxTotal > 0 && Math.abs(d.total_gib - maxTotal) < 1e-9;
+        const dpct = detailMaxTotal > 0 ? (d.total_gib / detailMaxTotal) * 100 : 0;
+        const detailIsMax = detailMaxTotal > 0 && Math.abs(d.total_gib - detailMaxTotal) < 1e-9;
         const detailBarColor = detailIsMax ? 'var(--bar-max, #53c16f)' : 'var(--blue, #3f8cff)';
         const dtr = document.createElement('tr');
         const isFirstDetail = idx === 0;

@@ -67,7 +67,7 @@
       text-transform: uppercase;
       letter-spacing: 0.09em;
       font-size: 0.83em;
-      transform: translateY(-0.07em);
+      transform: translateY(0);
     }
     .brand-mikrotik-mark {
       display: block;
@@ -212,8 +212,45 @@
     .control input { border: 1px solid var(--border); border-radius: 8px; background: var(--card); color: var(--text); padding: 4px 8px; font-size: 12px; width: 80px; }
     .control button { border: 1px solid var(--border); border-radius: 8px; background: var(--card); color: var(--text); padding: 4px 8px; font-size: 12px; cursor: pointer; }
     @media (max-width: 760px) {
-      .topbar { flex-direction: column; }
-      .controls { justify-content: flex-start; }
+      body { padding: 16px; }
+      .topbar { flex-direction: column; gap: 18px; }
+      .brand-title {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+        white-space: normal;
+      }
+      .brand-mikrotik-mark {
+        width: min(100%, 11.8em);
+        height: auto;
+      }
+      .brand-text {
+        font-size: 0.78em;
+        letter-spacing: 0.08em;
+        transform: translateY(0);
+      }
+      .subtitle { line-height: 1.35; }
+      .controls {
+        width: 100%;
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px 12px;
+        justify-content: stretch;
+        margin-bottom: 14px;
+      }
+      .control {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 6px;
+        min-width: 0;
+      }
+      .theme-dropdown, .lang-dropdown { width: 100%; }
+      .lang-toggle, .theme-toggle {
+        width: 100%;
+        justify-content: flex-start;
+        box-sizing: border-box;
+      }
       .tab { min-height: 42px; padding: 9px 14px; }
       .lang-toggle, .theme-toggle { min-height: 42px; padding: 7px 10px; }
       .lang-item, .theme-item { min-height: 42px; padding: 8px 10px; }
