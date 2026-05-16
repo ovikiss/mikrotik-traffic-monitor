@@ -80,11 +80,11 @@ ssh admin@192.168.88.1 '/import file-name=install-traffic-monitor.rsc'
 ## GitHub Actions container publish
 Workflow triggers on:
 - push tags `v*`
-- manual `workflow_dispatch`
+- manual `workflow_dispatch` when run against a tag ref
 
 Published tags:
-- on `v*` tag push: `ghcr.io/ovikiss/mikrotik-traffic-monitor:vX.Y.Z` and `ghcr.io/ovikiss/mikrotik-traffic-monitor:sha-...`
-- on manual run from `main`: `ghcr.io/ovikiss/mikrotik-traffic-monitor:latest` and `ghcr.io/ovikiss/mikrotik-traffic-monitor:sha-...`
+- on `v*` tag push: `ghcr.io/ovikiss/mikrotik-traffic-monitor:vX.Y.Z` and `ghcr.io/ovikiss/mikrotik-traffic-monitor:latest`
+- `sha-*` image tags are intentionally not published
 
 Build platforms:
 - `linux/arm/v7`

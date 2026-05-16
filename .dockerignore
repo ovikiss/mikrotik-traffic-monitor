@@ -1,5 +1,9 @@
 .git
 .github
+.DS_Store
 README.md
+SESSION_SUMMARY.md
+docs
+homeassistant
 mikrotik
 scripts
