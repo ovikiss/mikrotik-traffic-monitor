@@ -23,6 +23,7 @@ mkdir -p "$WWW"
 ACTIVE_IFINDEX=""
 POLL_SLEEP_SEC="3600"
 ACTIVE_POLL_INTERVAL="1h"
+LAST_FORCED_SAMPLE_SLOT=""
 
 parse_interval_to_sec() {
   RAW="$(printf '%s' "${1:-}" | tr '[:upper:]' '[:lower:]')"
@@ -101,10 +102,35 @@ resolve_poll_interval() {
   esac
 }
 
+forced_sample_slot_now() {
+  HM="$(date '+%H%M')"
+  case "$HM" in
+    2359|0001) date "+%Y-%m-%d-$HM" ;;
+    *) return 1 ;;
+  esac
+}
+
+has_pending_forced_sample() {
+  SLOT="$(forced_sample_slot_now || true)"
+  [ -n "$SLOT" ] || return 1
+  [ "$SLOT" != "$LAST_FORCED_SAMPLE_SLOT" ] || return 1
+  return 0
+}
+
+mark_forced_sample_slot() {
+  SLOT="$(forced_sample_slot_now || true)"
+  [ -n "$SLOT" ] || return 0
+  LAST_FORCED_SAMPLE_SLOT="$SLOT"
+}
+
 sleep_poll_interval() {
   TARGET="$POLL_SLEEP_SEC"
   ELAPSED=0
   while [ "$ELAPSED" -lt "$TARGET" ]; do
+    if has_pending_forced_sample; then
+      break
+    fi
+
     REMAIN=$((TARGET - ELAPSED))
     STEP=5
     if [ "$REMAIN" -lt "$STEP" ]; then
@@ -115,6 +141,10 @@ sleep_poll_interval() {
     ELAPSED=$((ELAPSED + STEP))
     resolve_poll_interval
     TARGET="$POLL_SLEEP_SEC"
+    if has_pending_forced_sample; then
+      break
+    fi
+
     if [ "$TARGET" -le "$ELAPSED" ]; then
       break
     fi
@@ -778,6 +808,7 @@ while true; do
 
   DBYTES=$((DIN + DOUT))
   sqlite_exec "INSERT INTO samples(ts,in_octets,out_octets,delta_bytes,delta_in_bytes,delta_out_bytes) VALUES($TS,$IN,$OUT,$DBYTES,$DIN,$DOUT);"
+  mark_forced_sample_slot
   sqlite_exec "DELETE FROM samples WHERE ts < strftime('%s','now','-1825 days');"
 
   render_views
