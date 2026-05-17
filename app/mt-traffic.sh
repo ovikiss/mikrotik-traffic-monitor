@@ -211,41 +211,10 @@ resolve_ifindex() {
   return 0
 }
 
-write_ui() {
-if [ -f "$SCRIPT_DIR/www/index.html" ]; then
-  SRC_UI="$SCRIPT_DIR/www/index.html"
-  DST_UI="$WWW/index.html"
-  if [ "$SRC_UI" != "$DST_UI" ]; then
-    cp "$SRC_UI" "$DST_UI"
-  fi
-else
-  printf '%s\n' '<!doctype html><html><body>Missing /app/www/index.html</body></html>' > "$WWW/index.html"
-fi
-
-mkdir -p "$WWW/i18n"
-if [ -f "$SCRIPT_DIR/i18n/en.json" ]; then
-  cp "$SCRIPT_DIR/i18n/en.json" "$WWW/i18n/en.json"
-else
-  printf '%s\n' '{}' > "$WWW/i18n/en.json"
-fi
-if [ -f "$SCRIPT_DIR/i18n/ro.json" ]; then
-  cp "$SCRIPT_DIR/i18n/ro.json" "$WWW/i18n/ro.json"
-else
-  printf '%s\n' '{}' > "$WWW/i18n/ro.json"
-fi
-if [ -f "$SCRIPT_DIR/i18n/languages.json" ]; then
-  cp "$SCRIPT_DIR/i18n/languages.json" "$WWW/i18n/languages.json"
-else
-  printf '%s\n' '[{"code":"en","label":"EN","flag":"\ud83c\uddfa\ud83c\uddf8","file":"/i18n/en.json","icon":"/images/lang/en.svg"},{"code":"ro","label":"RO","flag":"\ud83c\uddf7\ud83c\uddf4","file":"/i18n/ro.json","icon":"/images/lang/ro.svg"}]' > "$WWW/i18n/languages.json"
-fi
-
-if [ -d "$SCRIPT_DIR/images" ]; then
-  rm -rf "$WWW/images"
-  mkdir -p "$WWW/images"
-  cp -R "$SCRIPT_DIR/images/." "$WWW/images/"
-else
-  mkdir -p "$WWW/images"
-fi
+prepare_data_dir() {
+mkdir -p "$WWW"
+# Static UI assets are served from /app. Keep /data/www for generated files only.
+rm -rf "$WWW/index.html" "$WWW/images" "$WWW/i18n"
 }
 
 sqlite_exec() {
@@ -598,13 +567,15 @@ render_views() {
 }
 
 start_http_server() {
-  WWW_DIR="$WWW" HTTP_PORT_ENV="$HTTP_PORT" SETTINGS_PATH_ENV="$SETTINGS_PATH" EFFECTIVE_POLL_INTERVAL_ENV="$ACTIVE_POLL_INTERVAL" python3 - <<'PY' &
+  WWW_DIR="$WWW" STATIC_DIR_ENV="$SCRIPT_DIR" HTTP_PORT_ENV="$HTTP_PORT" SETTINGS_PATH_ENV="$SETTINGS_PATH" EFFECTIVE_POLL_INTERVAL_ENV="$ACTIVE_POLL_INTERVAL" python3 - <<'PY' &
 import json
 import os
+from urllib.parse import unquote, urlsplit
 from http.server import ThreadingHTTPServer, SimpleHTTPRequestHandler
 from pathlib import Path
 
-www = os.environ["WWW_DIR"]
+www = Path(os.environ["WWW_DIR"]).resolve()
+static_root = Path(os.environ["STATIC_DIR_ENV"]).resolve()
 port = int(os.environ["HTTP_PORT_ENV"])
 settings_path = Path(os.environ["SETTINGS_PATH_ENV"])
 effective_poll_interval = os.environ.get("EFFECTIVE_POLL_INTERVAL_ENV", "")
@@ -674,10 +645,15 @@ def valid_language(v):
     return v[0].isalpha()
 
 
-class Handler(SimpleHTTPRequestHandler):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, directory=www, **kwargs)
+def safe_join(root, rel):
+    root = Path(root).resolve()
+    target = (root / rel).resolve()
+    if target == root or root in target.parents:
+        return target
+    return None
 
+
+class Handler(SimpleHTTPRequestHandler):
     # Silence per-request access logs in RouterOS container logs.
     def log_message(self, format, *args):
         return
@@ -690,6 +666,47 @@ class Handler(SimpleHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(b)
 
+    def _serve_file(self, path, cache_static=False):
+        if not path or not path.is_file():
+            self.send_error(404, "File not found")
+            return
+        try:
+            data = path.read_bytes()
+        except OSError:
+            self.send_error(404, "File not found")
+            return
+
+        self.send_response(200)
+        self.send_header("Content-Type", self.guess_type(str(path)))
+        self.send_header("Content-Length", str(len(data)))
+        self.send_header("Cache-Control", "public, max-age=3600" if cache_static else "no-store")
+        self.end_headers()
+        self.wfile.write(data)
+
+    def _static_or_generated_path(self):
+        path = unquote(urlsplit(self.path).path)
+        if path in ("", "/"):
+            return safe_join(static_root, "www/index.html"), True
+        if path == "/index.html":
+            return safe_join(static_root, "www/index.html"), True
+        if path.startswith("/images/"):
+            return safe_join(static_root, path.lstrip("/")), True
+        if path.startswith("/i18n/"):
+            return safe_join(static_root, path.lstrip("/")), True
+        if path.startswith("/api/"):
+            return safe_join(www, path.lstrip("/")), False
+        if path in (
+            "/day.csv",
+            "/month.csv",
+            "/year.csv",
+            "/daily.csv",
+            "/month_days.csv",
+            "/year_months.csv",
+            "/info.txt",
+        ):
+            return safe_join(www, path.lstrip("/")), False
+        return None, False
+
     def do_GET(self):
         if self.path.startswith("/api/settings.json"):
             cfg = read_settings()
@@ -700,7 +717,9 @@ class Handler(SimpleHTTPRequestHandler):
                 "language": cfg.get("language", ""),
             })
             return
-        super().do_GET()
+
+        path, cache_static = self._static_or_generated_path()
+        self._serve_file(path, cache_static=cache_static)
 
     def do_POST(self):
         if self.path != "/api/settings":
@@ -763,7 +782,7 @@ ThreadingHTTPServer(("0.0.0.0", port), Handler).serve_forever()
 PY
 }
 
-write_ui
+prepare_data_dir
 init_db
 resolve_poll_interval
 start_http_server

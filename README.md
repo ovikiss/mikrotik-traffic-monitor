@@ -17,6 +17,7 @@ Containerized MikroTik WAN traffic monitor with:
 - UI: `http://<router-lan-ip>:8088/`
 - CSV: `/day.csv`, `/month.csv`, `/year.csv`, `/info.txt`
 - API: `/api/summary.json`, `/api/day.json`, `/api/month.json`, `/api/year.json`
+- Static UI files are served from the container image; `/data` stores only persistent/generated data (`traffic.db`, `settings.json`, CSV/API output).
 
 ## Repo structure
 - `app/mt-traffic.sh` - runtime entrypoint: SNMP collector, SQLite writer, CSV/API generator, static UI server
