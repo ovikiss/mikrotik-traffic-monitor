@@ -666,7 +666,7 @@ class Handler(SimpleHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(b)
 
-    def _serve_file(self, path, cache_static=False):
+    def _serve_file(self, path, cache_static=False, send_body=True):
         if not path or not path.is_file():
             self.send_error(404, "File not found")
             return
@@ -681,7 +681,8 @@ class Handler(SimpleHTTPRequestHandler):
         self.send_header("Content-Length", str(len(data)))
         self.send_header("Cache-Control", "public, max-age=3600" if cache_static else "no-store")
         self.end_headers()
-        self.wfile.write(data)
+        if send_body:
+            self.wfile.write(data)
 
     def _static_or_generated_path(self):
         path = unquote(urlsplit(self.path).path)
@@ -720,6 +721,10 @@ class Handler(SimpleHTTPRequestHandler):
 
         path, cache_static = self._static_or_generated_path()
         self._serve_file(path, cache_static=cache_static)
+
+    def do_HEAD(self):
+        path, cache_static = self._static_or_generated_path()
+        self._serve_file(path, cache_static=cache_static, send_body=False)
 
     def do_POST(self):
         if self.path != "/api/settings":
