@@ -49,7 +49,7 @@ docker run --rm -p 8080:8080 \
   -e MT_COMMUNITY=trafficdb \
   -e IFINDEX=auto \
   -e IFNAME_PATTERN=pppoe \
-  -e POLL_INTERVAL=60m \
+  -e POLL_INTERVAL=1h \
   -e TZ=Europe/Bucharest \
   -v "$PWD/data:/data" \
   ghcr.io/ovikiss/mikrotik-traffic-monitor:local

@@ -166,10 +166,6 @@ const I18N_FALLBACK = {
   dark: 'Dark',
   poll: 'Poll',
   pollInterval: 'Poll interval',
-  secondsSingular: 'second',
-  secondsPlural: 'seconds',
-  minutesSingular: 'minute',
-  minutesPlural: 'minutes',
   hoursSingular: 'hour',
   hoursPlural: 'hours',
   pollSaved: 'Poll interval saved',
@@ -179,7 +175,6 @@ const I18N_FALLBACK = {
   fontCurrent: 'Standard',
   fontLarge: 'Large',
   fontSaved: 'Font size saved',
-  save: 'Save',
   language: 'Language',
   subtitleBase: 'Day / Month / Year aggregation, updated every',
   totalToday: 'Total Today',
@@ -523,15 +518,11 @@ function togglePollMenu() {
 function formatPollInterval(v) {
   const s = (v || '').trim().toLowerCase();
   if (!s) return '-';
-  const m = s.match(/^([0-9]+)([smh]?)$/);
+  const m = s.match(/^([0-9]+)h$/);
   if (!m) return s;
   const n = parseInt(m[1], 10);
   if (!Number.isFinite(n) || n <= 0) return s;
-  const u = m[2] || 'm';
-  let unitKey = 'minutesPlural';
-  if (u === 's') unitKey = (n === 1) ? 'secondsSingular' : 'secondsPlural';
-  if (u === 'm') unitKey = (n === 1) ? 'minutesSingular' : 'minutesPlural';
-  if (u === 'h') unitKey = (n === 1) ? 'hoursSingular' : 'hoursPlural';
+  const unitKey = (n === 1) ? 'hoursSingular' : 'hoursPlural';
   return `${n} ${t(unitKey)}`;
 }
 
@@ -557,7 +548,7 @@ function isAllowedPollInterval(v) {
 }
 
 function renderSubtitle() {
-  const poll = formatPollInterval(state.pollInterval || '60m');
+  const poll = formatPollInterval(state.pollInterval || '1h');
   document.getElementById('subtitle').textContent = `${t('subtitleBase')} ${poll}.`;
 }
 
@@ -676,8 +667,8 @@ function applyLanguage() {
   document.getElementById('tab-year').textContent = t('year');
   document.getElementById('th-period').textContent = t('period');
   document.getElementById('th-total').innerHTML = `${uiMetricIcon('total')}${t('total')}`;
-  document.getElementById('th-rx').innerHTML = `${uiMetricIcon('rx')}RX`;
-  document.getElementById('th-tx').innerHTML = `${uiMetricIcon('tx')}TX`;
+  document.getElementById('th-rx').innerHTML = `${uiMetricIcon('rx')}RX <span class="th-hint text-inherit">(${esc(t('download'))})</span>`;
+  document.getElementById('th-tx').innerHTML = `${uiMetricIcon('tx')}TX <span class="th-hint text-inherit">(${esc(t('upload'))})</span>`;
   document.getElementById('th-visual').innerHTML = `${uiMetricIcon('visual')}${t('visual')} <span class=\"th-hint text-inherit\">${esc(t('visualHint'))}</span>`;
 }
 

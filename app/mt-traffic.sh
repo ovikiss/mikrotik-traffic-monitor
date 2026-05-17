@@ -6,7 +6,6 @@ set -eu
 : "${IFINDEX:=auto}"
 : "${IFNAME_PATTERN:=pppoe}"
 : "${POLL_INTERVAL:=1h}"
-: "${POLL_SEC:=}"
 : "${HTTP_PORT:=8080}"
 : "${TZ:=Europe/Bucharest}"
 : "${DATA_DIR:=/data}"
@@ -85,21 +84,8 @@ resolve_poll_interval() {
     return 0
   fi
 
-  case "${POLL_SEC:-}" in
-    ''|*[!0-9]*)
-      POLL_SLEEP_SEC="3600"
-      ACTIVE_POLL_INTERVAL="1h"
-      ;;
-    *)
-      if [ "$POLL_SEC" -gt 0 ] 2>/dev/null; then
-        POLL_SLEEP_SEC="$POLL_SEC"
-        ACTIVE_POLL_INTERVAL="${POLL_SEC}s"
-      else
-        POLL_SLEEP_SEC="3600"
-        ACTIVE_POLL_INTERVAL="1h"
-      fi
-      ;;
-  esac
+  POLL_SLEEP_SEC="3600"
+  ACTIVE_POLL_INTERVAL="1h"
 }
 
 forced_sample_slot_now() {
