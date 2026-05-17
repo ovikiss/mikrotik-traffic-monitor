@@ -57,7 +57,6 @@
 
 # Prepare env list
 :foreach e in=[/container/envs/find where list="trafficdb"] do={ /container/envs/remove $e }
-/container/envs/add list="trafficdb" key="MT_HOST" value=$mtmRouterIp
 /container/envs/add list="trafficdb" key="MT_COMMUNITY" value=$mtmSnmpCommunity
 /container/envs/add list="trafficdb" key="IFINDEX" value=$mtmIfIndex
 /container/envs/add list="trafficdb" key="IFNAME_PATTERN" value=$mtmIfNamePattern

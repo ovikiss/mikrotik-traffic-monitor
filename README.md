@@ -46,7 +46,6 @@ docker build -t ghcr.io/ovikiss/mikrotik-traffic-monitor:local .
 ```bash
 docker run --rm -p 8080:8080 \
   -e HTTP_PORT=8080 \
-  -e MT_HOST=192.168.88.1 \
   -e MT_COMMUNITY=trafficdb \
   -e IFINDEX=auto \
   -e IFNAME_PATTERN=pppoe \
@@ -62,6 +61,7 @@ docker run --rm -p 8080:8080 \
 - `mtmDataPath` (default `/usb1/trafficdb`)
 - `mtmRootDir` (default `/usb1/containers/trafficdb`)
 - `mtmImage` (default `ghcr.io/ovikiss/mikrotik-traffic-monitor:latest`)
+- MikroTik router IP is auto-detected from the container default gateway; no `MT_HOST` env is needed for RouterOS deploys.
 - `mtmIfIndex` (WAN ifIndex, default `auto` for PPPoE autodetect)
 - `mtmIfNamePattern` (interface-name pattern for autodetect, default `pppoe`)
 - `mtmPollInterval` (poll interval, default `1h`; UI allows `1h`, `3h`, `6h`, `12h`)

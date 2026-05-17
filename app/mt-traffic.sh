@@ -1,8 +1,8 @@
 #!/bin/sh
 set -eu
 
-: "${MT_HOST:?MT_HOST is required}"
 : "${MT_COMMUNITY:?MT_COMMUNITY is required}"
+: "${MT_HOST:=auto}"
 : "${IFINDEX:=auto}"
 : "${IFNAME_PATTERN:=pppoe}"
 : "${POLL_INTERVAL:=1h}"
@@ -23,6 +23,34 @@ ACTIVE_IFINDEX=""
 POLL_SLEEP_SEC="3600"
 ACTIVE_POLL_INTERVAL="1h"
 LAST_FORCED_SAMPLE_SLOT=""
+
+default_gateway_ip() {
+  [ -r /proc/net/route ] || return 1
+  GW_HEX="$(awk '$2 == "00000000" { print $3; exit }' /proc/net/route 2>/dev/null || true)"
+  case "$GW_HEX" in
+    ????????) ;;
+    *) return 1 ;;
+  esac
+
+  B1="$(printf '%s' "$GW_HEX" | cut -c7-8)"
+  B2="$(printf '%s' "$GW_HEX" | cut -c5-6)"
+  B3="$(printf '%s' "$GW_HEX" | cut -c3-4)"
+  B4="$(printf '%s' "$GW_HEX" | cut -c1-2)"
+  printf '%d.%d.%d.%d\n' "$((0x$B1))" "$((0x$B2))" "$((0x$B3))" "$((0x$B4))"
+}
+
+resolve_mt_host() {
+  case "${MT_HOST:-auto}" in
+    ''|auto|AUTO)
+      DETECTED_MT_HOST="$(default_gateway_ip || true)"
+      if [ -z "$DETECTED_MT_HOST" ]; then
+        echo "MT_HOST auto-detect failed; set MT_HOST explicitly" >&2
+        exit 1
+      fi
+      MT_HOST="$DETECTED_MT_HOST"
+      ;;
+  esac
+}
 
 parse_interval_to_sec() {
   RAW="$(printf '%s' "${1:-}" | tr '[:upper:]' '[:lower:]')"
@@ -790,6 +818,7 @@ PY
 prepare_data_dir
 init_db
 resolve_poll_interval
+resolve_mt_host
 start_http_server
 resolve_ifindex || true
 render_views
