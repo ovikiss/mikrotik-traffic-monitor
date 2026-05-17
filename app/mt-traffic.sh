@@ -239,9 +239,12 @@ else
   printf '%s\n' '[{"code":"en","label":"EN","flag":"\ud83c\uddfa\ud83c\uddf8","file":"/i18n/en.json","icon":"/images/lang/en.svg"},{"code":"ro","label":"RO","flag":"\ud83c\uddf7\ud83c\uddf4","file":"/i18n/ro.json","icon":"/images/lang/ro.svg"}]' > "$WWW/i18n/languages.json"
 fi
 
-mkdir -p "$WWW/images"
 if [ -d "$SCRIPT_DIR/images" ]; then
+  rm -rf "$WWW/images"
+  mkdir -p "$WWW/images"
   cp -R "$SCRIPT_DIR/images/." "$WWW/images/"
+else
+  mkdir -p "$WWW/images"
 fi
 }
 
