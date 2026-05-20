@@ -57,8 +57,8 @@ docker run --rm -p 8080:8080 \
 
 ## Install on MikroTik
 1. Edit variables at the top of `mikrotik/install.rsc`:
-- `mtmVeth` (default `veth2`)
-- `mtmDataPath` (default `/usb1/trafficdb`)
+- `mtmVeth` (default `veth-tdb`)
+- `mtmDataPath` (default `/usb1/trafficdb-data`)
 - `mtmRootDir` (default `/usb1/containers/trafficdb`)
 - `mtmImage` (default `ghcr.io/ovikiss/mikrotik-traffic-monitor:latest`)
 - MikroTik router IP is auto-detected from the container default gateway; no `MT_HOST` env is needed for RouterOS deploys.
@@ -66,6 +66,7 @@ docker run --rm -p 8080:8080 \
 - `mtmIfNamePattern` (interface-name pattern for autodetect, default `pppoe`)
 - `mtmPollInterval` (poll interval, default `1h`; UI allows `1h`, `3h`, `6h`, `12h`)
 - `mtmHttpLanPort` (UI/API port, default `8088`, exported as env `HTTP_PORT`)
+- The `trafficdb-gui` NAT rule is created or updated automatically using the actual IP configured on the container veth.
 
 2. Import script:
 ```bash

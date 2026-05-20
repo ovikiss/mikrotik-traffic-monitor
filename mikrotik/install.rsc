@@ -2,13 +2,14 @@
 # Import with: /import file-name=install.rsc
 # Adjust variables below before import.
 
-:local mtmVeth "veth2"
+:local mtmVeth "veth-tdb"
 :local mtmBridge "dockers"
 :local mtmSubnet "172.18.0"
 :local mtmMask "16"
 :local mtmRouterIp ($mtmSubnet . ".1")
 :local mtmContainerIp ($mtmSubnet . ".2")
-:local mtmDataPath "/usb1/trafficdb"
+:local mtmDataPath "/usb1/trafficdb-data"
+:local mtmDataDir "usb1/trafficdb-data"
 :local mtmRootDir "/usb1/containers/trafficdb"
 :local mtmPullDir "/usb1/pull"
 :local mtmImage "ghcr.io/ovikiss/mikrotik-traffic-monitor:latest"
@@ -20,27 +21,41 @@
 :local mtmHttpLanPort "8088"
 :local mtmLanCidr "192.168.88.0/24"
 
-# Ensure directories on disk
-:if ([:len [/file find where name="usb1/trafficdb"]] = 0) do={ /file add name="usb1/trafficdb" type=directory }
+# Ensure support directories on disk
 :if ([:len [/file find where name="usb1/containers"]] = 0) do={ /file add name="usb1/containers" type=directory }
 :if ([:len [/file find where name="usb1/pull"]] = 0) do={ /file add name="usb1/pull" type=directory }
 
 # Configure container extraction path
 /container/config/set tmpdir=$mtmPullDir
 
-# Enable SNMP and create readonly community scoped to container IP
-/snmp/set enabled=yes
-:if ([:len [/snmp/community/find where name=$mtmSnmpCommunity]] = 0) do={
-  /snmp/community/add name=$mtmSnmpCommunity addresses=($mtmContainerIp . "/32") security=none read-access=yes write-access=no
-} else={
-  /snmp/community/set [find where name=$mtmSnmpCommunity] addresses=($mtmContainerIp . "/32") security=none read-access=yes write-access=no
+# Stop and remove the old container before touching mounted paths.
+:if ([:len [/container/find where name=$mtmContainerName]] > 0) do={
+  /container/stop [find where name=$mtmContainerName]
+  /delay 2
+  /container/remove [find where name=$mtmContainerName]
 }
+
+# Ensure persistent data directory exists.
+:if ([:len [/file find where name=$mtmDataDir]] = 0) do={ /file add name=$mtmDataDir type=directory }
 
 # Ensure veth exists and is linked to the container bridge
 :if ([:len [/interface/veth/find where name=$mtmVeth]] = 0) do={
   /interface/veth/add name=$mtmVeth address=($mtmContainerIp . "/" . $mtmMask) gateway=$mtmRouterIp
 } else={
   /interface/veth/set [find where name=$mtmVeth] address=($mtmContainerIp . "/" . $mtmMask) gateway=$mtmRouterIp
+}
+
+:local mtmContainerAddress ([/interface/veth/get [find where name=$mtmVeth] address] . "")
+:local mtmDetectedContainerIp $mtmContainerAddress
+:local mtmSlashPos [:find $mtmContainerAddress "/"]
+:if ([:typeof $mtmSlashPos] != "nil") do={ :set mtmDetectedContainerIp [:pick $mtmContainerAddress 0 $mtmSlashPos] }
+
+# Enable SNMP and create readonly community scoped to the actual container IP.
+/snmp/set enabled=yes
+:if ([:len [/snmp/community/find where name=$mtmSnmpCommunity]] = 0) do={
+  /snmp/community/add name=$mtmSnmpCommunity addresses=($mtmDetectedContainerIp . "/32") security=none read-access=yes write-access=no
+} else={
+  /snmp/community/set [find where name=$mtmSnmpCommunity] addresses=($mtmDetectedContainerIp . "/32") security=none read-access=yes write-access=no
 }
 
 :if ([:len [/interface/bridge/find where name=$mtmBridge]] = 0) do={
@@ -69,22 +84,15 @@
 :foreach m in=[/container/mounts/find where list="trafficdb"] do={ /container/mounts/remove $m }
 /container/mounts/add list="trafficdb" src=$mtmDataPath dst="/data"
 
-# Replace existing container if present
-:if ([:len [/container/find where name=$mtmContainerName]] > 0) do={
-  /container/stop [find where name=$mtmContainerName]
-  /delay 2
-  /container/remove [find where name=$mtmContainerName]
-}
-
 # Pull and run container
 /container/add name=$mtmContainerName remote-image=$mtmImage interface=$mtmVeth root-dir=$mtmRootDir mountlists="trafficdb" envlists="trafficdb" start-on-boot=yes logging=yes dns="192.168.88.1,1.1.1.1"
 /container/start [find where name=$mtmContainerName]
 
 # LAN port-forward to UI/API
 :if ([:len [/ip/firewall/nat/find where comment="trafficdb-gui"]] = 0) do={
-  /ip/firewall/nat/add chain=dstnat action=dst-nat protocol=tcp src-address=$mtmLanCidr dst-address=192.168.88.1 dst-port=$mtmHttpLanPort to-addresses=$mtmContainerIp to-ports=$mtmHttpLanPort comment="trafficdb-gui"
+  /ip/firewall/nat/add chain=dstnat action=dst-nat protocol=tcp src-address=$mtmLanCidr dst-address=192.168.88.1 dst-port=$mtmHttpLanPort to-addresses=$mtmDetectedContainerIp to-ports=$mtmHttpLanPort comment="trafficdb-gui"
 } else={
-  /ip/firewall/nat/set [find where comment="trafficdb-gui"] chain=dstnat action=dst-nat protocol=tcp src-address=$mtmLanCidr dst-address=192.168.88.1 dst-port=$mtmHttpLanPort to-addresses=$mtmContainerIp to-ports=$mtmHttpLanPort
+  /ip/firewall/nat/set [find where comment="trafficdb-gui"] chain=dstnat action=dst-nat protocol=tcp src-address=$mtmLanCidr dst-address=192.168.88.1 dst-port=$mtmHttpLanPort to-addresses=$mtmDetectedContainerIp to-ports=$mtmHttpLanPort
 }
 
 :put ("Traffic Monitor installed. Open http://192.168.88.1:" . $mtmHttpLanPort . "/")
