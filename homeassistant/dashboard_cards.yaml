@@ -25,13 +25,13 @@ cards:
         name: Year Upload (TX)
       - entity: sensor.mikrotik_traffic_samples
         name: Samples
-      - entity: sensor.mikrotik_db_size
+      - entity: sensor.mikrotik_traffic_db_size
         name: DB Size (MB)
-      - entity: sensor.mikrotik_db_size_bytes
+      - entity: sensor.mikrotik_traffic_db_size_bytes
         name: DB Size (Bytes)
-      - entity: sensor.mikrotik_poll_interval
+      - entity: sensor.mikrotik_traffic_poll_interval
         name: Poll interval
-      - entity: sensor.mikrotik_last_update
+      - entity: sensor.mikrotik_traffic_last_update
         name: Last update
 
   - type: gauge
