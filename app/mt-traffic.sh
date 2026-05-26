@@ -306,124 +306,167 @@ backfill_deltas() {
 }
 
 render_api() {
-  BASE="$WWW" IFINDEX_ENV="$ACTIVE_IFINDEX" POLL_INTERVAL_ENV="$ACTIVE_POLL_INTERVAL" POLL_SEC_ENV="$POLL_SLEEP_SEC" python3 - <<'PY'
-import csv
-import json
-import os
-from pathlib import Path
+  mkdir -p "$WWW/api"
 
-base = Path(os.environ["BASE"])
-api = base / "api"
-api.mkdir(exist_ok=True)
+  # Generate day.json
+  sqlite3 "$DB" "
+    SELECT json_group_array(
+      json_object(
+        'period', period,
+        'total_gib', total_gib,
+        'rx_gib', rx_gib,
+        'tx_gib', tx_gib
+      )
+    )
+    FROM (
+      SELECT date(ts,'unixepoch','localtime') AS period,
+             ROUND(SUM(delta_bytes)/1073741824.0, 2) AS total_gib,
+             ROUND(SUM(delta_in_bytes)/1073741824.0, 2) AS rx_gib,
+             ROUND(SUM(delta_out_bytes)/1073741824.0, 2) AS tx_gib
+      FROM samples
+      WHERE ts >= strftime('%s','now','localtime','start of month','utc')
+      GROUP BY period
+      ORDER BY period DESC
+      LIMIT 31
+    );
+  " > "$WWW/api/day.json"
 
+  # Generate month.json
+  sqlite3 "$DB" "
+    SELECT json_group_array(
+      json_object(
+        'period', period,
+        'total_gib', total_gib,
+        'rx_gib', rx_gib,
+        'tx_gib', tx_gib
+      )
+    )
+    FROM (
+      SELECT strftime('%Y-%m', ts,'unixepoch','localtime') AS period,
+             ROUND(SUM(delta_bytes)/1073741824.0, 2) AS total_gib,
+             ROUND(SUM(delta_in_bytes)/1073741824.0, 2) AS rx_gib,
+             ROUND(SUM(delta_out_bytes)/1073741824.0, 2) AS tx_gib
+      FROM samples
+      WHERE ts >= strftime('%s','now','localtime','start of year','utc')
+      GROUP BY period
+      ORDER BY period DESC
+      LIMIT 12
+    );
+  " > "$WWW/api/month.json"
 
-def load_csv(name: str):
-    out = []
-    path = base / name
-    if not path.exists():
-        return out
-    with path.open(newline="", encoding="utf-8") as f:
-        for row in csv.DictReader(f):
-            out.append({
-                "period": row.get("period", ""),
-                "total_gib": float(row.get("total_gib") or 0),
-                "rx_gib": float(row.get("rx_gib") or 0),
-                "tx_gib": float(row.get("tx_gib") or 0),
-            })
-    return out
+  # Generate year.json
+  sqlite3 "$DB" "
+    SELECT json_group_array(
+      json_object(
+        'period', period,
+        'total_gib', total_gib,
+        'rx_gib', rx_gib,
+        'tx_gib', tx_gib
+      )
+    )
+    FROM (
+      SELECT strftime('%Y', ts,'unixepoch','localtime') AS period,
+             ROUND(SUM(delta_bytes)/1073741824.0, 2) AS total_gib,
+             ROUND(SUM(delta_in_bytes)/1073741824.0, 2) AS rx_gib,
+             ROUND(SUM(delta_out_bytes)/1073741824.0, 2) AS tx_gib
+      FROM samples
+      WHERE ts >= 0
+      GROUP BY period
+      ORDER BY period DESC
+    );
+  " > "$WWW/api/year.json"
 
+  # Generate month_days.json
+  sqlite3 "$DB" "
+    SELECT json_group_array(
+      json_object(
+        'period', period,
+        'month_key', month_key,
+        'total_gib', total_gib,
+        'rx_gib', rx_gib,
+        'tx_gib', tx_gib
+      )
+    )
+    FROM (
+      SELECT date(ts,'unixepoch','localtime') AS period,
+             strftime('%Y-%m', ts,'unixepoch','localtime') AS month_key,
+             ROUND(SUM(delta_bytes)/1073741824.0, 2) AS total_gib,
+             ROUND(SUM(delta_in_bytes)/1073741824.0, 2) AS rx_gib,
+             ROUND(SUM(delta_out_bytes)/1073741824.0, 2) AS tx_gib
+      FROM samples
+      WHERE ts >= strftime('%s','now','localtime','start of year','utc')
+      GROUP BY period
+      ORDER BY period DESC
+    );
+  " > "$WWW/api/month_days.json"
 
-def load_detail_csv(name: str):
-    out = []
-    path = base / name
-    if not path.exists():
-        return out
-    with path.open(newline="", encoding="utf-8") as f:
-        for row in csv.DictReader(f):
-            item = {
-                "period": row.get("period", ""),
-                "total_gib": float(row.get("total_gib") or 0),
-                "rx_gib": float(row.get("rx_gib") or 0),
-                "tx_gib": float(row.get("tx_gib") or 0),
-            }
-            if "month_key" in row:
-                item["month_key"] = row.get("month_key", "")
-            if "year_key" in row:
-                item["year_key"] = row.get("year_key", "")
-            out.append(item)
-    return out
+  # Generate year_months.json
+  sqlite3 "$DB" "
+    SELECT json_group_array(
+      json_object(
+        'period', period,
+        'year_key', year_key,
+        'total_gib', total_gib,
+        'rx_gib', rx_gib,
+        'tx_gib', tx_gib
+      )
+    )
+    FROM (
+      SELECT strftime('%Y-%m', ts,'unixepoch','localtime') AS period,
+             strftime('%Y', ts,'unixepoch','localtime') AS year_key,
+             ROUND(SUM(delta_bytes)/1073741824.0, 2) AS total_gib,
+             ROUND(SUM(delta_in_bytes)/1073741824.0, 2) AS rx_gib,
+             ROUND(SUM(delta_out_bytes)/1073741824.0, 2) AS tx_gib
+      FROM samples
+      WHERE ts >= 0
+      GROUP BY period
+      ORDER BY period DESC
+    );
+  " > "$WWW/api/year_months.json"
 
-
-def load_info():
-    info = {}
-    p = base / "info.txt"
-    if p.exists():
-        for line in p.read_text(encoding="utf-8").splitlines():
-            if "=" in line:
-                k, v = line.split("=", 1)
-                info[k] = v
-    return info
-
-
-def to_num(v):
-    try:
-        return float(v)
-    except Exception:
-        return 0.0
-
-
-def to_int(v):
-    try:
-        return int(float(v))
-    except Exception:
-        return 0
-
-info = load_info()
-day = load_csv("day.csv")
-month = load_csv("month.csv")
-year = load_csv("year.csv")
-month_days = load_detail_csv("month_days.csv")
-year_months = load_detail_csv("year_months.csv")
-
-summary = {
-    "updated_local": info.get("updated_local", ""),
-    "samples": int(to_num(info.get("samples", "0"))),
-    "db_size_bytes": to_int(info.get("db_size_bytes", "0")),
-    "kpi": {
-        "today_total_gib": to_num(info.get("today_total_gib", "0")),
-        "today_rx_gib": to_num(info.get("today_rx_gib", "0")),
-        "today_tx_gib": to_num(info.get("today_tx_gib", "0")),
-        "month_total_gib": to_num(info.get("month_total_gib", "0")),
-        "month_rx_gib": to_num(info.get("month_rx_gib", "0")),
-        "month_tx_gib": to_num(info.get("month_tx_gib", "0")),
-        "year_total_gib": to_num(info.get("year_total_gib", "0")),
-        "year_rx_gib": to_num(info.get("year_rx_gib", "0")),
-        "year_tx_gib": to_num(info.get("year_tx_gib", "0")),
-    },
-    "interface": {"ifindex": os.environ.get("IFINDEX_ENV", "")},
-    "poll": {
-        "interval": os.environ.get("POLL_INTERVAL_ENV", ""),
-        "seconds": int(to_num(os.environ.get("POLL_SEC_ENV", "0"))),
-    },
-    "windows": {"day": "current_month", "month": "current_year", "year": "all_years"},
-    "endpoints": {
-        "day": "/api/day.json",
-        "month": "/api/month.json",
-        "year": "/api/year.json",
-        "month_days": "/api/month_days.json",
-        "year_months": "/api/year_months.json",
-        "summary": "/api/summary.json",
-    },
+  # Generate summary.json
+  cat <<EOF > "$WWW/api/summary.json"
+{
+  "updated_local": "${UPDATED_LOCAL}",
+  "samples": ${SAMPLES},
+  "db_size_bytes": ${DB_SIZE_BYTES},
+  "kpi": {
+    "today_total_gib": ${TODAY_TOTAL_GIB},
+    "today_rx_gib": ${TODAY_RX_GIB},
+    "today_tx_gib": ${TODAY_TX_GIB},
+    "month_total_gib": ${MONTH_TOTAL_GIB},
+    "month_rx_gib": ${MONTH_RX_GIB},
+    "month_tx_gib": ${MONTH_TX_GIB},
+    "year_total_gib": ${YEAR_TOTAL_GIB},
+    "year_rx_gib": ${YEAR_RX_GIB},
+    "year_tx_gib": ${YEAR_TX_GIB}
+  },
+  "interface": {
+    "ifindex": "${ACTIVE_IFINDEX}"
+  },
+  "poll": {
+    "interval": "${ACTIVE_POLL_INTERVAL}",
+    "seconds": ${POLL_SLEEP_SEC}
+  },
+  "windows": {
+    "day": "current_month",
+    "month": "current_year",
+    "year": "all_years"
+  },
+  "endpoints": {
+    "day": "/api/day.json",
+    "month": "/api/month.json",
+    "year": "/api/year.json",
+    "month_days": "/api/month_days.json",
+    "year_months": "/api/year_months.json",
+    "summary": "/api/summary.json"
+  }
 }
+EOF
 
-(api / "day.json").write_text(json.dumps(day, indent=2), encoding="utf-8")
-(api / "month.json").write_text(json.dumps(month, indent=2), encoding="utf-8")
-(api / "year.json").write_text(json.dumps(year, indent=2), encoding="utf-8")
-(api / "month_days.json").write_text(json.dumps(month_days, indent=2), encoding="utf-8")
-(api / "year_months.json").write_text(json.dumps(year_months, indent=2), encoding="utf-8")
-(api / "summary.json").write_text(json.dumps(summary, indent=2), encoding="utf-8")
-
-ha = '''# Home Assistant example (REST sensor)
+  # Generate home_assistant_rest_example.yaml
+  cat <<'EOF' > "$WWW/api/home_assistant_rest_example.yaml"
+# Home Assistant example (REST sensor)
 rest:
   - resource: "http://192.168.88.1:8088/api/summary.json"
     scan_interval: 120
@@ -496,331 +539,11 @@ template:
       - name: "MikroTik Last Update"
         unique_id: mikrotik_traffic_last_update
         state: "{{ state_attr('sensor.mikrotik_traffic_summary', 'updated_local') | default('unknown', true) }}"
-'''
-(api / "home_assistant_rest_example.yaml").write_text(ha, encoding="utf-8")
-PY
-}
-
-render_views() {
-  sqlite3 -header -csv "$DB" "
-    SELECT date(ts,'unixepoch','localtime') AS period,
-           ROUND(SUM(delta_bytes)/1073741824.0, 2) AS total_gib,
-           ROUND(SUM(delta_in_bytes)/1073741824.0, 2) AS rx_gib,
-           ROUND(SUM(delta_out_bytes)/1073741824.0, 2) AS tx_gib
-    FROM samples
-    WHERE ts >= strftime('%s','now','localtime','start of month','utc')
-    GROUP BY period
-    ORDER BY period DESC
-    LIMIT 31;
-  " > "$WWW/day.csv"
-
-  sqlite3 -header -csv "$DB" "
-    SELECT strftime('%Y-%m', ts,'unixepoch','localtime') AS period,
-           ROUND(SUM(delta_bytes)/1073741824.0, 2) AS total_gib,
-           ROUND(SUM(delta_in_bytes)/1073741824.0, 2) AS rx_gib,
-           ROUND(SUM(delta_out_bytes)/1073741824.0, 2) AS tx_gib
-    FROM samples
-    WHERE ts >= strftime('%s','now','localtime','start of year','utc')
-    GROUP BY period
-    ORDER BY period DESC
-    LIMIT 12;
-  " > "$WWW/month.csv"
-
-  sqlite3 -header -csv "$DB" "
-    SELECT strftime('%Y', ts,'unixepoch','localtime') AS period,
-           ROUND(SUM(delta_bytes)/1073741824.0, 2) AS total_gib,
-           ROUND(SUM(delta_in_bytes)/1073741824.0, 2) AS rx_gib,
-           ROUND(SUM(delta_out_bytes)/1073741824.0, 2) AS tx_gib
-    FROM samples
-    WHERE ts >= 0
-    GROUP BY period
-    ORDER BY period DESC;
-  " > "$WWW/year.csv"
-
-  sqlite3 -header -csv "$DB" "
-    SELECT date(ts,'unixepoch','localtime') AS period,
-           strftime('%Y-%m', ts,'unixepoch','localtime') AS month_key,
-           ROUND(SUM(delta_bytes)/1073741824.0, 2) AS total_gib,
-           ROUND(SUM(delta_in_bytes)/1073741824.0, 2) AS rx_gib,
-           ROUND(SUM(delta_out_bytes)/1073741824.0, 2) AS tx_gib
-    FROM samples
-    WHERE ts >= strftime('%s','now','localtime','start of year','utc')
-    GROUP BY period
-    ORDER BY period DESC;
-  " > "$WWW/month_days.csv"
-
-  sqlite3 -header -csv "$DB" "
-    SELECT strftime('%Y-%m', ts,'unixepoch','localtime') AS period,
-           strftime('%Y', ts,'unixepoch','localtime') AS year_key,
-           ROUND(SUM(delta_bytes)/1073741824.0, 2) AS total_gib,
-           ROUND(SUM(delta_in_bytes)/1073741824.0, 2) AS rx_gib,
-           ROUND(SUM(delta_out_bytes)/1073741824.0, 2) AS tx_gib
-    FROM samples
-    WHERE ts >= 0
-    GROUP BY period
-    ORDER BY period DESC;
-  " > "$WWW/year_months.csv"
-
-  cp "$WWW/day.csv" "$WWW/daily.csv"
-
-  TODAY_TOTAL_GIB="$(sqlite_exec "SELECT COALESCE(ROUND(SUM(delta_bytes)/1073741824.0,2),0) FROM samples WHERE ts >= strftime('%s','now','localtime','start of day','utc');")"
-  TODAY_RX_GIB="$(sqlite_exec "SELECT COALESCE(ROUND(SUM(delta_in_bytes)/1073741824.0,2),0) FROM samples WHERE ts >= strftime('%s','now','localtime','start of day','utc');")"
-  TODAY_TX_GIB="$(sqlite_exec "SELECT COALESCE(ROUND(SUM(delta_out_bytes)/1073741824.0,2),0) FROM samples WHERE ts >= strftime('%s','now','localtime','start of day','utc');")"
-  MONTH_TOTAL_GIB="$(sqlite_exec "SELECT COALESCE(ROUND(SUM(delta_bytes)/1073741824.0,2),0) FROM samples WHERE ts >= strftime('%s','now','localtime','start of month','utc');")"
-  MONTH_RX_GIB="$(sqlite_exec "SELECT COALESCE(ROUND(SUM(delta_in_bytes)/1073741824.0,2),0) FROM samples WHERE ts >= strftime('%s','now','localtime','start of month','utc');")"
-  MONTH_TX_GIB="$(sqlite_exec "SELECT COALESCE(ROUND(SUM(delta_out_bytes)/1073741824.0,2),0) FROM samples WHERE ts >= strftime('%s','now','localtime','start of month','utc');")"
-  YEAR_TOTAL_GIB="$(sqlite_exec "SELECT COALESCE(ROUND(SUM(delta_bytes)/1073741824.0,2),0) FROM samples WHERE ts >= strftime('%s','now','localtime','start of year','utc');")"
-  YEAR_RX_GIB="$(sqlite_exec "SELECT COALESCE(ROUND(SUM(delta_in_bytes)/1073741824.0,2),0) FROM samples WHERE ts >= strftime('%s','now','localtime','start of year','utc');")"
-  YEAR_TX_GIB="$(sqlite_exec "SELECT COALESCE(ROUND(SUM(delta_out_bytes)/1073741824.0,2),0) FROM samples WHERE ts >= strftime('%s','now','localtime','start of year','utc');")"
-  SAMPLES="$(sqlite_exec "SELECT COUNT(*) FROM samples;")"
-  SAMPLES_DAY="$(sqlite_exec "SELECT COUNT(*) FROM samples WHERE ts >= strftime('%s','now','localtime','start of day','utc');")"
-  SAMPLES_MONTH="$(sqlite_exec "SELECT COUNT(*) FROM samples WHERE ts >= strftime('%s','now','localtime','start of month','utc');")"
-  SAMPLES_YEAR="$(sqlite_exec "SELECT COUNT(*) FROM samples WHERE ts >= strftime('%s','now','localtime','start of year','utc');")"
-  DB_SIZE_BYTES="$(wc -c < "$DB" 2>/dev/null || echo 0)"
-  DB_SIZE_BYTES="${DB_SIZE_BYTES//[!0-9]/}"
-  [ -n "$DB_SIZE_BYTES" ] || DB_SIZE_BYTES=0
-  UPDATED_LOCAL="$(date '+%Y-%m-%d %H:%M:%S %z')"
-
-  {
-    echo "today_total_gib=$TODAY_TOTAL_GIB"
-    echo "today_rx_gib=$TODAY_RX_GIB"
-    echo "today_tx_gib=$TODAY_TX_GIB"
-    echo "month_total_gib=$MONTH_TOTAL_GIB"
-    echo "month_rx_gib=$MONTH_RX_GIB"
-    echo "month_tx_gib=$MONTH_TX_GIB"
-    echo "year_total_gib=$YEAR_TOTAL_GIB"
-    echo "year_rx_gib=$YEAR_RX_GIB"
-    echo "year_tx_gib=$YEAR_TX_GIB"
-    echo "samples=$SAMPLES"
-    echo "samples_day=$SAMPLES_DAY"
-    echo "samples_month=$SAMPLES_MONTH"
-    echo "samples_year=$SAMPLES_YEAR"
-    echo "db_size_bytes=$DB_SIZE_BYTES"
-    echo "updated_local=$UPDATED_LOCAL"
-  } > "$WWW/info.txt"
-
-  render_api
+EOF
 }
 
 start_http_server() {
-  WWW_DIR="$WWW" STATIC_DIR_ENV="$SCRIPT_DIR" HTTP_PORT_ENV="$HTTP_PORT" SETTINGS_PATH_ENV="$SETTINGS_PATH" EFFECTIVE_POLL_INTERVAL_ENV="$ACTIVE_POLL_INTERVAL" python3 - <<'PY' &
-import json
-import os
-from urllib.parse import unquote, urlsplit
-from http.server import ThreadingHTTPServer, SimpleHTTPRequestHandler
-from pathlib import Path
-
-www = Path(os.environ["WWW_DIR"]).resolve()
-static_root = Path(os.environ["STATIC_DIR_ENV"]).resolve()
-port = int(os.environ["HTTP_PORT_ENV"])
-settings_path = Path(os.environ["SETTINGS_PATH_ENV"])
-effective_poll_interval = os.environ.get("EFFECTIVE_POLL_INTERVAL_ENV", "")
-
-
-def read_settings():
-    if not settings_path.exists():
-        return {}
-    try:
-        data = json.loads(settings_path.read_text(encoding="utf-8"))
-        if isinstance(data, dict):
-            return data
-    except Exception:
-        pass
-    return {}
-
-
-def write_settings(data):
-    settings_path.parent.mkdir(parents=True, exist_ok=True)
-    tmp = settings_path.with_suffix(".tmp")
-    tmp.write_text(json.dumps(data), encoding="utf-8")
-    tmp.replace(settings_path)
-
-
-def normalize_interval(v):
-    if not isinstance(v, str):
-        return ""
-    v = v.strip().lower()
-    if v == "60m":
-        return "1h"
-    if v == "180m":
-        return "3h"
-    if v == "360m":
-        return "6h"
-    if v == "720m":
-        return "12h"
-    if v.isdigit():
-        n = int(v)
-        if n == 60:
-            return "1h"
-        if n == 180:
-            return "3h"
-        if n == 360:
-            return "6h"
-        if n == 720:
-            return "12h"
-    return v
-
-
-def valid_interval(v):
-    return v in ("1h", "3h", "6h", "12h")
-
-
-def valid_theme(v):
-    return isinstance(v, str) and v in ("light", "dark", "auto")
-
-
-def valid_language(v):
-    if not isinstance(v, str):
-        return False
-    v = v.strip().lower()
-    if len(v) < 2 or len(v) > 16:
-        return False
-    for c in v:
-        if not (c.isalnum() or c in ("-", "_")):
-            return False
-    return v[0].isalpha()
-
-
-def safe_join(root, rel):
-    root = Path(root).resolve()
-    target = (root / rel).resolve()
-    if target == root or root in target.parents:
-        return target
-    return None
-
-
-class Handler(SimpleHTTPRequestHandler):
-    # Silence per-request access logs in RouterOS container logs.
-    def log_message(self, format, *args):
-        return
-
-    def _send_json(self, code, payload):
-        b = json.dumps(payload).encode("utf-8")
-        self.send_response(code)
-        self.send_header("Content-Type", "application/json")
-        self.send_header("Content-Length", str(len(b)))
-        self.end_headers()
-        self.wfile.write(b)
-
-    def _serve_file(self, path, cache_static=False, send_body=True):
-        if not path or not path.is_file():
-            self.send_error(404, "File not found")
-            return
-        try:
-            data = path.read_bytes()
-        except OSError:
-            self.send_error(404, "File not found")
-            return
-
-        self.send_response(200)
-        self.send_header("Content-Type", self.guess_type(str(path)))
-        self.send_header("Content-Length", str(len(data)))
-        self.send_header("Cache-Control", "public, max-age=3600" if cache_static else "no-store")
-        self.end_headers()
-        if send_body:
-            self.wfile.write(data)
-
-    def _static_or_generated_path(self):
-        path = unquote(urlsplit(self.path).path)
-        if path in ("", "/"):
-            return safe_join(static_root, "www/index.html"), True
-        if path == "/index.html":
-            return safe_join(static_root, "www/index.html"), True
-        if path.startswith("/images/"):
-            return safe_join(static_root, path.lstrip("/")), True
-        if path.startswith("/i18n/"):
-            return safe_join(static_root, path.lstrip("/")), True
-        if path.startswith("/api/"):
-            return safe_join(www, path.lstrip("/")), False
-        if path in (
-            "/day.csv",
-            "/month.csv",
-            "/year.csv",
-            "/daily.csv",
-            "/month_days.csv",
-            "/year_months.csv",
-            "/info.txt",
-        ):
-            return safe_join(www, path.lstrip("/")), False
-        return None, False
-
-    def do_GET(self):
-        if self.path.startswith("/api/settings.json"):
-            cfg = read_settings()
-            self._send_json(200, {
-                "poll_interval": cfg.get("poll_interval", ""),
-                "effective_poll_interval": effective_poll_interval,
-                "theme": cfg.get("theme", ""),
-                "language": cfg.get("language", ""),
-            })
-            return
-
-        path, cache_static = self._static_or_generated_path()
-        self._serve_file(path, cache_static=cache_static)
-
-    def do_HEAD(self):
-        path, cache_static = self._static_or_generated_path()
-        self._serve_file(path, cache_static=cache_static, send_body=False)
-
-    def do_POST(self):
-        if self.path != "/api/settings":
-            self._send_json(404, {"error": "not_found"})
-            return
-        try:
-            l = int(self.headers.get("Content-Length", "0"))
-        except Exception:
-            l = 0
-        body = self.rfile.read(l) if l > 0 else b"{}"
-        try:
-            data = json.loads(body.decode("utf-8"))
-        except Exception:
-            self._send_json(400, {"error": "invalid_json"})
-            return
-        if not isinstance(data, dict):
-            self._send_json(400, {"error": "invalid_payload"})
-            return
-
-        cfg = read_settings()
-        out = {"ok": True}
-        changed = False
-
-        if "poll_interval" in data:
-            interval = normalize_interval(str(data.get("poll_interval", "")))
-            if not valid_interval(interval):
-                self._send_json(400, {"error": "invalid_interval"})
-                return
-            cfg["poll_interval"] = interval
-            out["poll_interval"] = interval
-            changed = True
-
-        if "theme" in data:
-            theme = str(data.get("theme", "")).strip().lower()
-            if not valid_theme(theme):
-                self._send_json(400, {"error": "invalid_theme"})
-                return
-            cfg["theme"] = theme
-            out["theme"] = theme
-            changed = True
-
-        if "language" in data:
-            language = str(data.get("language", "")).strip().lower()
-            if not valid_language(language):
-                self._send_json(400, {"error": "invalid_language"})
-                return
-            cfg["language"] = language
-            out["language"] = language
-            changed = True
-
-        if not changed:
-            self._send_json(400, {"error": "empty_payload"})
-            return
-
-        write_settings(cfg)
-        self._send_json(200, out)
-
-
-ThreadingHTTPServer(("0.0.0.0", port), Handler).serve_forever()
-PY
+  SETTINGS_PATH_ENV="$SETTINGS_PATH" WWW_DIR="$WWW" STATIC_DIR_ENV="$SCRIPT_DIR" HTTP_PORT_ENV="$HTTP_PORT" EFFECTIVE_POLL_INTERVAL_ENV="$ACTIVE_POLL_INTERVAL" "$SCRIPT_DIR/server" &
 }
 
 prepare_data_dir
