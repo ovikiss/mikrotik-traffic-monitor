@@ -542,6 +542,83 @@ template:
 EOF
 }
 
+render_views() {
+  sqlite3 -header -csv "$DB" "
+    SELECT date(ts,'unixepoch','localtime') AS period,
+           ROUND(SUM(delta_bytes)/1073741824.0, 2) AS total_gib,
+           ROUND(SUM(delta_in_bytes)/1073741824.0, 2) AS rx_gib,
+           ROUND(SUM(delta_out_bytes)/1073741824.0, 2) AS tx_gib
+    FROM samples
+    WHERE ts >= strftime('%s','now','localtime','start of month','utc')
+    GROUP BY period
+    ORDER BY period DESC
+    LIMIT 31;
+  " > "$WWW/day.csv"
+
+  sqlite3 -header -csv "$DB" "
+    SELECT strftime('%Y-%m', ts,'unixepoch','localtime') AS period,
+           ROUND(SUM(delta_bytes)/1073741824.0, 2) AS total_gib,
+           ROUND(SUM(delta_in_bytes)/1073741824.0, 2) AS rx_gib,
+           ROUND(SUM(delta_out_bytes)/1073741824.0, 2) AS tx_gib
+    FROM samples
+    WHERE ts >= strftime('%s','now','localtime','start of year','utc')
+    GROUP BY period
+    ORDER BY period DESC
+    LIMIT 12;
+  " > "$WWW/month.csv"
+
+  sqlite3 -header -csv "$DB" "
+    SELECT strftime('%Y', ts,'unixepoch','localtime') AS period,
+           ROUND(SUM(delta_bytes)/1073741824.0, 2) AS total_gib,
+           ROUND(SUM(delta_in_bytes)/1073741824.0, 2) AS rx_gib,
+           ROUND(SUM(delta_out_bytes)/1073741824.0, 2) AS tx_gib
+    FROM samples
+    WHERE ts >= 0
+    GROUP BY period
+    ORDER BY period DESC;
+  " > "$WWW/year.csv"
+
+  cp "$WWW/day.csv" "$WWW/daily.csv"
+
+  TODAY_TOTAL_GIB="$(sqlite_exec "SELECT COALESCE(ROUND(SUM(delta_bytes)/1073741824.0,2),0) FROM samples WHERE ts >= strftime('%s','now','localtime','start of day','utc');")"
+  TODAY_RX_GIB="$(sqlite_exec "SELECT COALESCE(ROUND(SUM(delta_in_bytes)/1073741824.0,2),0) FROM samples WHERE ts >= strftime('%s','now','localtime','start of day','utc');")"
+  TODAY_TX_GIB="$(sqlite_exec "SELECT COALESCE(ROUND(SUM(delta_out_bytes)/1073741824.0,2),0) FROM samples WHERE ts >= strftime('%s','now','localtime','start of day','utc');")"
+  MONTH_TOTAL_GIB="$(sqlite_exec "SELECT COALESCE(ROUND(SUM(delta_bytes)/1073741824.0,2),0) FROM samples WHERE ts >= strftime('%s','now','localtime','start of month','utc');")"
+  MONTH_RX_GIB="$(sqlite_exec "SELECT COALESCE(ROUND(SUM(delta_in_bytes)/1073741824.0,2),0) FROM samples WHERE ts >= strftime('%s','now','localtime','start of month','utc');")"
+  MONTH_TX_GIB="$(sqlite_exec "SELECT COALESCE(ROUND(SUM(delta_out_bytes)/1073741824.0,2),0) FROM samples WHERE ts >= strftime('%s','now','localtime','start of month','utc');")"
+  YEAR_TOTAL_GIB="$(sqlite_exec "SELECT COALESCE(ROUND(SUM(delta_bytes)/1073741824.0,2),0) FROM samples WHERE ts >= strftime('%s','now','localtime','start of year','utc');")"
+  YEAR_RX_GIB="$(sqlite_exec "SELECT COALESCE(ROUND(SUM(delta_in_bytes)/1073741824.0,2),0) FROM samples WHERE ts >= strftime('%s','now','localtime','start of year','utc');")"
+  YEAR_TX_GIB="$(sqlite_exec "SELECT COALESCE(ROUND(SUM(delta_out_bytes)/1073741824.0,2),0) FROM samples WHERE ts >= strftime('%s','now','localtime','start of year','utc');")"
+  SAMPLES="$(sqlite_exec "SELECT COUNT(*) FROM samples;")"
+  SAMPLES_DAY="$(sqlite_exec "SELECT COUNT(*) FROM samples WHERE ts >= strftime('%s','now','localtime','start of day','utc');")"
+  SAMPLES_MONTH="$(sqlite_exec "SELECT COUNT(*) FROM samples WHERE ts >= strftime('%s','now','localtime','start of month','utc');")"
+  SAMPLES_YEAR="$(sqlite_exec "SELECT COUNT(*) FROM samples WHERE ts >= strftime('%s','now','localtime','start of year','utc');")"
+  DB_SIZE_BYTES="$(wc -c < "$DB" 2>/dev/null || echo 0)"
+  DB_SIZE_BYTES="$(printf '%s' "$DB_SIZE_BYTES" | tr -cd '0-9')"
+  [ -n "$DB_SIZE_BYTES" ] || DB_SIZE_BYTES=0
+  UPDATED_LOCAL="$(date '+%Y-%m-%d %H:%M:%S %z')"
+
+  {
+    echo "today_total_gib=$TODAY_TOTAL_GIB"
+    echo "today_rx_gib=$TODAY_RX_GIB"
+    echo "today_tx_gib=$TODAY_TX_GIB"
+    echo "month_total_gib=$MONTH_TOTAL_GIB"
+    echo "month_rx_gib=$MONTH_RX_GIB"
+    echo "month_tx_gib=$MONTH_TX_GIB"
+    echo "year_total_gib=$YEAR_TOTAL_GIB"
+    echo "year_rx_gib=$YEAR_RX_GIB"
+    echo "year_tx_gib=$YEAR_TX_GIB"
+    echo "samples=$SAMPLES"
+    echo "samples_day=$SAMPLES_DAY"
+    echo "samples_month=$SAMPLES_MONTH"
+    echo "samples_year=$SAMPLES_YEAR"
+    echo "db_size_bytes=$DB_SIZE_BYTES"
+    echo "updated_local=$UPDATED_LOCAL"
+  } > "$WWW/info.txt"
+
+  render_api
+}
+
 start_http_server() {
   SETTINGS_PATH_ENV="$SETTINGS_PATH" WWW_DIR="$WWW" STATIC_DIR_ENV="$SCRIPT_DIR" HTTP_PORT_ENV="$HTTP_PORT" EFFECTIVE_POLL_INTERVAL_ENV="$ACTIVE_POLL_INTERVAL" "$SCRIPT_DIR/server" &
 }
