@@ -73,29 +73,30 @@ parse_interval_to_sec() {
   return 0
 }
 
+LAST_SETTINGS_MOD=""
+LAST_POLL_INTERVAL=""
+
 read_runtime_poll_interval() {
   if [ ! -f "$SETTINGS_PATH" ]; then
     return 1
   fi
 
-  V="$(SETTINGS_PATH_ENV="$SETTINGS_PATH" python3 - <<'PY'
-import json
-import os
-from pathlib import Path
+  MOD_TIME="$(stat -c %Y "$SETTINGS_PATH" 2>/dev/null || echo "")"
+  if [ -n "$MOD_TIME" ] && [ "$MOD_TIME" = "$LAST_SETTINGS_MOD" ]; then
+    if [ -n "$LAST_POLL_INTERVAL" ]; then
+      printf '%s\n' "$LAST_POLL_INTERVAL"
+      return 0
+    fi
+  fi
 
-p = Path(os.environ["SETTINGS_PATH_ENV"])
-try:
-    data = json.loads(p.read_text(encoding="utf-8"))
-except Exception:
-    print("")
-    raise SystemExit(0)
-v = data.get("poll_interval", "")
-print(v if isinstance(v, str) else "")
-PY
-)"
-  [ -n "$V" ] || return 1
-  printf '%s\n' "$V"
-  return 0
+  V="$(sed -n 's/.*"poll_interval"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' "$SETTINGS_PATH" 2>/dev/null || true)"
+  if [ -n "$V" ]; then
+    LAST_SETTINGS_MOD="$MOD_TIME"
+    LAST_POLL_INTERVAL="$V"
+    printf '%s\n' "$V"
+    return 0
+  fi
+  return 1
 }
 
 resolve_poll_interval() {
@@ -277,24 +278,31 @@ CREATE INDEX IF NOT EXISTS idx_samples_ts ON samples(ts);
 }
 
 backfill_deltas() {
-  PREV_IN=""
-  PREV_OUT=""
+  # Verificăm dacă este nevoie de backfill
+  NEED_BACKFILL="$(sqlite_exec "SELECT COUNT(*) FROM samples WHERE delta_in_bytes IS NULL OR delta_out_bytes IS NULL;")"
+  if [ "$NEED_BACKFILL" = "0" ]; then
+    return 0
+  fi
 
-  sqlite3 -separator '|' "$DB" "SELECT id,in_octets,out_octets FROM samples ORDER BY id;" | while IFS='|' read -r ID CUR_IN CUR_OUT; do
-    if [ -z "$PREV_IN" ]; then
-      DIN=0
-      DOUT=0
-    else
-      if [ "$CUR_IN" -ge "$PREV_IN" ]; then DIN=$((CUR_IN - PREV_IN)); else DIN=$CUR_IN; fi
-      if [ "$CUR_OUT" -ge "$PREV_OUT" ]; then DOUT=$((CUR_OUT - PREV_OUT)); else DOUT=$CUR_OUT; fi
-    fi
-
-    DBYTES=$((DIN + DOUT))
-    sqlite3 "$DB" "UPDATE samples SET delta_in_bytes=$DIN, delta_out_bytes=$DOUT, delta_bytes=$DBYTES WHERE id=$ID;"
-
-    PREV_IN=$CUR_IN
-    PREV_OUT=$CUR_OUT
-  done
+  # Executăm actualizarea bulk în mod ultra-rapid într-o singură tranzacție
+  sqlite_exec "
+    WITH lagged AS (
+      SELECT id,
+             in_octets,
+             out_octets,
+             LAG(in_octets) OVER (ORDER BY id) as prev_in,
+             LAG(out_octets) OVER (ORDER BY id) as prev_out
+      FROM samples
+    )
+    UPDATE samples
+    SET delta_in_bytes = CASE WHEN prev_in IS NULL THEN 0 WHEN samples.in_octets >= prev_in THEN samples.in_octets - prev_in ELSE samples.in_octets END,
+        delta_out_bytes = CASE WHEN prev_out IS NULL THEN 0 WHEN samples.out_octets >= prev_out THEN samples.out_octets - prev_out ELSE samples.out_octets END,
+        delta_bytes = (CASE WHEN prev_in IS NULL THEN 0 WHEN samples.in_octets >= prev_in THEN samples.in_octets - prev_in ELSE samples.in_octets END) +
+                      (CASE WHEN prev_out IS NULL THEN 0 WHEN samples.out_octets >= prev_out THEN samples.out_octets - prev_out ELSE samples.out_octets END)
+    FROM lagged
+    WHERE samples.id = lagged.id
+      AND (samples.delta_in_bytes IS NULL OR samples.delta_out_bytes IS NULL);
+  "
 }
 
 render_api() {
