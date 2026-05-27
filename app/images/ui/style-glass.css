@@ -5,8 +5,8 @@
       --border: rgba(148, 163, 184, 0.2);
       --text: #0f172a;
       --muted: #475569;
-      --blue: #5c6e88;
-      --bar-max: #334155;
+      --blue: #3b82f6;
+      --bar-max: #10b981;
       --table-head: rgba(255, 255, 255, 0.35);
       --table-border: rgba(15, 23, 42, 0.05);
       --bar-bg: rgba(15, 23, 42, 0.05);
@@ -25,27 +25,27 @@
     }
 
     html[data-theme="dark"] {
-      --bg: #0f131e;
-      --card: rgba(28, 35, 51, 0.45);
-      --card-strong: rgba(36, 45, 66, 0.55);
-      --border: rgba(255, 255, 255, 0.05);
-      --text: #f1f5f9;
-      --muted: #64748b;
-      --blue: #5c6e88;
-      --bar-max: #94a3b8;
-      --table-head: rgba(17, 24, 39, 0.3);
-      --table-border: rgba(255, 255, 255, 0.03);
-      --bar-bg: rgba(255, 255, 255, 0.04);
-      --glass-blur: blur(30px) saturate(1.5);
+      --bg: #0b0f19;
+      --card: rgba(18, 22, 35, 0.42); /* Gorgeous high-fidelity translucent dark grey */
+      --card-strong: rgba(255, 255, 255, 0.06);
+      --border: rgba(255, 255, 255, 0.08);
+      --text: #f8fafc;
+      --muted: #94a3b8;
+      --blue: #38bdf8;
+      --bar-max: #10b981;
+      --table-head: rgba(0, 0, 0, 0.2);
+      --table-border: rgba(255, 255, 255, 0.04);
+      --bar-bg: rgba(255, 255, 255, 0.08);
+      --glass-blur: blur(40px) saturate(1.7);
       --glass-shadow: 
-        0 30px 60px -15px rgba(0, 0, 0, 0.65), 
-        0 0px 1px 1px rgba(255, 255, 255, 0.06);
+        0 40px 80px -15px rgba(0, 0, 0, 0.75), 
+        0 0px 1px 1px rgba(255, 255, 255, 0.08);
       --glass-inset: 
-        inset 1px 1px 1px 0px rgba(255, 255, 255, 0.06),
-        inset -1px -1px 1px 0px rgba(0, 0, 0, 0.15);
-      --overlay-dim: rgba(0, 0, 0, 0.35);
-      --overlay-a: rgba(30, 41, 59, 0.3);
-      --overlay-b: rgba(15, 23, 42, 0.3);
+        inset 1px 1px 1px 0px rgba(255, 255, 255, 0.08),
+        inset -1px -1px 1px 0px rgba(0, 0, 0, 0.2);
+      --overlay-dim: rgba(0, 0, 0, 0.4);
+      --overlay-a: rgba(255, 255, 255, 0.02);
+      --overlay-b: rgba(255, 255, 255, 0.01);
       --wallpaper-url: none;
       --glow-accent: rgba(255, 255, 255, 0.08);
     }
@@ -55,10 +55,7 @@
     html[data-font-size="100"] { --base-font-size: 14px; --font-scale: 1.25; }
 
     html {
-      background:
-        radial-gradient(circle at 80% 20%, rgba(28, 36, 56, 0.95), transparent 50%),
-        radial-gradient(circle at 20% 80%, rgba(18, 25, 41, 0.95), transparent 60%),
-        linear-gradient(135deg, #0e121d 0%, #080b12 100%);
+      background: url('/images/ui/bg-glass.jpg') center / cover no-repeat fixed !important;
     }
 
     body {
@@ -216,6 +213,15 @@
       letter-spacing: 0.08em;
       color: var(--muted);
     }
+    .kpi-data-label {
+      display: block;
+      font-size: 0.74em;
+      font-weight: 500;
+      color: var(--muted);
+      margin-bottom: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
     .kpi .val {
       font-size: 1.95em;
       font-weight: 700;
@@ -224,30 +230,43 @@
       line-height: 1;
     }
     .kpi .sub {
-      font-size: 0.82em;
+      font-size: 0.8em;
       font-weight: 500;
       color: var(--muted);
       margin-top: 12px;
       display: flex;
-      gap: 6px;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 4px;
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+      padding-top: 10px;
+    }
+    .kpi .sub span {
+      display: flex;
       align-items: center;
-      border-top: 1px solid rgba(255, 255, 255, 0.04);
-      padding-top: 8px;
+      gap: 4px;
+    }
+    .sub-sep {
+      display: none !important;
     }
     html[data-theme="light"] .kpi .sub {
       border-top: 1px solid rgba(0, 0, 0, 0.04);
     }
 
-    /* Main Table Glass Panel */
+    /* Main Table Glass Panel (Transparent to remove double-layering) */
     .card {
-      background: rgba(255, 255, 255, 0.01);
-      border: 1px solid var(--border);
-      border-radius: 20px;
-      padding: 24px;
-      box-shadow: var(--glass-inset);
+      background: transparent !important;
+      border: 0 !important;
+      border-radius: 0 !important;
+      padding: 0 !important;
+      box-shadow: none !important;
+      backdrop-filter: none !important;
     }
     html[data-theme="light"] .card {
-      background: rgba(255, 255, 255, 0.15);
+      background: transparent !important;
+      border: 0 !important;
+      box-shadow: none !important;
+      backdrop-filter: none !important;
     }
 
     /* Pills Tab Layout */
@@ -255,25 +274,25 @@
       display: flex;
       gap: 4px;
       margin-bottom: 20px;
-      background: rgba(0, 0, 0, 0.04);
-      padding: 3px;
-      border-radius: 999px;
+      background: rgba(0, 0, 0, 0.15) !important;
+      padding: 4px !important;
+      border-radius: 12px !important;
       width: fit-content;
-      border: 1px solid var(--table-border);
+      border: 1px solid rgba(255, 255, 255, 0.04) !important;
     }
     html[data-theme="dark"] .tabs {
-      background: rgba(255, 255, 255, 0.02);
-      border: 1px solid rgba(255, 255, 255, 0.05);
+      background: rgba(0, 0, 0, 0.15) !important;
+      border: 1px solid rgba(255, 255, 255, 0.04) !important;
     }
 
     .tab {
       border: 0;
       background: transparent;
-      color: var(--muted);
-      border-radius: 999px;
-      padding: 6px 18px;
+      color: rgba(255, 255, 255, 0.5) !important;
+      border-radius: 8px !important;
+      padding: 6px 16px;
       min-height: 32px;
-      font-size: 0.9em;
+      font-size: 0.85em;
       font-weight: 600;
       cursor: pointer;
       box-shadow: none;
@@ -281,19 +300,19 @@
     }
 
     .tab:hover {
-      color: var(--text);
+      color: rgba(255, 255, 255, 0.8) !important;
     }
 
     .tab.active {
-      background: var(--card-strong);
-      color: var(--text);
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05), var(--glass-inset);
-      border: 0.5px solid var(--border);
+      background: rgba(255, 255, 255, 0.08) !important;
+      color: #ffffff !important;
+      box-shadow: inset 1px 1px 1px rgba(255, 255, 255, 0.05), 0 2px 6px rgba(0, 0, 0, 0.15) !important;
+      border: 1px solid rgba(255, 255, 255, 0.08) !important;
     }
     html[data-theme="dark"] .tab.active {
-      background: rgba(255, 255, 255, 0.08);
-      color: #ffffff;
-      border: 0.5px solid rgba(255, 255, 255, 0.08);
+      background: rgba(255, 255, 255, 0.08) !important;
+      color: #ffffff !important;
+      border: 1px solid rgba(255, 255, 255, 0.08) !important;
     }
 
     /* Elegant Tables */
@@ -373,54 +392,86 @@
     .detail-period { padding-left: 28px; color: var(--muted); }
     .num { text-align: right; font-variant-numeric: tabular-nums; font-weight: 600; }
 
-    /* Muted Relative Progress Bars */
+    /* Muted Relative Progress Bars (Thicker and premium) */
     .bar-wrap {
-      width: 120px;
+      width: 100px;
       max-width: 100%;
-      height: 4px;
+      height: 8px;
       border-radius: 999px;
-      background: var(--bar-bg);
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.05);
       overflow: hidden;
       display: inline-block;
       vertical-align: middle;
+      box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.3);
     }
 
     .bar {
       height: 100%;
-      background: var(--blue);
+      background: linear-gradient(90deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.85) 100%);
+      box-shadow: 0 0 8px rgba(255, 255, 255, 0.5);
       border-radius: 999px;
-      opacity: 0.55;
-      transition: opacity 0.2s ease;
+      opacity: 0.75;
+      transition: opacity 0.2s ease, width 0.3s ease;
     }
 
     tbody tr:hover .bar {
-      opacity: 0.85;
+      opacity: 1;
     }
 
-    /* Minimalist status dot indicators */
+    /* Pulsing status indicators */
     .status-cell {
       text-align: right;
+      padding-right: 24px !important;
     }
-    .status-dot {
-      display: inline-block;
-      width: 6px;
-      height: 6px;
-      background-color: #10b981;
-      border-radius: 50%;
-      box-shadow: 0 0 8px rgba(16, 185, 129, 0.5);
-      vertical-align: middle;
+    .status-glass-pulse {
+      display: inline-flex;
+      align-items: center;
+      justify-content: flex-end;
+      width: 22px;
+      height: 14px;
+    }
+    
+    /* Elegant Wave Pulsing Animations */
+    .pulse-dot {
+      animation: statusDotPulse 2s infinite ease-in-out;
+    }
+    
+    .pulse-wave-inner {
+      animation: statusWaveInner 2s infinite ease-in-out;
+      transform-origin: 11px 7px;
+    }
+    
+    .pulse-wave-outer {
+      animation: statusWaveOuter 2s infinite ease-in-out;
+      transform-origin: 11px 7px;
+    }
+    
+    @keyframes statusDotPulse {
+      0%, 100% { opacity: 0.8; filter: drop-shadow(0 0 3px #10b981); }
+      50% { opacity: 1; filter: drop-shadow(0 0 6px #10b981); }
+    }
+    
+    @keyframes statusWaveInner {
+      0%, 100% { opacity: 0.3; transform: scale(0.95); }
+      50% { opacity: 0.8; transform: scale(1.05); }
+    }
+    
+    @keyframes statusWaveOuter {
+      0%, 100% { opacity: 0.15; transform: scale(0.9); }
+      50% { opacity: 0.5; transform: scale(1.1); }
     }
 
     /* Footer Metadata details */
     .meta {
-      margin-top: 14px;
+      margin-top: 24px;
       color: var(--muted);
-      font-size: 0.88em;
+      font-size: 0.82em;
       font-weight: 500;
-      background: var(--table-head);
+      background: rgba(0, 0, 0, 0.15);
       border: 1px solid var(--table-border);
       border-radius: 12px;
-      padding: 10px 14px;
+      padding: 10px 18px;
       box-shadow: var(--glass-inset);
       display: flex;
       flex-wrap: wrap;
@@ -435,12 +486,12 @@
       align-items: center;
       gap: 16px;
       padding-bottom: 24px;
-      border-bottom: 1px solid var(--table-border);
+      border-bottom: 1.5px solid rgba(255, 255, 255, 0.05) !important;
     }
 
     .controls {
       display: flex;
-      gap: 6px;
+      gap: 8px;
       align-items: center;
       flex-wrap: wrap;
       justify-content: flex-end;
@@ -452,9 +503,11 @@
       gap: 8px;
     }
     .control > span {
-      font-weight: 600;
-      font-size: 0.88em;
-      color: var(--muted);
+      font-weight: 500;
+      font-size: 0.78em;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: rgba(255, 255, 255, 0.45) !important;
     }
 
     .theme-dropdown, .lang-dropdown {
@@ -465,29 +518,31 @@
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      background: var(--card-strong);
-      color: var(--text);
-      padding: 5px 12px;
-      min-height: 34px;
+      border: 1px solid rgba(255, 255, 255, 0.1) !important;
+      border-radius: 10px !important;
+      background: rgba(255, 255, 255, 0.03) !important;
+      color: rgba(255, 255, 255, 0.9) !important;
+      padding: 6px 14px !important;
+      min-height: 36px;
       font: inherit;
-      font-weight: 600;
-      font-size: 0.9em;
+      font-weight: 500;
+      font-size: 0.88em;
       cursor: pointer;
-      backdrop-filter: var(--glass-blur);
-      -webkit-backdrop-filter: var(--glass-blur);
-      box-shadow: var(--glass-inset);
+      backdrop-filter: blur(20px) !important;
+      -webkit-backdrop-filter: blur(20px) !important;
+      box-shadow: inset 1px 1px 1px rgba(255, 255, 255, 0.1), 0 4px 12px rgba(0, 0, 0, 0.15) !important;
       transition: all 0.2s ease;
     }
 
     .theme-toggle:hover, .lang-toggle:hover {
-      border-color: rgba(255, 255, 255, 0.15);
-      background: var(--card);
+      background: rgba(255, 255, 255, 0.08) !important;
+      border-color: rgba(255, 255, 255, 0.2) !important;
+      color: #ffffff !important;
     }
     html[data-theme="light"] .theme-toggle:hover,
     html[data-theme="light"] .lang-toggle:hover {
-      border-color: rgba(0, 0, 0, 0.15);
+      border-color: rgba(0, 0, 0, 0.15) !important;
+      background: rgba(0, 0, 0, 0.05) !important;
     }
 
     .theme-toggle img, .lang-toggle img {

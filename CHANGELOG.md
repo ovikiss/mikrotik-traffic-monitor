@@ -2,6 +2,18 @@
 
 All notable changes to the MikroTik Traffic Monitor project will be documented in this file.
 
+## [0.7.8] - 2026-05-27
+### Added
+- **Pulsing Radio Wave Status Icon**: Implemented a highly-detailed SVG wireframe pulsing signal wave `((•))` under the `STATUS` column in the Glass theme, replacing the simple solid green dot.
+- **Sparklines Redesign (Bar & Waves)**: Overhauled inline SVG sparkline drawing to render high-fidelity, prominent SVGs (110x36px). "Total Today" displays an elegant 8-bar rounded histogram filled with a white-to-silver gradient, while "Current Month" and "Current Year" render smooth horizontal-tangent cubic bezier curves with gradient area fills. Array padding was added to prevent empty sparklines on fresh databases.
+- **Stacked KPI Sub-items**: Reorganized "RX" and "TX" to stack vertically and display user-friendly translated labels "Download" and "Upload", hiding the visual text separators in the Glass theme.
+
+### Fixed
+- **Wavy Background Wallpaper**: Loaded the actual high-fidelity wavy abstract dark slate wallpaper (`bg-glass.jpg`) on the `html` element of the page.
+- **Glassy Dropdowns & Controls**: Redesigned all topbar controls and dropdown toggles to have custom border-radius, backdrop-blur, and white-silver semi-transparent borders for a premium, frosted glassy appearance.
+- **Double-Layering Fix**: Removed the secondary card background and border around the main table grid so it floats directly on the outer glass container, resolving panel layering issues.
+- **Translucent Pill Tabs**: Upgraded tabs with semi-transparent borders and glassy light overlays.
+
 ## [0.7.6] - 2026-05-27
 ### Fixed
 - **Color Accuracy**: Adjusted card background opacity and colors to use the exact warm slate-blue/charcoal tint (`rgba(28, 35, 51, 0.45)`) from the approved mockup.

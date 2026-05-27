@@ -37,5 +37,6 @@
   "fontCurrent": "Standard",
   "fontLarge": "Large",
   "fontSaved": "Font size saved",
-  "dbSize": "DB size"
+  "dbSize": "DB size",
+  "dataLabel": "Data"
 }

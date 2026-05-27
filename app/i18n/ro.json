@@ -37,5 +37,6 @@
   "fontCurrent": "Standard",
   "fontLarge": "Mare",
   "fontSaved": "Mărime font salvată",
-  "dbSize": "Mărime DB"
+  "dbSize": "Mărime DB",
+  "dataLabel": "Date"
 }

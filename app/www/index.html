@@ -117,30 +117,39 @@
         <span class="label" id="label-day">Total Today</span>
       </div>
       <div class="kpi-body">
-        <span class="val" id="kpi-day">0.00 GiB</span>
+        <div class="kpi-value-block">
+          <span class="kpi-data-label" id="kpi-data-label-day">Data:</span>
+          <span class="val" id="kpi-day">0.00 GiB</span>
+        </div>
         <div class="kpi-sparkline" id="sparkline-day"></div>
       </div>
-      <div class="sub"><span id="kpi-day-rx">RX: 0.00 GiB</span> | <span id="kpi-day-tx">TX: 0.00 GiB</span></div>
+      <div class="sub"><span id="kpi-day-rx">RX: 0.00 GiB</span> <span class="sub-sep">|</span> <span id="kpi-day-tx">TX: 0.00 GiB</span></div>
     </div>
     <div class="kpi">
       <div class="kpi-header">
         <span class="label" id="label-month">Current Month Total</span>
       </div>
       <div class="kpi-body">
-        <span class="val" id="kpi-month">0.00 GiB</span>
+        <div class="kpi-value-block">
+          <span class="kpi-data-label" id="kpi-data-label-month">Data:</span>
+          <span class="val" id="kpi-month">0.00 GiB</span>
+        </div>
         <div class="kpi-sparkline" id="sparkline-month"></div>
       </div>
-      <div class="sub"><span id="kpi-month-rx">RX: 0.00 GiB</span> | <span id="kpi-month-tx">TX: 0.00 GiB</span></div>
+      <div class="sub"><span id="kpi-month-rx">RX: 0.00 GiB</span> <span class="sub-sep">|</span> <span id="kpi-month-tx">TX: 0.00 GiB</span></div>
     </div>
     <div class="kpi">
       <div class="kpi-header">
         <span class="label" id="label-year">Current Year Total</span>
       </div>
       <div class="kpi-body">
-        <span class="val" id="kpi-year">0.00 GiB</span>
+        <div class="kpi-value-block">
+          <span class="kpi-data-label" id="kpi-data-label-year">Data:</span>
+          <span class="val" id="kpi-year">0.00 GiB</span>
+        </div>
         <div class="kpi-sparkline" id="sparkline-year"></div>
       </div>
-      <div class="sub"><span id="kpi-year-rx">RX: 0.00 GiB</span> | <span id="kpi-year-tx">TX: 0.00 GiB</span></div>
+      <div class="sub"><span id="kpi-year-rx">RX: 0.00 GiB</span> <span class="sub-sep">|</span> <span id="kpi-year-tx">TX: 0.00 GiB</span></div>
     </div>
   </div>
 
@@ -216,7 +225,8 @@ const I18N_FALLBACK = {
   samples: 'Samples',
   lastUpdate: 'Last update',
   dbSize: 'DB size',
-  loadError: 'Load error'
+  loadError: 'Load error',
+  dataLabel: 'Data'
 };
 
 const TAB_LABEL_KEY = { day: 'day', month: 'month', year: 'year' };
@@ -698,6 +708,12 @@ function applyLanguage() {
   document.getElementById('tab-month').textContent = t('month');
   document.getElementById('tab-year').textContent = t('year');
   
+  if (document.getElementById('kpi-data-label-day')) {
+    document.getElementById('kpi-data-label-day').textContent = t('dataLabel') + ':';
+    document.getElementById('kpi-data-label-month').textContent = t('dataLabel') + ':';
+    document.getElementById('kpi-data-label-year').textContent = t('dataLabel') + ':';
+  }
+  
   const headerRow = document.getElementById('table-header-row');
   if (headerRow) {
     if (state.themeStyle === 'glass') {
@@ -755,39 +771,116 @@ function applyFontSize() {
 function drawSparkline(elementId, values) {
   const el = document.getElementById(elementId);
   if (!el) return;
-  if (state.themeStyle !== 'glass' || !values || values.length < 2) {
+  if (state.themeStyle !== 'glass') {
     el.innerHTML = '';
     return;
   }
-  const width = 80;
-  const height = 22;
-  const min = Math.min(...values);
-  const max = Math.max(...values);
+
+  // Ensure we have a nice visual dataset even if database is fresh
+  let dataPoints = values ? [...values] : [];
+  const targetLength = elementId === 'sparkline-day' ? 8 : 6;
+  if (dataPoints.length === 0) {
+    dataPoints = Array(targetLength).fill(0);
+  } else if (dataPoints.length === 1) {
+    dataPoints = [0, 0, 0, 0, 0, dataPoints[0]];
+  } else if (dataPoints.length < targetLength) {
+    while (dataPoints.length < targetLength) {
+      dataPoints.unshift(0);
+    }
+  }
+
+  const width = 110;
+  const height = 36;
+  const min = Math.min(...dataPoints);
+  const max = Math.max(...dataPoints);
   const range = max - min || 1;
-  
-  const points = values.map((val, idx) => {
-    const x = (idx / (values.length - 1)) * width;
-    const y = height - ((val - min) / range) * height;
-    return `${x},${y}`;
-  }).join(' ');
-  
+
+  if (elementId === 'sparkline-day') {
+    // Bar chart (histogram) to match "TOTAL TODAY" card from the mockup
+    const barCount = dataPoints.length;
+    const spacing = 3;
+    const barWidth = (width - (spacing * (barCount - 1))) / barCount;
+    let rectsHtml = '';
+    dataPoints.forEach((val, idx) => {
+      const x = idx * (barWidth + spacing);
+      const h = Math.max(3, ((val - min) / range) * (height - 4));
+      const y = height - h;
+      rectsHtml += `<rect x="${x}" y="${y}" width="${barWidth}" height="${h}" rx="2" fill="url(#sparkline-bar-grad)" />`;
+    });
+
+    el.innerHTML = `
+      <svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" style="overflow: visible; display: block;">
+        <defs>
+          <linearGradient id="sparkline-bar-grad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="rgba(255, 255, 255, 0.75)" />
+            <stop offset="100%" stop-color="rgba(255, 255, 255, 0.15)" />
+          </linearGradient>
+        </defs>
+        ${rectsHtml}
+      </svg>
+    `;
+    return;
+  }
+
+  // Smooth cubic bezier wave curve to match "CURRENT MONTH" & "CURRENT YEAR" cards from the mockup
+  const points = dataPoints.map((val, idx) => {
+    const x = (idx / (dataPoints.length - 1)) * width;
+    const y = height - ((val - min) / range) * (height - 4) - 2;
+    return { x, y };
+  });
+
+  const getBezierPath = (pts) => {
+    if (pts.length < 2) return '';
+    let d = `M ${pts[0].x} ${pts[0].y}`;
+    for (let i = 0; i < pts.length - 1; i++) {
+      const p0 = pts[i];
+      const p1 = pts[i+1];
+      const cpX1 = p0.x + (p1.x - p0.x) / 2;
+      const cpY1 = p0.y;
+      const cpX2 = p0.x + (p1.x - p0.x) / 2;
+      const cpY2 = p1.y;
+      d += ` C ${cpX1} ${cpY1}, ${cpX2} ${cpY2}, ${p1.x} ${p1.y}`;
+    }
+    return d;
+  };
+
+  const strokePath = getBezierPath(points);
+  const fillPath = `${strokePath} L ${width} ${height} L 0 ${height} Z`;
+
   el.innerHTML = `
     <svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" style="overflow: visible; display: block;">
-      <polyline fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" points="${points}" />
+      <defs>
+        <linearGradient id="sparkline-wave-grad-${elementId}" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="rgba(255, 255, 255, 0.45)" />
+          <stop offset="100%" stop-color="rgba(255, 255, 255, 0.0)" />
+        </linearGradient>
+      </defs>
+      <path d="${fillPath}" fill="url(#sparkline-wave-grad-${elementId})" />
+      <path d="${strokePath}" fill="none" stroke="rgba(255, 255, 255, 0.8)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
     </svg>
   `;
 }
 
 function renderKpis() {
+  const isGlass = state.themeStyle === 'glass';
   document.getElementById('kpi-day').textContent = fmtTraffic(state.info.today_total_gib);
   document.getElementById('kpi-month').textContent = fmtTraffic(state.info.month_total_gib);
   document.getElementById('kpi-year').textContent = fmtTraffic(state.info.year_total_gib);
-  document.getElementById('kpi-day-rx').innerHTML = `${uiMetricIcon('rx')}RX: ${fmtTraffic(state.info.today_rx_gib)}`;
-  document.getElementById('kpi-day-tx').innerHTML = `${uiMetricIcon('tx')}TX: ${fmtTraffic(state.info.today_tx_gib)}`;
-  document.getElementById('kpi-month-rx').innerHTML = `${uiMetricIcon('rx')}RX: ${fmtTraffic(state.info.month_rx_gib)}`;
-  document.getElementById('kpi-month-tx').innerHTML = `${uiMetricIcon('tx')}TX: ${fmtTraffic(state.info.month_tx_gib)}`;
-  document.getElementById('kpi-year-rx').innerHTML = `${uiMetricIcon('rx')}RX: ${fmtTraffic(state.info.year_rx_gib)}`;
-  document.getElementById('kpi-year-tx').innerHTML = `${uiMetricIcon('tx')}TX: ${fmtTraffic(state.info.year_tx_gib)}`;
+
+  const rxDayHtml = isGlass ? `${t('download')}: ${fmtTraffic(state.info.today_rx_gib)}` : `${uiMetricIcon('rx')}RX: ${fmtTraffic(state.info.today_rx_gib)}`;
+  const txDayHtml = isGlass ? `${t('upload')}: ${fmtTraffic(state.info.today_tx_gib)}` : `${uiMetricIcon('tx')}TX: ${fmtTraffic(state.info.today_tx_gib)}`;
+  document.getElementById('kpi-day-rx').innerHTML = rxDayHtml;
+  document.getElementById('kpi-day-tx').innerHTML = txDayHtml;
+
+  const rxMonthHtml = isGlass ? `${t('download')}: ${fmtTraffic(state.info.month_rx_gib)}` : `${uiMetricIcon('rx')}RX: ${fmtTraffic(state.info.month_rx_gib)}`;
+  const txMonthHtml = isGlass ? `${t('upload')}: ${fmtTraffic(state.info.month_tx_gib)}` : `${uiMetricIcon('tx')}TX: ${fmtTraffic(state.info.month_tx_gib)}`;
+  document.getElementById('kpi-month-rx').innerHTML = rxMonthHtml;
+  document.getElementById('kpi-month-tx').innerHTML = txMonthHtml;
+
+  const rxYearHtml = isGlass ? `${t('download')}: ${fmtTraffic(state.info.year_rx_gib)}` : `${uiMetricIcon('rx')}RX: ${fmtTraffic(state.info.year_rx_gib)}`;
+  const txYearHtml = isGlass ? `${t('upload')}: ${fmtTraffic(state.info.year_tx_gib)}` : `${uiMetricIcon('tx')}TX: ${fmtTraffic(state.info.year_tx_gib)}`;
+  document.getElementById('kpi-year-rx').innerHTML = rxYearHtml;
+  document.getElementById('kpi-year-tx').innerHTML = txYearHtml;
 
   const dailyTotals = (state.rows.day || []).slice(0, 10).reverse().map(r => r.total_gib);
   const monthlyTotals = (state.rows.month || []).slice(0, 10).reverse().map(r => r.total_gib);
@@ -841,7 +934,17 @@ function renderRows() {
     if (isExpanded) tr.className = 'group-parent-expanded';
     
     if (state.themeStyle === 'glass') {
-      const statusDot = `<span class="status-dot"></span>`;
+      const statusDot = `
+        <span class="status-glass-pulse">
+          <svg class="status-signal-svg" width="22" height="14" viewBox="0 0 22 14" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align: middle; overflow: visible; display: inline-block;">
+            <path d="M3 2C1.5 3.5 1 5.5 1 7C1 8.5 1.5 10.5 3 12" stroke="rgba(255, 255, 255, 0.45)" stroke-width="1.5" stroke-linecap="round" class="pulse-wave-outer" />
+            <path d="M6 4C5.2 4.8 5 5.8 5 7C5 8.2 5.2 9.2 6 10" stroke="rgba(255, 255, 255, 0.7)" stroke-width="1.5" stroke-linecap="round" class="pulse-wave-inner" />
+            <circle cx="11" cy="7" r="2.5" fill="#a7f3d0" class="pulse-dot" style="filter: drop-shadow(0 0 3px #10b981);" />
+            <path d="M16 4C16.8 4.8 17 5.8 17 7C17 8.2 16.8 9.2 16 10" stroke="rgba(255, 255, 255, 0.7)" stroke-width="1.5" stroke-linecap="round" class="pulse-wave-inner" />
+            <path d="M19 2C20.5 3.5 21 5.5 21 7C21 8.5 20.5 10.5 19 12" stroke="rgba(255, 255, 255, 0.45)" stroke-width="1.5" stroke-linecap="round" class="pulse-wave-outer" />
+          </svg>
+        </span>
+      `;
       tr.innerHTML = `
         <td>${prefix}${esc(formatPeriod(state.activeTab, r.period))}</td>
         <td class="num">${esc(fmtTraffic(r.rx_gib))}</td>
@@ -898,7 +1001,17 @@ function renderRows() {
         dtr.className = `detail-row${isFirstDetail ? ' detail-row-first' : ''}${isLastDetail ? ' detail-row-last' : ''}`;
         
         if (state.themeStyle === 'glass') {
-          const statusDot = `<span class="status-dot"></span>`;
+          const statusDot = `
+            <span class="status-glass-pulse">
+              <svg class="status-signal-svg" width="22" height="14" viewBox="0 0 22 14" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align: middle; overflow: visible; display: inline-block;">
+                <path d="M3 2C1.5 3.5 1 5.5 1 7C1 8.5 1.5 10.5 3 12" stroke="rgba(255, 255, 255, 0.45)" stroke-width="1.5" stroke-linecap="round" class="pulse-wave-outer" />
+                <path d="M6 4C5.2 4.8 5 5.8 5 7C5 8.2 5.2 9.2 6 10" stroke="rgba(255, 255, 255, 0.7)" stroke-width="1.5" stroke-linecap="round" class="pulse-wave-inner" />
+                <circle cx="11" cy="7" r="2.5" fill="#a7f3d0" class="pulse-dot" style="filter: drop-shadow(0 0 3px #10b981);" />
+                <path d="M16 4C16.8 4.8 17 5.8 17 7C17 8.2 16.8 9.2 16 10" stroke="rgba(255, 255, 255, 0.7)" stroke-width="1.5" stroke-linecap="round" class="pulse-wave-inner" />
+                <path d="M19 2C20.5 3.5 21 5.5 21 7C21 8.5 20.5 10.5 19 12" stroke="rgba(255, 255, 255, 0.45)" stroke-width="1.5" stroke-linecap="round" class="pulse-wave-outer" />
+              </svg>
+            </span>
+          `;
           dtr.innerHTML = `
             <td class="detail-period">${esc(formatPeriod(isMonthTab ? 'day' : 'month', d.period))}</td>
             <td class="num">${esc(fmtTraffic(d.rx_gib))}</td>
