@@ -331,11 +331,16 @@
       border-collapse: separate;
       border-spacing: 0;
       font-size: 0.95em;
+      table-layout: auto;
     }
 
     th, td {
       padding: 14px 18px;
       border-bottom: 1px solid var(--table-border);
+    }
+
+    td {
+      white-space: nowrap;
     }
 
     th {
@@ -345,7 +350,16 @@
       letter-spacing: 0.06em;
       color: var(--muted);
       background: var(--table-head);
+      white-space: normal;
+      vertical-align: bottom;
     }
+
+    /* Column Width Optimization to prevent wrapping and allocate all extra space to Visual progress bar */
+    table th:nth-child(1), table td:nth-child(1) { width: 1%; }
+    table th:nth-child(2), table td:nth-child(2) { width: 1%; }
+    table th:nth-child(3), table td:nth-child(3) { width: 1%; }
+    table th:nth-child(4), table td:nth-child(4) { width: 1%; }
+    table th:nth-child(5), table td:nth-child(5) { width: auto; }
 
     tr {
       transition: background-color 0.15s ease;
@@ -625,7 +639,14 @@
     }
 
     .text-inherit { font: inherit; color: inherit; }
-    .th-hint { opacity: 0.55; font-weight: normal; font-size: 0.85em; }
+    .th-hint {
+      display: block;
+      font-size: 0.85em;
+      opacity: 0.55;
+      font-weight: normal;
+      white-space: normal;
+      margin-top: 4px;
+    }
 
     @keyframes dropdownFadeIn {
       from { opacity: 0; transform: translateY(-4px); }

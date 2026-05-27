@@ -2,6 +2,14 @@
 
 All notable changes to the MikroTik Traffic Monitor project will be documented in this file.
 
+## [0.8.4] - 2026-05-27
+### Fixed
+- **Optimized Table Layout & Column Distribution**: Completely overhauled the data table layout in the Glass theme to resolve text wrapping and column squeezing:
+  - Added `white-space: nowrap` to table cells (`td`), ensuring that numerical traffic values (like `171.48 GiB` or dates like `27-05-2026`) never wrap or split units onto separate lines.
+  - Styled table header hints (`.th-hint`) to be clean `display: block` elements that allow word wrapping (`white-space: normal`), preventing them from forcing columns to stretch horizontally.
+  - Specified clean proportional column widths: columns 1-4 (`Period`, `Total`, `RX`, `TX`) are set to use exactly the minimum width required (`width: 1%`), allocating all remaining table width (`width: auto`) to the `Visual` progress bar column.
+  - Aligned all table headers nicely using `vertical-align: bottom`.
+
 ## [0.8.3] - 2026-05-27
 ### Fixed
 - **Premium Light Mode Aesthetics & Contrast**: Completely overhauled the Glass theme's light mode to deliver a high-contrast, premium appearance:
