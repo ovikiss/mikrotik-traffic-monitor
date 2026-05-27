@@ -2,6 +2,11 @@
 
 All notable changes to the MikroTik Traffic Monitor project will be documented in this file.
 
+## [0.8.5] - 2026-05-27
+### Fixed
+- **Glass Table Column Balancing**: Rebalanced Glass table column widths so `Period`, `Total`, `RX`, and `TX` have more readable spacing while keeping `Visual` compact.
+- **Removed KPI `Data:` Prefix**: Removed the `Data:`/`Date:` label that was shown above KPI values in all themes, restoring the previous clean card look.
+
 ## [0.8.4] - 2026-05-27
 ### Fixed
 - **Optimized Table Layout & Column Distribution**: Completely overhauled the data table layout in the Glass theme to resolve text wrapping and column squeezing:

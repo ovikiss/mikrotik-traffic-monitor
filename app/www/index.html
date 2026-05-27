@@ -118,7 +118,6 @@
       </div>
       <div class="kpi-body">
         <div class="kpi-value-block">
-          <span class="kpi-data-label" id="kpi-data-label-day">Data:</span>
           <span class="val" id="kpi-day">0.00 GiB</span>
         </div>
         <div class="kpi-sparkline" id="sparkline-day"></div>
@@ -131,7 +130,6 @@
       </div>
       <div class="kpi-body">
         <div class="kpi-value-block">
-          <span class="kpi-data-label" id="kpi-data-label-month">Data:</span>
           <span class="val" id="kpi-month">0.00 GiB</span>
         </div>
         <div class="kpi-sparkline" id="sparkline-month"></div>
@@ -144,7 +142,6 @@
       </div>
       <div class="kpi-body">
         <div class="kpi-value-block">
-          <span class="kpi-data-label" id="kpi-data-label-year">Data:</span>
           <span class="val" id="kpi-year">0.00 GiB</span>
         </div>
         <div class="kpi-sparkline" id="sparkline-year"></div>
@@ -226,7 +223,6 @@ const I18N_FALLBACK = {
   lastUpdate: 'Last update',
   dbSize: 'DB size',
   loadError: 'Load error',
-  dataLabel: 'Data',
   date: 'Date',
   status: 'Status',
   progress: 'Progress'
@@ -710,12 +706,6 @@ function applyLanguage() {
   document.getElementById('tab-day').textContent = t('day');
   document.getElementById('tab-month').textContent = t('month');
   document.getElementById('tab-year').textContent = t('year');
-  
-  if (document.getElementById('kpi-data-label-day')) {
-    document.getElementById('kpi-data-label-day').textContent = t('dataLabel') + ':';
-    document.getElementById('kpi-data-label-month').textContent = t('dataLabel') + ':';
-    document.getElementById('kpi-data-label-year').textContent = t('dataLabel') + ':';
-  }
   
   const headerRow = document.getElementById('table-header-row');
   if (headerRow) {

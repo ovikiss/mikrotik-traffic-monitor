@@ -214,15 +214,6 @@
       letter-spacing: 0.08em;
       color: var(--muted);
     }
-    .kpi-data-label {
-      display: block;
-      font-size: 0.74em;
-      font-weight: 500;
-      color: var(--muted);
-      margin-bottom: 4px;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-    }
     .kpi .val {
       font-size: 1.95em;
       font-weight: 700;
@@ -331,7 +322,7 @@
       border-collapse: separate;
       border-spacing: 0;
       font-size: 0.95em;
-      table-layout: auto;
+      table-layout: fixed;
     }
 
     th, td {
@@ -354,12 +345,12 @@
       vertical-align: bottom;
     }
 
-    /* Column Width Optimization to prevent wrapping and allocate all extra space to Visual progress bar */
-    table th:nth-child(1), table td:nth-child(1) { width: 1%; }
-    table th:nth-child(2), table td:nth-child(2) { width: 1%; }
-    table th:nth-child(3), table td:nth-child(3) { width: 1%; }
-    table th:nth-child(4), table td:nth-child(4) { width: 1%; }
-    table th:nth-child(5), table td:nth-child(5) { width: auto; }
+    /* Rebalanced columns: keep Visual compact and give metrics more room */
+    table th:nth-child(1), table td:nth-child(1) { width: 22%; }
+    table th:nth-child(2), table td:nth-child(2) { width: 16%; }
+    table th:nth-child(3), table td:nth-child(3) { width: 16%; }
+    table th:nth-child(4), table td:nth-child(4) { width: 16%; }
+    table th:nth-child(5), table td:nth-child(5) { width: 30%; }
 
     tr {
       transition: background-color 0.15s ease;
@@ -734,7 +725,6 @@
     }
 
     html[data-theme="light"] .kpi .sub,
-    html[data-theme="light"] .kpi-data-label,
     html[data-theme="light"] .subtitle {
       color: #334155 !important; /* Premium Slate 700 for labels */
     }
