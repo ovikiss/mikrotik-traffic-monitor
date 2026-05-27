@@ -226,7 +226,10 @@ const I18N_FALLBACK = {
   lastUpdate: 'Last update',
   dbSize: 'DB size',
   loadError: 'Load error',
-  dataLabel: 'Data'
+  dataLabel: 'Data',
+  date: 'Date',
+  status: 'Status',
+  progress: 'Progress'
 };
 
 const TAB_LABEL_KEY = { day: 'day', month: 'month', year: 'year' };
@@ -718,12 +721,12 @@ function applyLanguage() {
   if (headerRow) {
     if (state.themeStyle === 'glass') {
       headerRow.innerHTML = `
-        <th id="th-period">DATE</th>
-        <th class="num" id="th-rx">DOWNLOAD</th>
-        <th class="num" id="th-tx">UPLOAD</th>
-        <th class="num" id="th-total">TOTAL</th>
-        <th id="th-status" class="num" style="text-align: right;">STATUS</th>
-        <th id="th-visual">& PROGRESS</th>
+        <th id="th-period">${esc(t('date').toUpperCase())}</th>
+        <th class="num" id="th-rx">${esc(t('download').toUpperCase())}</th>
+        <th class="num" id="th-tx">${esc(t('upload').toUpperCase())}</th>
+        <th class="num" id="th-total">${esc(t('total').toUpperCase())}</th>
+        <th id="th-status" class="num" style="text-align: right;">${esc(t('status').toUpperCase())}</th>
+        <th id="th-visual">& ${esc(t('progress').toUpperCase())}</th>
       `;
     } else {
       headerRow.innerHTML = `

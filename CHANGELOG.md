@@ -2,6 +2,10 @@
 
 All notable changes to the MikroTik Traffic Monitor project will be documented in this file.
 
+## [0.7.9] - 2026-05-27
+### Fixed
+- **Dynamic Table Header Translation**: Resolved an issue where the Glass theme table header columns (`DATE`, `DOWNLOAD`, `UPLOAD`, `TOTAL`, `STATUS`, `& PROGRESS`) were hardcoded in English. They are now dynamically translated using the localization system (e.g. `DATA`, `DESCĂRCARE`, `ÎNCĂRCARE`, `TOTAL`, `STATUS`, `& PROGRES` in Romanian) and correctly formatted in uppercase to match the design aesthetics.
+
 ## [0.7.8] - 2026-05-27
 ### Added
 - **Pulsing Radio Wave Status Icon**: Implemented a highly-detailed SVG wireframe pulsing signal wave `((•))` under the `STATUS` column in the Glass theme, replacing the simple solid green dot.

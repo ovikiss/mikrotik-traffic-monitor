@@ -38,5 +38,8 @@
   "fontLarge": "Large",
   "fontSaved": "Font size saved",
   "dbSize": "DB size",
-  "dataLabel": "Data"
+  "dataLabel": "Data",
+  "date": "Date",
+  "status": "Status",
+  "progress": "Progress"
 }
