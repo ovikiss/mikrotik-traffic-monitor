@@ -1,0 +1,43 @@
+# Changelog
+
+All notable changes to the MikroTik Traffic Monitor project will be documented in this file.
+
+## [0.7.6] - 2026-05-27
+### Fixed
+- **Color Accuracy**: Adjusted card background opacity and colors to use the exact warm slate-blue/charcoal tint (`rgba(28, 35, 51, 0.45)`) from the approved mockup.
+- **Muted Progress Bars**: Set relative traffic progress indicators to a sophisticated, non-strident slate-blue color (`#5c6e88`).
+- **Pulsing Status Dots & Sparklines**: Realigned colors to achieve absolute visual depth and harmony.
+
+## [0.7.5] - 2026-05-27
+### Fixed
+- **HTML Nesting Bug**: Fixed a duplicate closing tag (`</div>`) after the topbar in `index.html` that caused `.dashboard-container` to close prematurely. The outer glass frame now correctly wraps the entire page (Topbar + Divider + Sidebar + Data Table) as a single centered floating panel on desktop, restoring the proper side-by-side layout.
+
+## [0.7.4] - 2026-05-27
+### Changed
+- **Topbar Controls Labels**: Restored the visibility of descriptive text labels (`Temă`, `Mod`, `Mărime font`, `Interval`, `Limbă`) in the Glass theme, maintaining exact visual and functional parity with Modern and Classic layouts.
+
+## [0.7.3] - 2026-05-27
+### Added
+- **Enclosing Glass Container**: Implemented a floating, outer glass frame (`.dashboard-container`) wrapping the entire dashboard.
+- **Dynamic Live Sparklines**: Added inline SVG sparkline trend charts inside the KPI cards, dynamically drawing the last 10 days, months, or years of traffic directly from your live database.
+- **Rearranged Table Columns**: Custom table column layout specifically for the Glass Dashboard theme: `DATE` | `DOWNLOAD` | `UPLOAD` | `TOTAL` | `STATUS` (live pulsing emerald dot) | `& PROGRESS` (thin muted bar).
+### Changed
+- Both Classic and Modern themes styled with reset blocks to be completely untouched by the new enclosing container.
+
+## [0.7.1] - 2026-05-27
+### Added
+- **Minimalist Glass Dashboard Style**: Introduced the third theme option with an alternative side-by-side responsive layout (KPI sidebar on the left, table on the right).
+
+## [0.6.1] - 2026-05-26
+### Fixed
+- **Hotfix for Container Crash**: Restored the missing `render_views` function in `mt-traffic.sh` which was accidentally dropped during the Go server migration. This prevents container startup crashes (exit status 127).
+
+## [0.6.0] - 2026-05-26
+### Added
+- **High-Performance Go Server**: Replaced Python with a compiled static Go web server (`server.go`), reducing idle RAM from ~30MB to ~2MB.
+- **Native SQLite JSON API**: Migrated CSV-to-JSON parsing directly inside SQLite using native JSON functions, reducing page generation time to <1ms.
+- **Multi-Stage Build**: Reduced container size from ~85MB to <15MB by removing Python dependencies.
+
+## [0.5.0] - 2026-05-16
+### Added
+- Native SQLite window functions and sleep loop optimisations.
