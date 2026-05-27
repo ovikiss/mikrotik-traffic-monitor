@@ -2,6 +2,10 @@
 
 All notable changes to the MikroTik Traffic Monitor project will be documented in this file.
 
+## [0.8.1] - 2026-05-27
+### Fixed
+- **Top-Aligned Vertical Expansion**: Repositioned the entire floating glass panel to align to the top of the viewport (`justify-content: flex-start` on body, with a comfortable top margin) instead of centering vertically. This prevents the topbar/dashboard from jumping vertically as table groups are expanded or collapsed, keeping the header fixed at the top while the interface grows naturally downwards.
+
 ## [0.8.0] - 2026-05-27
 ### Fixed
 - **Pure Smoky Lead Gray Color Palette**: Replaced all custom property dark variables in the Glass theme with completely neutral zinc and smoky lead grays, eliminating the bluish/indigo tint from the main panel face and text labels.
