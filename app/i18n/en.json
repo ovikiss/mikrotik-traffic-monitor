@@ -1,4 +1,4 @@
-﻿{
+{
   "themeStyle": "Theme",
   "theme": "Mode",
   "auto": "Auto",
@@ -6,6 +6,7 @@
   "dark": "Dark",
   "styleModern": "Modern",
   "styleClassic": "Classic",
+  "styleGlass": "Glass Dashboard",
   "poll": "Poll",
   "pollInterval": "Poll interval",
   "hoursSingular": "hour",

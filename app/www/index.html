@@ -41,6 +41,7 @@
           <select id="theme-style" class="sr-only" tabindex="-1" aria-hidden="true">
             <option value="modern" id="style-opt-modern">Modern</option>
             <option value="classic" id="style-opt-classic">Classic</option>
+            <option value="glass" id="style-opt-glass">Glass Dashboard</option>
           </select>
         </div>
       </label>
@@ -160,6 +161,7 @@ const I18N_FALLBACK = {
   themeStyle: 'Theme',
   styleModern: 'Modern',
   styleClassic: 'Classic',
+  styleGlass: 'Glass Dashboard',
   theme: 'Mode',
   auto: 'Auto',
   light: 'Light',
@@ -223,7 +225,8 @@ const THEME_ITEMS = [
 ];
 const THEME_STYLE_ITEMS = [
   { value: 'modern', labelKey: 'styleModern' },
-  { value: 'classic', labelKey: 'styleClassic' }
+  { value: 'classic', labelKey: 'styleClassic' },
+  { value: 'glass', labelKey: 'styleGlass' }
 ];
 const POLL_ITEMS = [
   { value: '1h', amount: 1 },
@@ -357,7 +360,13 @@ function renderThemeStyleMenu() {
 function updateThemeStyleButton() {
   const label = document.getElementById('theme-style-current-label');
   if (!label) return;
-  label.textContent = t(state.themeStyle === 'classic' ? 'styleClassic' : 'styleModern');
+  if (state.themeStyle === 'classic') {
+    label.textContent = t('styleClassic');
+  } else if (state.themeStyle === 'glass') {
+    label.textContent = t('styleGlass');
+  } else {
+    label.textContent = t('styleModern');
+  }
 }
 
 function closeThemeStyleMenu() {
@@ -638,6 +647,9 @@ function applyLanguage() {
   document.getElementById('theme-style-label').textContent = t('themeStyle');
   document.getElementById('style-opt-modern').textContent = t('styleModern');
   document.getElementById('style-opt-classic').textContent = t('styleClassic');
+  if (document.getElementById('style-opt-glass')) {
+    document.getElementById('style-opt-glass').textContent = t('styleGlass');
+  }
   document.getElementById('theme-label').textContent = t('theme');
   document.getElementById('theme-opt-auto').textContent = t('auto');
   document.getElementById('theme-opt-light').textContent = t('light');
@@ -680,9 +692,18 @@ function applyTheme() {
 }
 
 function applyThemeStyle() {
-  const mode = state.themeStyle === 'classic' ? 'classic' : 'modern';
+  const mode = (state.themeStyle === 'classic' || state.themeStyle === 'glass') ? state.themeStyle : 'modern';
   const css = document.getElementById('theme-style-css');
-  if (css) css.setAttribute('href', mode === 'classic' ? `/images/ui/style-classic.css?v=${THEME_CSS_VERSION}` : `/images/ui/style-modern.css?v=${THEME_CSS_VERSION}`);
+  if (css) {
+    if (mode === 'classic') {
+      css.setAttribute('href', `/images/ui/style-classic.css?v=${THEME_CSS_VERSION}`);
+    } else if (mode === 'glass') {
+      css.setAttribute('href', `/images/ui/style-glass.css?v=${THEME_CSS_VERSION}`);
+    } else {
+      css.setAttribute('href', `/images/ui/style-modern.css?v=${THEME_CSS_VERSION}`);
+    }
+  }
+  document.documentElement.setAttribute('data-theme-style', mode);
   document.getElementById('theme-style').value = mode;
   updateThemeStyleButton();
 }
@@ -838,7 +859,7 @@ function setTheme(theme) {
 }
 
 function setThemeStyle(mode) {
-  state.themeStyle = (mode === 'classic' || mode === 'modern') ? mode : 'modern';
+  state.themeStyle = (mode === 'classic' || mode === 'modern' || mode === 'glass') ? mode : 'modern';
   localStorage.setItem('mtm_theme_style', state.themeStyle);
   applyThemeStyle();
   renderRows();
@@ -974,7 +995,7 @@ const storedThemeStyle = localStorage.getItem('mtm_theme_style');
 const storedFontSize = localStorage.getItem('mtm_font_size');
 state.lang = (typeof storedLang === 'string' && storedLang) ? storedLang.toLowerCase() : 'en';
 state.theme = (storedTheme === 'dark' || storedTheme === 'light' || storedTheme === 'auto') ? storedTheme : 'auto';
-state.themeStyle = (storedThemeStyle === 'classic' || storedThemeStyle === 'modern') ? storedThemeStyle : 'modern';
+state.themeStyle = (storedThemeStyle === 'classic' || storedThemeStyle === 'modern' || storedThemeStyle === 'glass') ? storedThemeStyle : 'modern';
 state.fontSize = (storedFontSize === '25' || storedFontSize === '50' || storedFontSize === '100') ? storedFontSize : '100';
 applyThemeStyle();
 applyTheme();
