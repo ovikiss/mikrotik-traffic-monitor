@@ -449,11 +449,12 @@
     .control {
       display: inline-flex;
       align-items: center;
-      gap: 0;
+      gap: 8px;
     }
-    /* Hide descriptive text labels in Topbar to make it ultra-compact */
     .control > span {
-      display: none !important;
+      font-weight: 600;
+      font-size: 0.88em;
+      color: var(--muted);
     }
 
     .theme-dropdown, .lang-dropdown {
