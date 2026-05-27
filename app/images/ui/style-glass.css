@@ -1,51 +1,51 @@
     :root {
-      --bg: #ebf0f9;
+      --bg: #ebf0f7;
       --card: rgba(255, 255, 255, 0.45);
       --card-strong: rgba(255, 255, 255, 0.65);
-      --border: rgba(255, 255, 255, 0.55);
+      --border: rgba(148, 163, 184, 0.25);
       --text: #0f172a;
       --muted: #475569;
-      --blue: #0284c7;
-      --bar-max: #059669;
+      --blue: #475569;
+      --bar-max: #334155;
       --table-head: rgba(255, 255, 255, 0.35);
-      --table-border: rgba(15, 23, 42, 0.08);
-      --bar-bg: rgba(15, 23, 42, 0.08);
-      --glass-blur: blur(24px) saturate(1.8);
-      --glass-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.05);
+      --table-border: rgba(15, 23, 42, 0.06);
+      --bar-bg: rgba(15, 23, 42, 0.06);
+      --glass-blur: blur(24px) saturate(1.6);
+      --glass-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.05), 0 1px 3px rgba(0, 0, 0, 0.02);
       --glass-inset: 
         inset 1px 1px 1px 0px rgba(255, 255, 255, 0.6),
         inset -1px -1px 1px 0px rgba(0, 0, 0, 0.02);
       --overlay-dim: rgba(255, 255, 255, 0.2);
-      --overlay-a: rgba(14, 165, 233, 0.15);
-      --overlay-b: rgba(99, 102, 241, 0.15);
-      --wallpaper-url: url('https://images.unsplash.com/photo-1557683316-973673baf926?q=80&w=2000&auto=format&fit=crop');
+      --overlay-a: rgba(148, 163, 184, 0.1);
+      --overlay-b: rgba(148, 163, 184, 0.05);
+      --wallpaper-url: none;
       --base-font-size: clamp(14px, .35vw + 12px, 18px);
       --font-scale: 1;
-      --glow-accent: rgba(14, 165, 233, 0.4);
+      --glow-accent: rgba(148, 163, 184, 0.2);
     }
 
     html[data-theme="dark"] {
-      --bg: #0b0f19;
-      --card: rgba(15, 23, 42, 0.4);
-      --card-strong: rgba(30, 41, 59, 0.55);
-      --border: rgba(255, 255, 255, 0.08);
-      --text: #f8fafc;
-      --muted: #94a3b8;
-      --blue: #38bdf8;
-      --bar-max: #34d399;
-      --table-head: rgba(15, 23, 42, 0.5);
-      --table-border: rgba(255, 255, 255, 0.06);
-      --bar-bg: rgba(255, 255, 255, 0.06);
-      --glass-blur: blur(24px) saturate(1.8);
-      --glass-shadow: 0 10px 40px -15px rgba(0, 0, 0, 0.6), 0 0px 1px rgba(255, 255, 255, 0.1);
+      --bg: #0d121f;
+      --card: rgba(17, 24, 39, 0.45);
+      --card-strong: rgba(31, 41, 55, 0.6);
+      --border: rgba(255, 255, 255, 0.06);
+      --text: #f1f5f9;
+      --muted: #64748b;
+      --blue: #64748b;
+      --bar-max: #94a3b8;
+      --table-head: rgba(17, 24, 39, 0.5);
+      --table-border: rgba(255, 255, 255, 0.04);
+      --bar-bg: rgba(255, 255, 255, 0.05);
+      --glass-blur: blur(24px) saturate(1.5);
+      --glass-shadow: 0 15px 40px -15px rgba(0, 0, 0, 0.5), 0 0px 1px rgba(255, 255, 255, 0.05);
       --glass-inset: 
-        inset 1px 1px 1px 0px rgba(255, 255, 255, 0.08),
-        inset -1px -1px 1px 0px rgba(0, 0, 0, 0.2);
-      --overlay-dim: rgba(0, 0, 0, 0.45);
-      --overlay-a: rgba(6, 182, 212, 0.2);
-      --overlay-b: rgba(236, 72, 153, 0.15);
-      --wallpaper-url: url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2000&auto=format&fit=crop');
-      --glow-accent: rgba(56, 189, 248, 0.4);
+        inset 1px 1px 1px 0px rgba(255, 255, 255, 0.05),
+        inset -1px -1px 1px 0px rgba(0, 0, 0, 0.15);
+      --overlay-dim: rgba(0, 0, 0, 0.35);
+      --overlay-a: rgba(100, 116, 139, 0.08);
+      --overlay-b: rgba(15, 23, 42, 0.2);
+      --wallpaper-url: none;
+      --glow-accent: rgba(255, 255, 255, 0.08);
     }
 
     html[data-font-size="25"] { --base-font-size: 14px; --font-scale: 0.8; }
@@ -55,9 +55,8 @@
     html {
       background:
         linear-gradient(180deg, var(--overlay-dim), var(--overlay-dim)),
-        radial-gradient(130% 120% at 0% 0%, var(--overlay-a), rgba(0,0,0,0) 60%),
-        radial-gradient(120% 120% at 100% 100%, var(--overlay-b), rgba(0,0,0,0) 65%),
-        var(--wallpaper-url) center / cover no-repeat fixed,
+        radial-gradient(130% 120% at 0% 0%, var(--overlay-a), rgba(0,0,0,0) 65%),
+        radial-gradient(120% 120% at 100% 100%, var(--overlay-b), rgba(0,0,0,0) 70%),
         var(--bg);
     }
 
@@ -69,6 +68,7 @@
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
       font-size: calc(var(--base-font-size) * var(--font-scale));
       box-sizing: border-box;
+      background: transparent;
     }
 
     /* Core Layout rearrangement using CSS Grid for a sidebar on desktop */
@@ -120,11 +120,12 @@
     .brand-text {
       display: inline-block;
       line-height: 1;
-      font-family: "Helvetica Neue", "Avenir Next", "Segoe UI", Arial, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       font-weight: 600;
       text-transform: uppercase;
-      letter-spacing: 0.12em;
+      letter-spacing: 0.1em;
       font-size: 0.83em;
+      opacity: 0.9;
     }
     .brand-mikrotik-mark {
       display: block;
@@ -133,10 +134,11 @@
       height: 1.38em;
       color: var(--text);
       overflow: visible;
+      opacity: 0.95;
     }
     .subtitle { color: var(--muted); margin-bottom: 12px; font-size: 0.95em; font-weight: 500; }
 
-    /* Glass Panels with Floating & Glow Animations */
+    /* Minimalist Glass Panels */
     .kpis {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -147,56 +149,59 @@
     .kpi {
       background: var(--card);
       border: 1px solid var(--border);
-      border-radius: 20px;
+      border-radius: 16px;
       padding: 16px 20px;
       backdrop-filter: var(--glass-blur);
       -webkit-backdrop-filter: var(--glass-blur);
       box-shadow: var(--glass-shadow), var(--glass-inset);
-      transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.1), 
-                  box-shadow 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.1),
-                  border-color 0.3s ease;
+      transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), 
+                  box-shadow 0.3s cubic-bezier(0.25, 0.8, 0.25, 1),
+                  border-color 0.2s ease;
     }
 
     .kpi:hover {
-      transform: translateY(-5px);
-      border-color: var(--glow-accent);
+      transform: translateY(-2px);
+      border-color: rgba(255, 255, 255, 0.12);
       box-shadow: 
-        0 15px 35px -10px rgba(0, 0, 0, 0.2), 
-        0 0 12px 2px var(--glow-accent),
+        0 12px 25px -10px rgba(0, 0, 0, 0.3), 
+        var(--glass-inset);
+    }
+    html[data-theme="light"] .kpi:hover {
+      border-color: rgba(0, 0, 0, 0.15);
+      box-shadow: 
+        0 12px 25px -10px rgba(0, 0, 0, 0.08), 
         var(--glass-inset);
     }
 
     .kpi .label {
-      font-size: 0.88em;
+      font-size: 0.82em;
       font-weight: 600;
       text-transform: uppercase;
-      letter-spacing: 0.06em;
+      letter-spacing: 0.05em;
       color: var(--muted);
-      margin-bottom: 8px;
+      margin-bottom: 6px;
     }
     .kpi .val {
-      font-size: 2em;
-      font-weight: 800;
+      font-size: 1.85em;
+      font-weight: 700;
       letter-spacing: -0.02em;
-      background: linear-gradient(135deg, var(--text), var(--muted));
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
+      color: var(--text);
     }
     .kpi .sub {
-      font-size: 0.9em;
+      font-size: 0.88em;
       font-weight: 500;
       color: var(--muted);
       margin-top: 8px;
       display: flex;
-      gap: 8px;
+      gap: 6px;
       align-items: center;
     }
 
-    /* Main Glass Dashboard Card */
+    /* Main Glass Panel */
     .card {
       background: var(--card);
       border: 1px solid var(--border);
-      border-radius: 24px;
+      border-radius: 20px;
       padding: 20px;
       backdrop-filter: var(--glass-blur);
       -webkit-backdrop-filter: var(--glass-blur);
@@ -206,42 +211,41 @@
     /* Pills Tab Layout */
     .tabs {
       display: flex;
-      gap: 6px;
+      gap: 4px;
       margin-bottom: 16px;
-      background: rgba(0, 0, 0, 0.05);
+      background: rgba(0, 0, 0, 0.04);
       padding: 4px;
       border-radius: 999px;
       width: fit-content;
       border: 1px solid var(--table-border);
     }
     html[data-theme="dark"] .tabs {
-      background: rgba(255, 255, 255, 0.03);
+      background: rgba(255, 255, 255, 0.02);
     }
 
     .tab {
       border: 0;
       background: transparent;
-      color: var(--text);
+      color: var(--muted);
       border-radius: 999px;
-      padding: 8px 18px;
-      min-height: 36px;
-      font-size: 0.95em;
+      padding: 6px 16px;
+      min-height: 32px;
+      font-size: 0.9em;
       font-weight: 600;
       cursor: pointer;
       box-shadow: none;
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      transition: all 0.2s ease;
+    }
+
+    .tab:hover {
+      color: var(--text);
     }
 
     .tab.active {
-      background: var(--text);
-      color: var(--bg);
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    }
-
-    html[data-theme="dark"] .tab.active {
-      background: #f8fafc;
-      color: #0f172a;
-      box-shadow: 0 4px 15px rgba(255, 255, 255, 0.1);
+      background: var(--card-strong);
+      color: var(--text);
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05), var(--glass-inset);
+      border: 0.5px solid var(--border);
     }
 
     /* Elegant Tables */
@@ -249,7 +253,7 @@
       width: 100%;
       overflow-x: auto;
       overflow-y: hidden;
-      border-radius: 16px;
+      border-radius: 12px;
       border: 1px solid var(--table-border);
     }
 
@@ -262,28 +266,28 @@
     }
 
     th, td {
-      padding: 12px 16px;
+      padding: 10px 14px;
       border-bottom: 1px solid var(--table-border);
     }
 
     th {
       font-weight: 700;
       text-transform: uppercase;
-      font-size: 0.8em;
-      letter-spacing: 0.08em;
+      font-size: 0.78em;
+      letter-spacing: 0.06em;
       color: var(--muted);
       background: var(--table-head);
     }
 
     tr {
-      transition: background-color 0.2s ease;
+      transition: background-color 0.15s ease;
     }
 
     tbody tr:not(.detail-row):not(.group-parent-expanded):hover {
-      background-color: rgba(255, 255, 255, 0.15);
+      background-color: rgba(255, 255, 255, 0.05);
     }
     html[data-theme="light"] tbody tr:not(.detail-row):not(.group-parent-expanded):hover {
-      background-color: rgba(0, 0, 0, 0.02);
+      background-color: rgba(0, 0, 0, 0.015);
     }
 
     .expander {
@@ -293,21 +297,21 @@
       cursor: pointer;
       padding: 0 8px 0 0;
       font-size: 14px;
-      transition: color 0.2s ease;
+      transition: color 0.15s ease;
     }
     .expander:hover {
-      color: var(--blue);
+      color: var(--text);
     }
 
     .expander-empty { display: inline-block; width: 14px; margin-right: 8px; }
 
     .detail-row td {
-      background: rgba(0, 0, 0, 0.02);
+      background: rgba(0, 0, 0, 0.01);
       border-bottom: 0;
       font-size: 0.92em;
     }
     html[data-theme="dark"] .detail-row td {
-      background: rgba(255, 255, 255, 0.02);
+      background: rgba(255, 255, 255, 0.01);
     }
 
     .group-parent-expanded td {
@@ -321,7 +325,7 @@
     .detail-period { padding-left: 28px; color: var(--muted); }
     .num { text-align: right; font-variant-numeric: tabular-nums; font-weight: 600; }
 
-    /* Stunning Neon Relative Bar */
+    /* Muted Relative Bar */
     .bar-wrap {
       width: 140px;
       max-width: 100%;
@@ -335,13 +339,14 @@
 
     .bar {
       height: 100%;
-      background: linear-gradient(90deg, #0284c7, #38bdf8);
+      background: var(--blue);
       border-radius: 999px;
-      box-shadow: 0 0 8px var(--glow-accent);
+      opacity: 0.75;
+      transition: opacity 0.2s ease;
     }
 
-    html[data-theme="dark"] .bar {
-      background: linear-gradient(90deg, #38bdf8, #06b6d4);
+    tbody tr:hover .bar {
+      opacity: 1;
     }
 
     /* Footer Metadata details */
@@ -352,7 +357,7 @@
       font-weight: 500;
       background: var(--table-head);
       border: 1px solid var(--table-border);
-      border-radius: 16px;
+      border-radius: 12px;
       padding: 10px 14px;
       box-shadow: var(--glass-inset);
       display: flex;
@@ -361,7 +366,7 @@
       align-items: center;
     }
 
-    /* High Tech Dropdowns & Topbar Controls */
+    /* Controls & Dropdowns */
     .topbar {
       display: flex;
       justify-content: space-between;
@@ -372,7 +377,7 @@
 
     .controls {
       display: flex;
-      gap: 8px;
+      gap: 6px;
       align-items: center;
       flex-wrap: wrap;
       justify-content: flex-end;
@@ -381,7 +386,7 @@
     .control {
       display: inline-flex;
       align-items: center;
-      gap: 6px;
+      gap: 4px;
       color: var(--muted);
       font-size: 0.88em;
       font-weight: 600;
@@ -394,41 +399,45 @@
     .theme-toggle, .lang-toggle {
       display: inline-flex;
       align-items: center;
-      gap: 8px;
+      gap: 6px;
       border: 1px solid var(--border);
-      border-radius: 14px;
+      border-radius: 12px;
       background: var(--card-strong);
       color: var(--text);
-      padding: 6px 14px;
-      min-height: 36px;
+      padding: 5px 12px;
+      min-height: 34px;
       font: inherit;
       font-weight: 600;
-      font-size: 0.95em;
+      font-size: 0.9em;
       cursor: pointer;
       backdrop-filter: var(--glass-blur);
       -webkit-backdrop-filter: var(--glass-blur);
       box-shadow: var(--glass-inset);
-      transition: all 0.3s ease;
+      transition: all 0.2s ease;
     }
 
     .theme-toggle:hover, .lang-toggle:hover {
-      border-color: var(--glow-accent);
-      box-shadow: 0 0 10px var(--glow-accent), var(--glass-inset);
+      border-color: rgba(255, 255, 255, 0.15);
+      background: var(--card);
+    }
+    html[data-theme="light"] .theme-toggle:hover,
+    html[data-theme="light"] .lang-toggle:hover {
+      border-color: rgba(0, 0, 0, 0.15);
     }
 
     .theme-toggle img, .lang-toggle img {
-      width: 15px;
-      height: 15px;
-      opacity: 0.85;
+      width: 14px;
+      height: 14px;
+      opacity: 0.75;
     }
 
     .theme-menu, .lang-menu {
       position: absolute;
       right: 0;
       top: calc(100% + 6px);
-      min-width: 150px;
+      min-width: 140px;
       border: 1px solid var(--border);
-      border-radius: 16px;
+      border-radius: 12px;
       background: var(--card-strong);
       box-shadow: var(--glass-shadow);
       display: none;
@@ -440,7 +449,7 @@
 
     .theme-menu.open, .lang-menu.open {
       display: block;
-      animation: dropdownFadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      animation: dropdownFadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
     .theme-item, .lang-item {
@@ -448,31 +457,31 @@
       white-space: nowrap;
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 8px;
       border: 0;
       background: transparent;
       color: var(--text);
-      border-radius: 12px;
-      padding: 8px 12px;
-      min-height: 36px;
+      border-radius: 8px;
+      padding: 6px 10px;
+      min-height: 32px;
       font: inherit;
       font-weight: 500;
       text-align: left;
       cursor: pointer;
-      transition: background-color 0.2s ease;
+      transition: background-color 0.15s ease;
     }
 
     .theme-item:hover, .lang-item:hover {
-      background: rgba(255, 255, 255, 0.15);
+      background: rgba(255, 255, 255, 0.08);
     }
     html[data-theme="light"] .theme-item:hover, 
     html[data-theme="light"] .lang-item:hover {
-      background: rgba(0, 0, 0, 0.04);
+      background: rgba(0, 0, 0, 0.03);
     }
 
     .theme-item img, .lang-item img {
-      width: 15px;
-      height: 15px;
+      width: 14px;
+      height: 14px;
     }
 
     .sr-only {
@@ -487,18 +496,18 @@
     }
 
     .ico-inline {
-      width: 14px;
-      height: 14px;
+      width: 13px;
+      height: 13px;
       vertical-align: -2px;
-      margin-right: 6px;
-      opacity: .8;
+      margin-right: 4px;
+      opacity: .7;
     }
 
     .text-inherit { font: inherit; color: inherit; }
-    .th-hint { opacity: 0.65; font-weight: normal; font-size: 0.85em; }
+    .th-hint { opacity: 0.55; font-weight: normal; font-size: 0.85em; }
 
     @keyframes dropdownFadeIn {
-      from { opacity: 0; transform: translateY(-8px); }
+      from { opacity: 0; transform: translateY(-4px); }
       to { opacity: 1; transform: translateY(0); }
     }
 
