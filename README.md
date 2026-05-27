@@ -30,6 +30,7 @@ Containerized MikroTik WAN traffic monitor with:
 - `app/images/lang/*.svg` - language icons
 - `app/images/ui/*.svg` - UI icons (theme, poll interval, metrics, status row)
 - `app/images/ui/style-modern.css` - Modern (glass) theme stylesheet
+- `app/images/ui/style-glass.css` - Glass Dashboard theme stylesheet (alternate sleek side-by-side layout)
 - `app/images/ui/style-classic.css` - Classic theme stylesheet
 - `mikrotik/install.rsc` - RouterOS install/deploy script (container, env, mount, NAT)
 - `scripts/install-to-router.sh` - helper that uploads/imports `install.rsc` over SSH
