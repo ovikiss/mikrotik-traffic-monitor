@@ -25,18 +25,18 @@
     }
 
     html[data-theme="dark"] {
-      --bg: #0b0f19;
-      --card: rgba(18, 22, 35, 0.42); /* Gorgeous high-fidelity translucent dark grey */
+      --bg: #09090b;
+      --card: rgba(28, 28, 30, 0.45); /* Gorgeous neutral smoky-lead gray glass */
       --card-strong: rgba(255, 255, 255, 0.06);
       --border: rgba(255, 255, 255, 0.08);
       --text: #f8fafc;
-      --muted: #94a3b8;
-      --blue: #38bdf8;
-      --bar-max: #10b981;
+      --muted: #a1a1aa; /* Pure smoky lead gray */
+      --blue: rgba(255, 255, 255, 0.7); /* Matte silver-white progress bar and accents */
+      --bar-max: rgba(255, 255, 255, 0.85); /* Matte silver-white for max */
       --table-head: rgba(0, 0, 0, 0.2);
       --table-border: rgba(255, 255, 255, 0.04);
       --bar-bg: rgba(255, 255, 255, 0.08);
-      --glass-blur: blur(40px) saturate(1.7);
+      --glass-blur: blur(40px) saturate(1.15); /* Muted saturation to completely eliminate blue color bleeding */
       --glass-shadow: 
         0 40px 80px -15px rgba(0, 0, 0, 0.75), 
         0 0px 1px 1px rgba(255, 255, 255, 0.08);
@@ -408,8 +408,8 @@
 
     .bar {
       height: 100%;
-      background: linear-gradient(90deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.85) 100%);
-      box-shadow: 0 0 8px rgba(255, 255, 255, 0.5);
+      background: linear-gradient(90deg, rgba(255,255,255,0.18) 0%, rgba(255,255,255,0.8) 100%) !important;
+      box-shadow: 0 0 8px rgba(255, 255, 255, 0.4);
       border-radius: 999px;
       opacity: 0.75;
       transition: opacity 0.2s ease, width 0.3s ease;

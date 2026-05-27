@@ -2,6 +2,12 @@
 
 All notable changes to the MikroTik Traffic Monitor project will be documented in this file.
 
+## [0.8.0] - 2026-05-27
+### Fixed
+- **Pure Smoky Lead Gray Color Palette**: Replaced all custom property dark variables in the Glass theme with completely neutral zinc and smoky lead grays, eliminating the bluish/indigo tint from the main panel face and text labels.
+- **Backdrop-Blur Saturation Muted**: Reduced `saturate` on backdrop-filter to `1.15` (down from `1.7`) to prevent any vibrant blue/cyan colors from the background wallpaper bleeding into the glass panels, achieving a beautiful frosted lead-gray glass look.
+- **Monochromatic Progress Bars**: Added `!important` to the matte silver-white relative progress bar gradient styling, successfully overriding the inline theme styles in JavaScript to render the progress bars in elegant monochromatic silver-white, matching the mockup 100%.
+
 ## [0.7.9] - 2026-05-27
 ### Fixed
 - **Dynamic Table Header Translation**: Resolved an issue where the Glass theme table header columns (`DATE`, `DOWNLOAD`, `UPLOAD`, `TOTAL`, `STATUS`, `& PROGRESS`) were hardcoded in English. They are now dynamically translated using the localization system (e.g. `DATA`, `DESCĂRCARE`, `ÎNCĂRCARE`, `TOTAL`, `STATUS`, `& PROGRES` in Romanian) and correctly formatted in uppercase to match the design aesthetics.
