@@ -2,6 +2,17 @@
 
 All notable changes to the MikroTik Traffic Monitor project will be documented in this file.
 
+## [0.8.3] - 2026-05-27
+### Fixed
+- **Premium Light Mode Aesthetics & Contrast**: Completely overhauled the Glass theme's light mode to deliver a high-contrast, premium appearance:
+  - Replaced the dark background image in light mode with a gorgeous, bright, high-fidelity macOS-style radial and linear light slate gradient.
+  - Resolved poor text contrast inside KPI cards by darkening labels (`Data:`, `Download:`, `Upload:`) to a crisp slate-700 (`#334155`).
+  - Added theme-awareness to SVG sparkline drawing in JavaScript: graphs are now rendered in high-contrast matte slate-gray in light mode, and silver-white in dark mode.
+  - Redesigned active pills (`.tab.active`) in light mode to display as a sharp white card with dark slate text.
+  - Adjusted relative progress bars (`.bar`) to display as an elegant, high-contrast steel-blue/lead-gray gradient track.
+  - Redesigned dropdown selectors (`.theme-toggle`, `.lang-toggle`) to have soft translucent white backdrops with dark slate text.
+  - **Theme Renaming**: Renamed the theme from "Glass Dashboard" ("Tablou de Bord Glass" in Romanian) to simply "Glass" ("Glass" in Romanian) for a cleaner, more minimalist UI terminology.
+
 ## [0.8.2] - 2026-05-27
 ### Changed
 - **Unified Table Structure Across All Themes**: Removed the custom Glass theme table headers and row formatting (including the `STATUS` column, which has been completely removed as it served no functional purpose for traffic records). All themes now share the exact same clean table layout, column names, translations, and ordering (`Period`, `Total`, `RX (Download)`, `TX (Upload)`, and `Visual` progress bar), styled beautifully with Glass aesthetics when active.
