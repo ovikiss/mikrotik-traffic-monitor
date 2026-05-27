@@ -2,6 +2,10 @@
 
 All notable changes to the MikroTik Traffic Monitor project will be documented in this file.
 
+## [0.8.2] - 2026-05-27
+### Changed
+- **Unified Table Structure Across All Themes**: Removed the custom Glass theme table headers and row formatting (including the `STATUS` column, which has been completely removed as it served no functional purpose for traffic records). All themes now share the exact same clean table layout, column names, translations, and ordering (`Period`, `Total`, `RX (Download)`, `TX (Upload)`, and `Visual` progress bar), styled beautifully with Glass aesthetics when active.
+
 ## [0.8.1] - 2026-05-27
 ### Fixed
 - **Top-Aligned Vertical Expansion**: Repositioned the entire floating glass panel to align to the top of the viewport (`justify-content: flex-start` on body, with a comfortable top margin) instead of centering vertically. This prevents the topbar/dashboard from jumping vertically as table groups are expanded or collapsed, keeping the header fixed at the top while the interface grows naturally downwards.

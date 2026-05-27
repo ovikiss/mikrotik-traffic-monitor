@@ -719,24 +719,13 @@ function applyLanguage() {
   
   const headerRow = document.getElementById('table-header-row');
   if (headerRow) {
-    if (state.themeStyle === 'glass') {
-      headerRow.innerHTML = `
-        <th id="th-period">${esc(t('date').toUpperCase())}</th>
-        <th class="num" id="th-rx">${esc(t('download').toUpperCase())}</th>
-        <th class="num" id="th-tx">${esc(t('upload').toUpperCase())}</th>
-        <th class="num" id="th-total">${esc(t('total').toUpperCase())}</th>
-        <th id="th-status" class="num" style="text-align: right;">${esc(t('status').toUpperCase())}</th>
-        <th id="th-visual">& ${esc(t('progress').toUpperCase())}</th>
-      `;
-    } else {
-      headerRow.innerHTML = `
-        <th id="th-period">${esc(t('period'))}</th>
-        <th class="num" id="th-total">${uiMetricIcon('total')}${esc(t('total'))}</th>
-        <th class="num" id="th-rx">${uiMetricIcon('rx')}RX <span class="th-hint text-inherit">(${esc(t('download'))})</span></th>
-        <th class="num" id="th-tx">${uiMetricIcon('tx')}TX <span class="th-hint text-inherit">(${esc(t('upload'))})</span></th>
-        <th id="th-visual">${uiMetricIcon('visual')}${esc(t('visual'))} <span class="th-hint text-inherit">${esc(t('visualHint'))}</span></th>
-      `;
-    }
+    headerRow.innerHTML = `
+      <th id="th-period">${esc(t('period'))}</th>
+      <th class="num" id="th-total">${uiMetricIcon('total')}${esc(t('total'))}</th>
+      <th class="num" id="th-rx">${uiMetricIcon('rx')}RX <span class="th-hint text-inherit">(${esc(t('download'))})</span></th>
+      <th class="num" id="th-tx">${uiMetricIcon('tx')}TX <span class="th-hint text-inherit">(${esc(t('upload'))})</span></th>
+      <th id="th-visual">${uiMetricIcon('visual')}${esc(t('visual'))} <span class="th-hint text-inherit">${esc(t('visualHint'))}</span></th>
+    `;
   }
 }
 
@@ -936,35 +925,13 @@ function renderRows() {
     const tr = document.createElement('tr');
     if (isExpanded) tr.className = 'group-parent-expanded';
     
-    if (state.themeStyle === 'glass') {
-      const statusDot = `
-        <span class="status-glass-pulse">
-          <svg class="status-signal-svg" width="22" height="14" viewBox="0 0 22 14" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align: middle; overflow: visible; display: inline-block;">
-            <path d="M3 2C1.5 3.5 1 5.5 1 7C1 8.5 1.5 10.5 3 12" stroke="rgba(255, 255, 255, 0.45)" stroke-width="1.5" stroke-linecap="round" class="pulse-wave-outer" />
-            <path d="M6 4C5.2 4.8 5 5.8 5 7C5 8.2 5.2 9.2 6 10" stroke="rgba(255, 255, 255, 0.7)" stroke-width="1.5" stroke-linecap="round" class="pulse-wave-inner" />
-            <circle cx="11" cy="7" r="2.5" fill="#a7f3d0" class="pulse-dot" style="filter: drop-shadow(0 0 3px #10b981);" />
-            <path d="M16 4C16.8 4.8 17 5.8 17 7C17 8.2 16.8 9.2 16 10" stroke="rgba(255, 255, 255, 0.7)" stroke-width="1.5" stroke-linecap="round" class="pulse-wave-inner" />
-            <path d="M19 2C20.5 3.5 21 5.5 21 7C21 8.5 20.5 10.5 19 12" stroke="rgba(255, 255, 255, 0.45)" stroke-width="1.5" stroke-linecap="round" class="pulse-wave-outer" />
-          </svg>
-        </span>
-      `;
-      tr.innerHTML = `
-        <td>${prefix}${esc(formatPeriod(state.activeTab, r.period))}</td>
-        <td class="num">${esc(fmtTraffic(r.rx_gib))}</td>
-        <td class="num">${esc(fmtTraffic(r.tx_gib))}</td>
-        <td class="num">${esc(fmtTraffic(r.total_gib))}</td>
-        <td class="num status-cell">${statusDot}</td>
-        <td><div class="bar-wrap"><div class="bar" style="width:${pct.toFixed(2)}%; background:${barColor};"></div></div></td>
-      `;
-    } else {
-      tr.innerHTML = `
-        <td>${prefix}${esc(formatPeriod(state.activeTab, r.period))}</td>
-        <td class="num">${esc(fmtTraffic(r.total_gib))}</td>
-        <td class="num">${esc(fmtTraffic(r.rx_gib))}</td>
-        <td class="num">${esc(fmtTraffic(r.tx_gib))}</td>
-        <td><div class="bar-wrap"><div class="bar" style="width:${pct.toFixed(2)}%; background:${barColor};"></div></div></td>
-      `;
-    }
+    tr.innerHTML = `
+      <td>${prefix}${esc(formatPeriod(state.activeTab, r.period))}</td>
+      <td class="num">${esc(fmtTraffic(r.total_gib))}</td>
+      <td class="num">${esc(fmtTraffic(r.rx_gib))}</td>
+      <td class="num">${esc(fmtTraffic(r.tx_gib))}</td>
+      <td><div class="bar-wrap"><div class="bar" style="width:${pct.toFixed(2)}%; background:${barColor};"></div></div></td>
+    `;
     tbody.appendChild(tr);
 
     if (canExpand) {
@@ -1003,35 +970,13 @@ function renderRows() {
         const isLastDetail = idx === detailRows.length - 1;
         dtr.className = `detail-row${isFirstDetail ? ' detail-row-first' : ''}${isLastDetail ? ' detail-row-last' : ''}`;
         
-        if (state.themeStyle === 'glass') {
-          const statusDot = `
-            <span class="status-glass-pulse">
-              <svg class="status-signal-svg" width="22" height="14" viewBox="0 0 22 14" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align: middle; overflow: visible; display: inline-block;">
-                <path d="M3 2C1.5 3.5 1 5.5 1 7C1 8.5 1.5 10.5 3 12" stroke="rgba(255, 255, 255, 0.45)" stroke-width="1.5" stroke-linecap="round" class="pulse-wave-outer" />
-                <path d="M6 4C5.2 4.8 5 5.8 5 7C5 8.2 5.2 9.2 6 10" stroke="rgba(255, 255, 255, 0.7)" stroke-width="1.5" stroke-linecap="round" class="pulse-wave-inner" />
-                <circle cx="11" cy="7" r="2.5" fill="#a7f3d0" class="pulse-dot" style="filter: drop-shadow(0 0 3px #10b981);" />
-                <path d="M16 4C16.8 4.8 17 5.8 17 7C17 8.2 16.8 9.2 16 10" stroke="rgba(255, 255, 255, 0.7)" stroke-width="1.5" stroke-linecap="round" class="pulse-wave-inner" />
-                <path d="M19 2C20.5 3.5 21 5.5 21 7C21 8.5 20.5 10.5 19 12" stroke="rgba(255, 255, 255, 0.45)" stroke-width="1.5" stroke-linecap="round" class="pulse-wave-outer" />
-              </svg>
-            </span>
-          `;
-          dtr.innerHTML = `
-            <td class="detail-period">${esc(formatPeriod(isMonthTab ? 'day' : 'month', d.period))}</td>
-            <td class="num">${esc(fmtTraffic(d.rx_gib))}</td>
-            <td class="num">${esc(fmtTraffic(d.tx_gib))}</td>
-            <td class="num">${esc(fmtTraffic(d.total_gib))}</td>
-            <td class="num status-cell">${statusDot}</td>
-            <td><div class="bar-wrap"><div class="bar" style="width:${dpct.toFixed(2)}%; background:${detailBarColor};"></div></div></td>
-          `;
-        } else {
-          dtr.innerHTML = `
-            <td class="detail-period">${esc(formatPeriod(isMonthTab ? 'day' : 'month', d.period))}</td>
-            <td class="num">${esc(fmtTraffic(d.total_gib))}</td>
-            <td class="num">${esc(fmtTraffic(d.rx_gib))}</td>
-            <td class="num">${esc(fmtTraffic(d.tx_gib))}</td>
-            <td><div class="bar-wrap"><div class="bar" style="width:${dpct.toFixed(2)}%; background:${detailBarColor};"></div></div></td>
-          `;
-        }
+        dtr.innerHTML = `
+          <td class="detail-period">${esc(formatPeriod(isMonthTab ? 'day' : 'month', d.period))}</td>
+          <td class="num">${esc(fmtTraffic(d.total_gib))}</td>
+          <td class="num">${esc(fmtTraffic(d.rx_gib))}</td>
+          <td class="num">${esc(fmtTraffic(d.tx_gib))}</td>
+          <td><div class="bar-wrap"><div class="bar" style="width:${dpct.toFixed(2)}%; background:${detailBarColor};"></div></div></td>
+        `;
         tbody.appendChild(dtr);
       });
     }
