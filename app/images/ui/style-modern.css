@@ -299,3 +299,9 @@
       .lang-toggle, .theme-toggle { min-height: 42px; padding: 7px 10px; }
       .lang-item, .theme-item { min-height: 42px; padding: 8px 10px; }
     }
+
+    /* Reset for new Glass theme layout elements in Modern style */
+    .dashboard-container, .dashboard-grid { display: block; }
+    .kpi-header, .kpi-body { display: block; }
+    .kpi-sparkline { display: none; }
+
