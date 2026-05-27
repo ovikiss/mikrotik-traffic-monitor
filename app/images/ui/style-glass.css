@@ -1,11 +1,11 @@
     :root {
-      --bg: #f3f5f9;
+      --bg: #ebf0f7;
       --card: rgba(255, 255, 255, 0.45);
       --card-strong: rgba(255, 255, 255, 0.65);
       --border: rgba(148, 163, 184, 0.2);
       --text: #0f172a;
       --muted: #475569;
-      --blue: #475569;
+      --blue: #5c6e88;
       --bar-max: #334155;
       --table-head: rgba(255, 255, 255, 0.35);
       --table-border: rgba(15, 23, 42, 0.05);
@@ -25,29 +25,29 @@
     }
 
     html[data-theme="dark"] {
-      --bg: #07090e;
-      --card: rgba(255, 255, 255, 0.035);
-      --card-strong: rgba(255, 255, 255, 0.07);
-      --border: rgba(255, 255, 255, 0.08);
+      --bg: #0f131e;
+      --card: rgba(28, 35, 51, 0.45);
+      --card-strong: rgba(36, 45, 66, 0.55);
+      --border: rgba(255, 255, 255, 0.05);
       --text: #f1f5f9;
       --muted: #64748b;
-      --blue: #475569;
+      --blue: #5c6e88;
       --bar-max: #94a3b8;
-      --table-head: rgba(255, 255, 255, 0.02);
-      --table-border: rgba(255, 255, 255, 0.04);
+      --table-head: rgba(17, 24, 39, 0.3);
+      --table-border: rgba(255, 255, 255, 0.03);
       --bar-bg: rgba(255, 255, 255, 0.04);
-      --glass-blur: blur(30px) saturate(1.6);
+      --glass-blur: blur(30px) saturate(1.5);
       --glass-shadow: 
         0 30px 60px -15px rgba(0, 0, 0, 0.65), 
-        0 0px 1px 1px rgba(255, 255, 255, 0.08);
+        0 0px 1px 1px rgba(255, 255, 255, 0.06);
       --glass-inset: 
-        inset 1px 1px 1px 0px rgba(255, 255, 255, 0.08),
-        inset -1px -1px 1px 0px rgba(0, 0, 0, 0.2);
-      --overlay-dim: rgba(0, 0, 0, 0.4);
-      --overlay-a: rgba(30, 41, 59, 0.4);
-      --overlay-b: rgba(15, 23, 42, 0.4);
+        inset 1px 1px 1px 0px rgba(255, 255, 255, 0.06),
+        inset -1px -1px 1px 0px rgba(0, 0, 0, 0.15);
+      --overlay-dim: rgba(0, 0, 0, 0.35);
+      --overlay-a: rgba(30, 41, 59, 0.3);
+      --overlay-b: rgba(15, 23, 42, 0.3);
       --wallpaper-url: none;
-      --glow-accent: rgba(255, 255, 255, 0.12);
+      --glow-accent: rgba(255, 255, 255, 0.08);
     }
 
     html[data-font-size="25"] { --base-font-size: 14px; --font-scale: 0.8; }
