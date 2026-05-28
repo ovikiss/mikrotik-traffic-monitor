@@ -252,7 +252,7 @@ const THEME_ITEMS = [
   { value: 'light', labelKey: 'light', icon: '/images/ui/theme-light.svg' },
   { value: 'dark', labelKey: 'dark', icon: '/images/ui/theme-dark.svg' }
 ];
-const THEME_STYLE_ITEMS = [
+let THEME_STYLE_ITEMS = [
   { value: 'modern', labelKey: 'styleModern' },
   { value: 'classic', labelKey: 'styleClassic' },
   { value: 'glass', labelKey: 'styleGlass' }
@@ -288,6 +288,15 @@ function fmtBytes(v) {
 }
 function t(key) {
   return (I18N[state.lang] && I18N[state.lang][key]) || (I18N.en && I18N.en[key]) || I18N_FALLBACK[key] || key;
+}
+
+function getThemeStyleLabel(item) {
+  const labels = item && item.label;
+  if (labels && typeof labels === 'object') {
+    if (state.lang === 'ro' && labels.ro) return String(labels.ro);
+    if (labels.en) return String(labels.en);
+  }
+  return t(item && item.labelKey ? item.labelKey : 'styleModern');
 }
 
 function uiMetricIcon(name) {
@@ -376,7 +385,7 @@ function renderThemeStyleMenu() {
     item.className = 'theme-item';
     item.setAttribute('role', 'option');
     item.setAttribute('data-theme-style', x.value);
-    item.innerHTML = `<img src="/images/ui/theme-style.svg" alt="" /><span>${t(x.labelKey)}</span>`;
+    item.innerHTML = `<img src="/images/ui/theme-style.svg" alt="" /><span>${getThemeStyleLabel(x)}</span>`;
     item.addEventListener('click', () => {
       closeThemeStyleMenu();
       setThemeStyle(x.value);
@@ -389,13 +398,8 @@ function renderThemeStyleMenu() {
 function updateThemeStyleButton() {
   const label = document.getElementById('theme-style-current-label');
   if (!label) return;
-  if (state.themeStyle === 'classic') {
-    label.textContent = t('styleClassic');
-  } else if (state.themeStyle === 'glass') {
-    label.textContent = t('styleGlass');
-  } else {
-    label.textContent = t('styleModern');
-  }
+  const picked = THEME_STYLE_ITEMS.find((x) => x.value === state.themeStyle) || THEME_STYLE_ITEMS[0];
+  label.textContent = getThemeStyleLabel(picked);
 }
 
 function closeThemeStyleMenu() {
@@ -727,16 +731,13 @@ function applyTheme() {
 }
 
 function applyThemeStyle() {
-  const mode = (state.themeStyle === 'classic' || state.themeStyle === 'glass') ? state.themeStyle : 'modern';
+  const allowed = THEME_STYLE_ITEMS.map((x) => x.value);
+  const mode = allowed.includes(state.themeStyle) ? state.themeStyle : (THEME_STYLE_ITEMS[0] ? THEME_STYLE_ITEMS[0].value : 'modern');
+  const picked = THEME_STYLE_ITEMS.find((x) => x.value === mode) || THEME_STYLE_ITEMS[0];
+  const cssFile = (picked && picked.css) ? String(picked.css) : (mode === 'classic' ? 'style-classic.css' : mode === 'glass' ? 'style-glass.css' : 'style-modern.css');
   const css = document.getElementById('theme-style-css');
   if (css) {
-    if (mode === 'classic') {
-      css.setAttribute('href', `/images/ui/style-classic.css?v=${THEME_CSS_VERSION}`);
-    } else if (mode === 'glass') {
-      css.setAttribute('href', `/images/ui/style-glass.css?v=${THEME_CSS_VERSION}`);
-    } else {
-      css.setAttribute('href', `/images/ui/style-modern.css?v=${THEME_CSS_VERSION}`);
-    }
+    css.setAttribute('href', `/images/ui/${cssFile}?v=${THEME_CSS_VERSION}`);
   }
   document.documentElement.setAttribute('data-theme-style', mode);
   document.getElementById('theme-style').value = mode;
@@ -1017,10 +1018,34 @@ function setTheme(theme) {
 }
 
 function setThemeStyle(mode) {
-  state.themeStyle = (mode === 'classic' || mode === 'modern' || mode === 'glass') ? mode : 'modern';
+  const allowed = THEME_STYLE_ITEMS.map((x) => x.value);
+  state.themeStyle = allowed.includes(mode) ? mode : (THEME_STYLE_ITEMS[0] ? THEME_STYLE_ITEMS[0].value : 'modern');
   localStorage.setItem('mtm_theme_style', state.themeStyle);
   applyThemeStyle();
   renderRows();
+}
+
+function normalizeThemeStyleConfig(items) {
+  if (!Array.isArray(items)) return null;
+  const out = [];
+  items.forEach((x) => {
+    if (!x || typeof x !== 'object') return;
+    const value = String(x.value || '').trim().toLowerCase();
+    const css = String(x.css || '').trim();
+    if (!value || !css) return;
+    const label = (x.label && typeof x.label === 'object') ? x.label : null;
+    out.push({ value, css, label, labelKey: x.labelKey || value });
+  });
+  return out.length ? out : null;
+}
+
+async function loadThemeStylesConfig() {
+  const q = `?_=${Date.now()}`;
+  try {
+    const cfg = await fetch('/i18n/theme-styles.json' + q).then(r => r.json());
+    const parsed = normalizeThemeStyleConfig(cfg);
+    if (parsed) THEME_STYLE_ITEMS = parsed;
+  } catch (_) {}
 }
 
 function setFontSize(mode) {
@@ -1153,7 +1178,7 @@ const storedThemeStyle = localStorage.getItem('mtm_theme_style');
 const storedFontSize = localStorage.getItem('mtm_font_size');
 state.lang = (typeof storedLang === 'string' && storedLang) ? storedLang.toLowerCase() : 'en';
 state.theme = (storedTheme === 'dark' || storedTheme === 'light' || storedTheme === 'auto') ? storedTheme : 'auto';
-state.themeStyle = (storedThemeStyle === 'classic' || storedThemeStyle === 'modern' || storedThemeStyle === 'glass') ? storedThemeStyle : 'modern';
+state.themeStyle = storedThemeStyle || 'modern';
 state.fontSize = (storedFontSize === '25' || storedFontSize === '50' || storedFontSize === '100') ? storedFontSize : '100';
 applyThemeStyle();
 applyTheme();
@@ -1185,12 +1210,24 @@ document.addEventListener('click', (e) => {
 });
 document.querySelectorAll('.tab').forEach(btn => btn.addEventListener('click', () => setActiveTab(btn.dataset.tab)));
 loadAll().catch(e => { document.getElementById('meta').textContent = `${t('loadError')}: ${e}`; });
-loadLanguageConfig().then(() => {
-  loadSettings().catch(() => {});
-  loadTranslations().catch(() => {});
+loadThemeStylesConfig().then(() => {
+  applyThemeStyle();
+  renderThemeStyleMenu();
+  loadLanguageConfig().then(() => {
+    loadSettings().catch(() => {});
+    loadTranslations().catch(() => {});
+  }).catch(() => {
+    loadSettings().catch(() => {});
+    loadTranslations().catch(() => {});
+  });
 }).catch(() => {
-  loadSettings().catch(() => {});
-  loadTranslations().catch(() => {});
+  loadLanguageConfig().then(() => {
+    loadSettings().catch(() => {});
+    loadTranslations().catch(() => {});
+  }).catch(() => {
+    loadSettings().catch(() => {});
+    loadTranslations().catch(() => {});
+  });
 });
 setInterval(() => { loadAll().catch(() => {}); }, 60000);
 </script>

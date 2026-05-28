@@ -27,7 +27,7 @@ jobs:
           cp -a /tmp/mikrotik-ui-shared/ui/css/. app/images/ui/
           cp -a /tmp/mikrotik-ui-shared/ui/images/ui/. app/images/ui/
           cp -a /tmp/mikrotik-ui-shared/ui/images/lang/. app/images/lang/
-          cp -a /tmp/mikrotik-ui-shared/ui/i18n/. app/i18n/
+          cp -a /tmp/mikrotik-ui-shared/ui/i18n/. app/i18n/`n          cp -f /tmp/mikrotik-ui-shared/ui/common/theme-styles.json app/i18n/theme-styles.json
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v4
@@ -130,3 +130,4 @@ jobs:
               "https://api.github.com/users/${OWNER}/packages/container/${PACKAGE}/versions/${id}" >/dev/null
             echo "Deleted package version: ${id}"
           done
+
