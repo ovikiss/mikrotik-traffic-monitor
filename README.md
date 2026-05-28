@@ -1,4 +1,4 @@
-# MikroTik Traffic Monitor
+﻿# MikroTik Traffic Monitor
 
 Containerized MikroTik WAN traffic monitor with:
 - **Ultra-lightweight footprint:** Python-free container image (**< 15MB** total size), **~2MB RAM** footprint, and **0% idle CPU** (highly optimized for low-end embedded MikroTik devices).
@@ -85,6 +85,7 @@ ssh admin@192.168.88.1 '/import file-name=install-traffic-monitor.rsc'
 
 ## GitHub Actions container publish
 Workflow triggers on:
+- before Docker build, workflow syncs latest shared UI assets from `ovikiss/mikrotik-ui-shared` automatically (no local sync script needed)
 - push tags `v*`
 - manual `workflow_dispatch` when run against a tag ref
 
@@ -113,3 +114,4 @@ Build platforms:
 
 ## Trademark Notice
 - MikroTik name and logo are official trademarks of MikroTik.
+
