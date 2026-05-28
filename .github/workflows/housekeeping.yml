@@ -78,6 +78,7 @@ jobs:
               ("linux", "arm", "v7"),
               ("linux", "arm64", ""),
           }
+          ENABLE_GHCR_CLEANUP = False
 
           API_BASE = "https://api.github.com"
           HEADERS = {
@@ -215,6 +216,12 @@ jobs:
                   log(f"Deleted run: {rid}")
 
           # 2) Cleanup GHCR package versions
+          if not ENABLE_GHCR_CLEANUP:
+              log("== GHCR cleanup ==")
+              log("GHCR cleanup disabled to preserve multi-arch manifest integrity.")
+              log("Housekeeping complete.")
+              raise SystemExit(0)
+
           log("== GHCR cleanup ==")
           versions = paginate(
               f"/users/{OWNER}/packages/container/{PACKAGE}/versions?per_page=100",
