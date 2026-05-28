@@ -1,4 +1,4 @@
-name: docker-publish
+﻿name: docker-publish
 
 on:
   push:
@@ -19,6 +19,15 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v6
+
+      - name: Sync latest shared UI
+        run: |
+          set -euo pipefail
+          git clone --depth 1 https://github.com/ovikiss/mikrotik-ui-shared.git /tmp/mikrotik-ui-shared
+          cp -a /tmp/mikrotik-ui-shared/ui/css/. app/images/ui/
+          cp -a /tmp/mikrotik-ui-shared/ui/images/ui/. app/images/ui/
+          cp -a /tmp/mikrotik-ui-shared/ui/images/lang/. app/images/lang/
+          cp -a /tmp/mikrotik-ui-shared/ui/i18n/. app/i18n/
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v4
@@ -105,7 +114,7 @@ jobs:
 
           if [ -n "${KEEP_DIGESTS}" ]; then
             EXTRA_KEEP_IDS="$(printf '%s' "$ALL" | jq -r --arg digests "$KEEP_DIGESTS" '
-              ($digests | split("\n") | map(select(length > 0))) as $want
+              ($digests | split("\\n") | map(select(length > 0))) as $want
               | .[] | select(.name as $n | ($want | index($n))) | .id
             ')"
             KEEP_IDS="$(printf '%s\n%s\n' "$KEEP_IDS" "$EXTRA_KEEP_IDS" | awk 'NF' | sort -u)"
