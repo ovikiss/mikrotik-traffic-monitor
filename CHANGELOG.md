@@ -2,6 +2,17 @@
 
 All notable changes to the MikroTik Traffic Monitor project will be documented in this file.
 
+## [0.8.10] - 2026-05-28
+### Added
+- **Shared Glass theme propagation**: Theme manifest in shared UI now includes `glass`, with shared CSS/background assets (`style-glass.css`, `bg-glass.jpg`) published from `ovikiss/mikrotik-ui-shared`.
+
+### Changed
+- **Dynamic shared theme catalog consumption**: Runtime theme-style list is loaded from shared `theme-styles.json`, so adding new shared themes propagates automatically at next build.
+
+## [0.8.9] - 2026-05-28
+### Fixed
+- **CI workflow shell parsing fix**: Repaired malformed newline/backtick in `docker-publish.yml` shared UI sync step that caused tag build failure on GitHub Actions.
+
 ## [0.8.5] - 2026-05-27
 ### Fixed
 - **Glass Table Column Balancing**: Rebalanced Glass table column widths so `Period`, `Total`, `RX`, and `TX` have more readable spacing while keeping `Visual` compact.
