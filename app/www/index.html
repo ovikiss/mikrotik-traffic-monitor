@@ -31,7 +31,7 @@
       <div class="subtitle" id="subtitle">Day / Month / Year aggregation, updated hourly.</div>
     </div>
     <div class="controls">
-      <label class="control" for="theme-style">
+      <label class="control" data-header-control="themeStyle" for="theme-style">
         <span id="theme-style-label">Theme</span>
         <div class="theme-dropdown" id="theme-style-dropdown">
           <button type="button" class="theme-toggle" id="theme-style-toggle" aria-haspopup="listbox" aria-expanded="false">
@@ -46,7 +46,7 @@
           </select>
         </div>
       </label>
-      <label class="control" for="theme">
+      <label class="control" data-header-control="theme" for="theme">
         <span id="theme-label">Mode</span>
         <div class="theme-dropdown" id="theme-dropdown">
           <button type="button" class="theme-toggle" id="theme-toggle" aria-haspopup="listbox" aria-expanded="false">
@@ -61,7 +61,7 @@
           </select>
         </div>
       </label>
-      <label class="control" for="font-size">
+      <label class="control" data-header-control="fontSize" for="font-size">
         <span id="font-label">Font size</span>
         <div class="theme-dropdown" id="font-dropdown">
           <button type="button" class="theme-toggle" id="font-toggle" aria-haspopup="listbox" aria-expanded="false">
@@ -76,7 +76,7 @@
           </select>
         </div>
       </label>
-      <label class="control" for="poll-interval">
+      <label class="control" data-header-control="pollInterval" for="poll-interval">
         <span id="poll-label">Poll</span>
         <div class="theme-dropdown" id="poll-dropdown">
           <button type="button" class="theme-toggle" id="poll-toggle" aria-haspopup="listbox" aria-expanded="false">
@@ -92,7 +92,7 @@
           </select>
         </div>
       </label>
-      <label class="control" for="lang">
+      <label class="control" data-header-control="language" for="lang">
         <span id="lang-label">Language</span>
         <div class="lang-dropdown" id="lang-dropdown">
           <button type="button" class="lang-toggle" id="lang-toggle" aria-haspopup="listbox" aria-expanded="false">
@@ -1039,6 +1039,39 @@ function normalizeThemeStyleConfig(items) {
   return out.length ? out : null;
 }
 
+function applyHeaderControlsConfig(cfg) {
+  const controlsRoot = document.querySelector('.controls');
+  if (!controlsRoot || !cfg || typeof cfg !== 'object') return;
+  const controls = new Map();
+  controlsRoot.querySelectorAll('[data-header-control]').forEach((el) => {
+    controls.set(el.getAttribute('data-header-control'), el);
+  });
+
+  const visible = (cfg.visible && typeof cfg.visible === 'object') ? cfg.visible : {};
+  controls.forEach((el, key) => {
+    if (Object.prototype.hasOwnProperty.call(visible, key) && visible[key] === false) {
+      el.style.display = 'none';
+    } else {
+      el.style.display = '';
+    }
+  });
+
+  if (Array.isArray(cfg.order)) {
+    cfg.order.forEach((key) => {
+      const el = controls.get(String(key));
+      if (el) controlsRoot.appendChild(el);
+    });
+  }
+}
+
+async function loadHeaderControlsConfig() {
+  const q = `?_=${Date.now()}`;
+  try {
+    const cfg = await fetch('/i18n/header-controls.json' + q).then(r => r.json());
+    applyHeaderControlsConfig(cfg);
+  } catch (_) {}
+}
+
 async function loadThemeStylesConfig() {
   const q = `?_=${Date.now()}`;
   try {
@@ -1210,7 +1243,7 @@ document.addEventListener('click', (e) => {
 });
 document.querySelectorAll('.tab').forEach(btn => btn.addEventListener('click', () => setActiveTab(btn.dataset.tab)));
 loadAll().catch(e => { document.getElementById('meta').textContent = `${t('loadError')}: ${e}`; });
-loadThemeStylesConfig().then(() => {
+loadHeaderControlsConfig().catch(() => {}).then(() => loadThemeStylesConfig()).then(() => {
   applyThemeStyle();
   renderThemeStyleMenu();
   loadLanguageConfig().then(() => {
