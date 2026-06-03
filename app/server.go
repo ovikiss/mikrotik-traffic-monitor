@@ -248,8 +248,8 @@ func main() {
 		} else if strings.HasPrefix(path, "/www/") {
 			filepathStr = filepath.Join(staticDir, path)
 			cacheStatic = true
-		} else if strings.HasPrefix(path, "/images/") || strings.HasPrefix(path, "/i18n/") || strings.HasPrefix(path, "/common/") {
-			filepathStr = filepath.Join(staticDir, path)
+		} else if strings.HasPrefix(path, "/styles-") || strings.HasPrefix(path, "/images/") || strings.HasPrefix(path, "/i18n/") || strings.HasPrefix(path, "/common/") {
+			filepathStr = filepath.Join(staticDir, "www", strings.TrimPrefix(path, "/"))
 			cacheStatic = true
 		} else if strings.HasPrefix(path, "/api/") || path == "/day.csv" || path == "/month.csv" || path == "/year.csv" || path == "/daily.csv" || path == "/month_days.csv" || path == "/year_months.csv" || path == "/info.txt" {
 			filepathStr = filepath.Join(wwwDir, path)
