@@ -12,9 +12,6 @@ Containerized MikroTik WAN traffic monitor with:
 - Month/Year expand works from arrow or period-cell tap (easier on mobile)
 - JSON API for Home Assistant integration
 
-## UI preview (Light + Dark)
-![MikroTik Traffic Monitor UI (Light and Dark)](docs/ui-light-dark.png)
-
 ## What it exposes
 - UI: `http://<router-lan-ip>:8088/`
 - CSV: `/day.csv`, `/month.csv`, `/year.csv`, `/info.txt`
@@ -32,7 +29,6 @@ Containerized MikroTik WAN traffic monitor with:
 - `scripts/install-to-router.sh` - helper that uploads/imports `install.rsc` over SSH
 - `homeassistant/mikrotik_traffic_package.yaml` - Home Assistant REST + template entities
 - `homeassistant/dashboard_cards.yaml` - Lovelace example cards for stats view
-- `docs/ui-light-dark.png` - README UI preview screenshot
 - `.github/workflows/ci.yml` - CI checks
 - `.github/workflows/docker-publish.yml` - multi-arch Docker build/publish to GHCR
 - `.github/workflows/housekeeping.yml` - cleanup workflow for old runs/images
