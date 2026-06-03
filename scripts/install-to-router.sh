@@ -6,6 +6,7 @@ PLATFORM="${2:-linux/arm/v7}"
 IMAGE="ghcr.io/ovikiss/mikrotik-traffic-monitor:latest"
 RSC_LOCAL="mikrotik/install.rsc"
 RSC_REMOTE="install-traffic-monitor.rsc"
+UI_SHARED_REV="$(git ls-remote https://github.com/ovikiss/mikrotik-ui-shared.git refs/heads/main | awk '{print $1}')"
 
 cleanup_remote_files() {
   while IFS= read -r remote_file; do
@@ -32,6 +33,7 @@ gh auth token | docker login ghcr.io -u ovikiss --password-stdin >/dev/null
 echo "Building and pushing $IMAGE for $PLATFORM"
 docker buildx build \
   --platform "$PLATFORM" \
+  --build-arg "UI_SHARED_REV=$UI_SHARED_REV" \
   -t "$IMAGE" \
   --push \
   .
