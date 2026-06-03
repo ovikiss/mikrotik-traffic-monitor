@@ -23,6 +23,7 @@ var (
 type Settings struct {
 	PollInterval string `json:"poll_interval,omitempty"`
 	Theme        string `json:"theme,omitempty"`
+	ThemeStyle   string `json:"theme_style,omitempty"`
 	Language     string `json:"language,omitempty"`
 	FontSize     string `json:"font_size,omitempty"`
 }
@@ -87,6 +88,12 @@ func validTheme(v string) bool {
 	return v == "light" || v == "dark" || v == "auto"
 }
 
+var slugRegex = regexp.MustCompile(`^[a-z][a-z0-9-_]{0,63}$`)
+
+func validThemeStyle(v string) bool {
+	return slugRegex.MatchString(v)
+}
+
 func validFontSize(v string) bool {
 	return v == "25" || v == "50" || v == "100"
 }
@@ -129,6 +136,7 @@ func main() {
 				"poll_interval":           cfg.PollInterval,
 				"effective_poll_interval": effectivePollInterval,
 				"theme":                   cfg.Theme,
+				"theme_style":             cfg.ThemeStyle,
 				"language":                cfg.Language,
 				"font_size":               cfg.FontSize,
 			}
@@ -187,6 +195,34 @@ func main() {
 					}
 					cfg.Theme = theme
 					out["theme"] = theme
+					changed = true
+				}
+			}
+
+			if val, ok := req["theme_style"]; ok {
+				if str, ok := val.(string); ok {
+					themeStyle := strings.ToLower(strings.TrimSpace(str))
+					if !validThemeStyle(themeStyle) {
+						w.Header().Set("Content-Type", "application/json")
+						w.WriteHeader(http.StatusBadRequest)
+						json.NewEncoder(w).Encode(map[string]string{"error": "invalid_theme_style"})
+						return
+					}
+					cfg.ThemeStyle = themeStyle
+					out["theme_style"] = themeStyle
+					changed = true
+				}
+			} else if val, ok := req["themeStyle"]; ok {
+				if str, ok := val.(string); ok {
+					themeStyle := strings.ToLower(strings.TrimSpace(str))
+					if !validThemeStyle(themeStyle) {
+						w.Header().Set("Content-Type", "application/json")
+						w.WriteHeader(http.StatusBadRequest)
+						json.NewEncoder(w).Encode(map[string]string{"error": "invalid_theme_style"})
+						return
+					}
+					cfg.ThemeStyle = themeStyle
+					out["theme_style"] = themeStyle
 					changed = true
 				}
 			}

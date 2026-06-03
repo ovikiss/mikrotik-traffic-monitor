@@ -930,6 +930,7 @@ function setThemeStyle(mode) {
   localStorage.setItem('mtm_theme_style', state.themeStyle);
   applyThemeStyle();
   renderRows();
+  saveSettings({ theme_style: state.themeStyle }).catch(() => {});
 }
 
 function setFontSize(mode) {
@@ -971,6 +972,8 @@ async function loadSettings() {
     const pRaw = (d && d.poll_interval) ? d.poll_interval : ((d && d.effective_poll_interval) ? d.effective_poll_interval : '');
     const p = normalizePollIntervalOption(pRaw);
     const theme = (d && getThemeDef(String(d.theme || '').toLowerCase())) ? String(d.theme || '').toLowerCase() : '';
+    const themeStyleRaw = String((d && (d.theme_style || d.themeStyle)) || '').toLowerCase();
+    const themeStyle = (d && getThemeStyleDef(themeStyleRaw)) ? themeStyleRaw : '';
     const lang = (d && getLanguageDef(String(d.language || '').toLowerCase())) ? String(d.language || '').toLowerCase() : '';
     const fontSize = (d && (d.font_size === '25' || d.font_size === '50' || d.font_size === '100')) ? d.font_size : '';
     state.pollInterval = p;
@@ -980,6 +983,11 @@ async function loadSettings() {
       state.theme = theme;
       localStorage.setItem('mtm_theme', theme);
       applyTheme();
+    }
+    if (themeStyle) {
+      state.themeStyle = themeStyle;
+      localStorage.setItem('mtm_theme_style', themeStyle);
+      applyThemeStyle();
     }
     if (lang) {
       state.lang = lang;
