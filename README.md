@@ -19,14 +19,15 @@ Containerized MikroTik WAN traffic monitor with:
 - UI: `http://<router-lan-ip>:8088/`
 - CSV: `/day.csv`, `/month.csv`, `/year.csv`, `/info.txt`
 - API: `/api/summary.json`, `/api/day.json`, `/api/month.json`, `/api/year.json`
-- Static UI files are served from the container image; `/data` stores only persistent/generated data (`traffic.db`, `settings.json`, CSV/API output).
+- Static UI files are served from the container image under `app/www/`; `/data` stores only persistent/generated data (`traffic.db`, `settings.json`, CSV/API output).
 
 ## Repo structure
 - `app/mt-traffic.sh` - runtime entrypoint: SNMP collector, SQLite writer, native JSON generator, and Go server launcher
 - `app/server.go` - lightweight, high-performance static asset and settings REST API web server written in Go (zero dependencies, compiles to a ~5MB static binary)
 - `app/www/index.html` - static frontend (glass UI, tabs Day/Month/Year, settings persistence)
 - `scripts/sync-ui-shared.sh` - syncs shared UI assets from `mikrotik-ui-shared` into the working tree or Docker build
-- `app/i18n/`, `app/images/`, `app/common/` - generated from `mikrotik-ui-shared` at build time and intentionally not tracked as source
+- `app/i18n/` - generated from `mikrotik-ui-shared` at build time and intentionally not tracked as source
+- `app/www/common/`, `app/www/images/`, `app/www/styles*.css` - generated from `mikrotik-ui-shared` at build time and intentionally not tracked as source
 - `mikrotik/install.rsc` - RouterOS install/deploy script (container, env, mount, NAT)
 - `scripts/install-to-router.sh` - helper that uploads/imports `install.rsc` over SSH
 - `homeassistant/mikrotik_traffic_package.yaml` - Home Assistant REST + template entities
@@ -110,4 +111,3 @@ Build platforms:
 
 ## Trademark Notice
 - MikroTik name and logo are official trademarks of MikroTik.
-

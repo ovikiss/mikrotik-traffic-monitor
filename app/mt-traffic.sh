@@ -242,8 +242,8 @@ resolve_ifindex() {
 
 prepare_data_dir() {
 mkdir -p "$WWW"
-# Static UI assets are served from /app. Keep /data/www for generated files only.
-rm -rf "$WWW/index.html" "$WWW/images" "$WWW/i18n"
+# Static UI assets are served from /app/www. Keep /data/www for generated files only.
+rm -rf "$WWW/index.html" "$WWW/images" "$WWW/common" "$WWW/i18n"
 }
 
 sqlite_exec() {

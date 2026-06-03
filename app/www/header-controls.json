@@ -1,0 +1,9 @@
+{
+  "enabled": {
+    "themeStyle": true,
+    "theme": true,
+    "fontSize": true,
+    "pollInterval": true,
+    "language": true
+  }
+}

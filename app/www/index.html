@@ -4,99 +4,11 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title></title>
-    <link rel="stylesheet" id="theme-style-css" href="/images/ui/styles-modern.css?v=20260516f" />
+    <link rel="stylesheet" id="theme-style-css" href="styles-modern.css?v=20260516f" />
 </head>
 <body>
   <div class="dashboard-container">
-    <div class="topbar">
-    <div>
-      <h1 class="brand-title">
-        <svg class="brand-mikrotik-mark" viewBox="0 0 258.95 44.62" width="258.95" height="44.62" preserveAspectRatio="xMinYMid meet" role="img" aria-label="MikroTik" xmlns="http://www.w3.org/2000/svg">
-          <g fill="currentColor">
-            <path d="M130.32,21.19c-.16-.21-.14-.5.04-.68l7.32-7.19c.33-.32.1-.88-.36-.88h-4.26c-.21,0-.4.08-.55.22l-8.24,7.56c-.33.3-.86.07-.86-.38v-6.58c0-.45-.37-.82-.82-.82h-2.97c-.45,0-.82.37-.82.82v18.27c0,.45.37.82.82.82h2.97c.46,0,.82-.37.82-.83l-.03-4.24c0-.23.09-.45.26-.61l2.56-2.38c.22-.2.56-.18.75.05l6.19,7.69c.16.19.39.31.64.31h4.27c.43,0,.67-.49.4-.83l-8.14-10.33Z"/>
-            <path d="M103.08,12.44h2.98c.45,0,.82.37.82.82v18.27c0,.45-.37.82-.82.82h-2.97c-.45,0-.82-.37-.82-.82V13.26c0-.45.37-.82.82-.82Z"/>
-            <path d="M159.77,12.38c-.39-.05-.95-.12-1.39-.12-2.67,0-4.83.76-6.19,2.16v-1.16c0-.45-.37-.82-.82-.82h-2.83c-.45,0-.82.37-.82.82v18.27c0,.45.37.82.82.82h2.97c.45,0,.82-.37.82-.82v-9.1c0-3.67,1.87-5.69,5.26-5.69.61.01,1.59.05,2.3.07.47.02.85-.35.85-.82v-2.5c0-.56-.42-1.04-.97-1.11Z"/>
-            <path d="M82.08,12.27c-2.68,0-5.09.92-6.74,2.56-.22.22-.56.2-.76-.03-1.41-1.63-3.57-2.53-6.17-2.53-2.39,0-4.43.71-5.83,2.02v-1.02c0-.45-.37-.82-.82-.82h-2.83c-.45,0-.82.37-.82.82v18.27c0,.45.37.82.82.82h2.97c.45,0,.82-.37.82-.82v-9.41c0-3.55,1.82-5.59,4.99-5.59,2.79,0,4.21,1.63,4.21,4.85v10.15c0,.45.37.82.82.82h2.97c.45,0,.82-.37.82-.82v-9.41c0-3.55,1.82-5.59,4.99-5.59,2.8,0,4.21,1.63,4.21,4.85v10.15c0,.45.37.82.82.82h2.97c.45,0,.82-.37.82-.82v-10.54c0-5.54-3.01-8.72-8.26-8.72Z"/>
-            <path d="M223.46,12.44h2.97c.45,0,.82.37.82.82v18.27c0,.45-.37.82-.82.82h-2.97c-.45,0-.82-.37-.82-.82V13.26c0-.45.37-.82.82-.82Z"/>
-            <path d="M258.84,31.52l-8.14-10.33c-.16-.21-.14-.5.04-.68l7.32-7.19c.33-.32.1-.88-.36-.88h-4.26c-.21,0-.4.08-.55.22l-8.24,7.56c-.33.3-.86.07-.86-.38v-6.58c0-.45-.37-.82-.82-.82h-2.97c-.45,0-.82.37-.82.82v18.27c0,.45.37.82.82.82h2.97c.46,0,.82-.37.82-.83l-.03-4.24c0-.23.09-.45.26-.61l2.56-2.38c.22-.2.56-.18.75.06l6.19,7.69c.16.19.39.31.64.31h4.27c.43,0,.67-.49.4-.83Z"/>
-            <path d="M177.29,12.27c-5.99,0-10.34,4.26-10.34,10.13s4.35,10.17,10.34,10.17,10.31-4.28,10.31-10.17-4.33-10.13-10.31-10.13ZM177.29,28.37c-3.35,0-5.69-2.46-5.69-5.97s2.34-5.94,5.69-5.94,5.66,2.39,5.66,5.94-2.33,5.97-5.66,5.97Z"/>
-            <path d="M212.57,12.44h-17.95c-.45,0-.82.37-.82.82v2.66c0,.45.37.82.82.82h6.1c.28,0,.51.23.51.51v14.28c0,.45.37.82.82.82h3.08c.45,0,.82-.37.82-.82v-14.28c0-.28.23-.51.51-.51h6.1c.45,0,.82-.37.82-.82v-2.66c0-.45-.37-.82-.82-.82Z"/>
-            <path d="M11.71,21.59c-.09-.1-.19-.19-.31-.26l-2.95-1.63c-.11-.06-.22-.07-.32-.05-.27-.02-.53.18-.53.48v7.99c0,.72.39,1.39,1.03,1.74l2.7,1.48c.33.18.73-.06.73-.43v-8.58c0-.29-.13-.55-.34-.74Z"/>
-            <path d="M33.21,14.78l-10.19-5.58-1.31-.72c-.52-.29-1.16-.29-1.69,0l-2.9,1.6c-.1.05-.16.13-.21.22-.17.23-.12.57.15.72l8.62,4.72c.3.22.29.68-.05.87l-3.81,2.11c-.52.29-1.16.29-1.69,0l-8.48-4.69c-.52-.29-1.16-.29-1.69,0l-1.4.77c-.28.16-.51.39-.66.65-.2.31-.32.68-.32,1.06v.52l6.44,3.53,3.73,2.06s.06.05.09.07c.09.06.17.12.25.19.24.23.4.52.5.83.04.14.06.29.06.44v10.66c0,.26.12.49.31.66.07.08.15.14.24.2l.76.42c.59.33,1.31.33,1.91,0l.76-.42c.17-.09.31-.24.39-.41.1-.14.15-.31.15-.49v-10.55c0-.63.34-1.22.9-1.53l4.95-2.73c.32-.18.7.03.75.38v10.57c0,.38.4.62.73.43l2.7-1.48c.64-.35,1.03-1.02,1.03-1.74v-11.61c0-.72-.4-1.39-1.03-1.74Z"/>
-            <path d="M39.33,9.57L23.3.62c-1.48-.83-3.28-.83-4.76,0L2.5,9.57c-1.54.86-2.5,2.49-2.5,4.26v17.08c0,1.78.97,3.42,2.53,4.28l16.04,8.82c1.46.81,3.24.81,4.7,0l16.04-8.82c1.56-.86,2.53-2.5,2.53-4.28V13.83c0-1.77-.96-3.4-2.5-4.26ZM36.95,32.33l-15.01,8.26c-.64.35-1.41.35-2.05,0l-15.01-8.26c-.68-.37-1.1-1.09-1.1-1.86V14.27c0-.77.42-1.48,1.09-1.86l15.01-8.38c.64-.36,1.43-.36,2.07,0l15.01,8.38c.67.38,1.09,1.09,1.09,1.86v16.2c0,.78-.42,1.49-1.1,1.86Z"/>
-          </g>
-        </svg>
-        <span class="brand-text" id="brand-text"></span>
-      </h1>
-      <div class="subtitle" id="subtitle"></div>
-    </div>
-    <div class="controls">
-      <label class="control" data-header-control="themeStyle" for="theme-style">
-        <span id="theme-style-label"></span>
-        <div class="theme-dropdown" id="theme-style-dropdown">
-          <button type="button" class="theme-toggle" id="theme-style-toggle" aria-haspopup="listbox" aria-expanded="false">
-            <img src="/images/ui/theme-style.svg" alt="" />
-            <span id="theme-style-current-label"></span>
-          </button>
-          <div class="theme-menu" id="theme-style-menu" role="listbox" aria-label="Theme style options"></div>
-          <select id="theme-style" class="sr-only" tabindex="-1" aria-hidden="true"></select>
-        </div>
-      </label>
-      <label class="control" data-header-control="theme" for="theme">
-        <span id="theme-label"></span>
-        <div class="theme-dropdown" id="theme-dropdown">
-          <button type="button" class="theme-toggle" id="theme-toggle" aria-haspopup="listbox" aria-expanded="false">
-            <img id="theme-current-icon" src="/images/ui/theme-auto.svg" alt="" />
-            <span id="theme-current-label"></span>
-          </button>
-          <div class="theme-menu" id="theme-menu" role="listbox" aria-label="Theme options"></div>
-          <select id="theme" class="sr-only" tabindex="-1" aria-hidden="true"></select>
-        </div>
-      </label>
-      <label class="control" data-header-control="fontSize" for="font-size">
-        <span id="font-label"></span>
-        <div class="theme-dropdown" id="font-dropdown">
-          <button type="button" class="theme-toggle" id="font-toggle" aria-haspopup="listbox" aria-expanded="false">
-            <img src="/images/ui/font-size.svg" alt="" />
-            <span id="font-current-label"></span>
-          </button>
-          <div class="theme-menu" id="font-menu" role="listbox" aria-label="Font size options"></div>
-          <select id="font-size" class="sr-only" tabindex="-1" aria-hidden="true">
-            <option value="25" id="font-opt-legacy">25%</option>
-            <option value="50" id="font-opt-current">50%</option>
-            <option value="100" id="font-opt-large">100%</option>
-          </select>
-        </div>
-      </label>
-      <label class="control" data-header-control="pollInterval" for="poll-interval">
-        <span id="poll-label"></span>
-        <div class="theme-dropdown" id="poll-dropdown">
-          <button type="button" class="theme-toggle" id="poll-toggle" aria-haspopup="listbox" aria-expanded="false">
-            <img src="/images/ui/interval.svg" alt="" />
-            <span id="poll-current-label"></span>
-          </button>
-          <div class="theme-menu" id="poll-menu" role="listbox" aria-label="Poll interval options"></div>
-          <select id="poll-interval" class="sr-only" tabindex="-1" aria-hidden="true">
-            <option value="1h" id="poll-interval-1h">1 hour</option>
-            <option value="3h" id="poll-interval-3h">3 hours</option>
-            <option value="6h" id="poll-interval-6h">6 hours</option>
-            <option value="12h" id="poll-interval-12h">12 hours</option>
-          </select>
-        </div>
-      </label>
-      <label class="control" data-header-control="language" for="lang">
-        <span id="lang-label"></span>
-        <div class="lang-dropdown" id="lang-dropdown">
-          <button type="button" class="lang-toggle" id="lang-toggle" aria-haspopup="listbox" aria-expanded="false">
-            <img id="lang-current-icon" src="/images/lang/en.svg" alt="" />
-            <span id="lang-current-label"></span>
-          </button>
-          <div class="lang-menu" id="lang-menu" role="listbox" aria-label="Language options"></div>
-          <select id="lang" class="sr-only" tabindex="-1" aria-hidden="true"></select>
-        </div>
-      </label>
-    </div>
-  </div>
+    <div class="topbar" data-mikrotik-header-root></div>
 
   <div class="dashboard-grid">
 
@@ -166,10 +78,12 @@
   </div>
   </div>
 
+<script src="common/header.js"></script>
+<script src="common/dropdown-utils.js"></script>
 <script>
 const DEFAULT_LANGUAGES = [
-  { code: 'en', label: 'EN', flag: '\uD83C\uDDFA\uD83C\uDDF8', file: '/i18n/en.json', icon: '/images/lang/en.svg' },
-  { code: 'ro', label: 'RO', flag: '\uD83C\uDDF7\uD83C\uDDF4', file: '/i18n/ro.json', icon: '/images/lang/ro.svg' }
+  { code: 'en', label: 'EN', flag: '\uD83C\uDDFA\uD83C\uDDF8', file: '/i18n/en.json', icon: 'images/lang/en.svg' },
+  { code: 'ro', label: 'RO', flag: '\uD83C\uDDF7\uD83C\uDDF4', file: '/i18n/ro.json', icon: 'images/lang/ro.svg' }
 ];
 const I18N = {};
 const I18N_FALLBACK = {
@@ -239,14 +153,14 @@ const MONTH_NAMES = {
   ro: ['Ian', 'Feb', 'Mar', 'Apr', 'Mai', 'Iun', 'Iul', 'Aug', 'Sep', 'Oct', 'Noi', 'Dec']
 };
 const DEFAULT_THEME_OPTIONS = [
-  { value: 'auto', label: { en: 'Auto', ro: 'Auto' }, icon: '/images/ui/theme-auto.svg' },
-  { value: 'light', label: { en: 'Light', ro: 'Luminos' }, icon: '/images/ui/theme-light.svg' },
-  { value: 'dark', label: { en: 'Dark', ro: 'Intunecat' }, icon: '/images/ui/theme-dark.svg' }
+  { value: 'auto', label: { en: 'Auto', ro: 'Auto' }, icon: 'images/ui/theme-auto.svg' },
+  { value: 'light', label: { en: 'Light', ro: 'Luminos' }, icon: 'images/ui/theme-light.svg' },
+  { value: 'dark', label: { en: 'Dark', ro: 'Intunecat' }, icon: 'images/ui/theme-dark.svg' }
 ];
 const DEFAULT_THEME_STYLE_OPTIONS = [
-  { value: 'modern', label: { en: 'Modern', ro: 'Modern' }, css: '/images/ui/styles-modern.css' },
-  { value: 'classic', label: { en: 'Classic', ro: 'Clasic' }, css: '/images/ui/styles-classic.css' },
-  { value: 'glass', label: { en: 'Glass', ro: 'Glass' }, css: '/images/ui/styles-glass.css' }
+  { value: 'modern', label: { en: 'Modern', ro: 'Modern' }, css: 'styles-modern.css' },
+  { value: 'classic', label: { en: 'Classic', ro: 'Clasic' }, css: 'styles-classic.css' },
+  { value: 'glass', label: { en: 'Glass', ro: 'Glass' }, css: 'styles-glass.css' }
 ];
 const POLL_ITEMS = [
   { value: '1h', amount: 1 },
@@ -282,7 +196,7 @@ function t(key) {
 }
 
 function uiMetricIcon(name) {
-  return `<img class="ico-inline" src="/images/ui/${name}.svg" alt="" />`;
+  return `<img class="ico-inline" src="images/ui/${name}.svg" alt="" />`;
 }
 
 function esc(v) {
@@ -307,7 +221,10 @@ function normalizeLanguageList(items) {
     const label = String(x.label || code.toUpperCase()).trim();
     const flag = String(x.flag || '').trim();
     const file = String(x.file || '').trim();
-    const icon = String(x.icon || `/images/lang/${code}.svg`).trim();
+    const icon = String(x.icon || `images/lang/${code}.svg`)
+      .trim()
+      .replace(/^\/+/, '')
+      .replace(/^images\/lang\//, 'images/lang/');
     if (!/^[a-z][a-z0-9_-]{1,15}$/.test(code)) return;
     if (!file || file[0] !== '/') return;
     out.push({ code, label: label || code.toUpperCase(), flag, file, icon });
@@ -329,7 +246,10 @@ function normalizeThemeOptions(items) {
     const label = x.label && typeof x.label === 'object'
       ? x.label
       : { en: String(x.label || value), ro: String(x.label || value) };
-    const icon = String(x.icon || `/images/ui/theme-${value}.svg`).trim();
+    const icon = String(x.icon || `images/ui/theme-${value}.svg`)
+      .trim()
+      .replace(/^\/+/, '')
+      .replace(/^images\/ui\//, 'images/ui/');
     out.push({ value, label, icon });
     seen.add(value);
   });
@@ -347,10 +267,10 @@ function normalizeThemeStyleOptions(items) {
     const label = x.label && typeof x.label === 'object'
       ? x.label
       : { en: String(x.label || value), ro: String(x.label || value) };
-    const css = String(x.css || `/images/ui/styles-${value}.css`)
+    const css = String(x.css || `styles-${value}.css`)
       .trim()
-      .replace(/\/images\/ui\/style-/g, '/images/ui/styles-')
-      .replace(/\/images\/ui\/styles-/g, '/images/ui/styles-')
+      .replace(/^\/+/, '')
+      .replace(/^images\/ui\//, '')
       .replace(/^style-/g, 'styles-');
     out.push({ value, label, css });
     seen.add(value);
@@ -402,16 +322,16 @@ function renderLanguageOptions() {
   if (sel) sel.value = state.lang;
 }
 function themeIconByMode(mode) {
-  if (mode === 'light') return '/images/ui/theme-light.svg';
-  if (mode === 'dark') return '/images/ui/theme-dark.svg';
-  return '/images/ui/theme-auto.svg';
+  if (mode === 'light') return 'images/ui/theme-light.svg';
+  if (mode === 'dark') return 'images/ui/theme-dark.svg';
+  return 'images/ui/theme-auto.svg';
 }
 
 function updateLanguageButton() {
   const langDef = getLanguageDef(state.lang) || getLanguageDef('en');
   const icon = document.getElementById('lang-current-icon');
   const label = document.getElementById('lang-current-label');
-  if (icon) icon.setAttribute('src', (langDef && langDef.icon) ? langDef.icon : '/images/lang/en.svg');
+  if (icon) icon.setAttribute('src', (langDef && langDef.icon) ? langDef.icon : 'images/lang/en.svg');
   if (label) label.textContent = (langDef && langDef.label) ? langDef.label : 'EN';
   const sel = document.getElementById('lang');
   if (sel) sel.value = state.lang;
@@ -430,7 +350,7 @@ function renderThemeStyleMenu() {
     item.className = 'theme-item';
     item.setAttribute('role', 'option');
     item.setAttribute('data-theme-style', x.value);
-    item.innerHTML = `<img src="/images/ui/theme-style.svg" alt="" /><span>${esc(label)}</span>`;
+    item.innerHTML = `<img src="images/ui/theme-style.svg" alt="" /><span>${esc(label)}</span>`;
     item.addEventListener('click', () => {
       closeThemeStyleMenu();
       setThemeStyle(x.value);
@@ -459,31 +379,25 @@ function updateThemeStyleButton() {
 function closeThemeStyleMenu() {
   const menu = document.getElementById('theme-style-menu');
   const toggle = document.getElementById('theme-style-toggle');
-  if (menu) menu.classList.remove('open');
-  if (toggle) toggle.setAttribute('aria-expanded', 'false');
+  closeDropdownMenu(menu, toggle);
 }
 
 function toggleThemeStyleMenu() {
   const menu = document.getElementById('theme-style-menu');
   const toggle = document.getElementById('theme-style-toggle');
-  if (!menu || !toggle) return;
-  const open = menu.classList.toggle('open');
-  toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+  toggleDropdownMenu(menu, toggle, [closeThemeMenu, closeFontMenu, closePollMenu, closeLanguageMenu]);
 }
 
 function closeLanguageMenu() {
   const menu = document.getElementById('lang-menu');
   const toggle = document.getElementById('lang-toggle');
-  if (menu) menu.classList.remove('open');
-  if (toggle) toggle.setAttribute('aria-expanded', 'false');
+  closeDropdownMenu(menu, toggle);
 }
 
 function toggleLanguageMenu() {
   const menu = document.getElementById('lang-menu');
   const toggle = document.getElementById('lang-toggle');
-  if (!menu || !toggle) return;
-  const open = menu.classList.toggle('open');
-  toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+  toggleDropdownMenu(menu, toggle, [closeThemeStyleMenu, closeThemeMenu, closeFontMenu, closePollMenu]);
 }
 
 function renderThemeMenu() {
@@ -530,16 +444,13 @@ function updateThemeButton() {
 function closeThemeMenu() {
   const menu = document.getElementById('theme-menu');
   const toggle = document.getElementById('theme-toggle');
-  if (menu) menu.classList.remove('open');
-  if (toggle) toggle.setAttribute('aria-expanded', 'false');
+  closeDropdownMenu(menu, toggle);
 }
 
 function toggleThemeMenu() {
   const menu = document.getElementById('theme-menu');
   const toggle = document.getElementById('theme-toggle');
-  if (!menu || !toggle) return;
-  const open = menu.classList.toggle('open');
-  toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+  toggleDropdownMenu(menu, toggle, [closeThemeStyleMenu, closeFontMenu, closePollMenu, closeLanguageMenu]);
 }
 
 function renderFontMenu() {
@@ -552,7 +463,7 @@ function renderFontMenu() {
     item.className = 'theme-item';
     item.setAttribute('role', 'option');
     item.setAttribute('data-font-size', x.value);
-    item.innerHTML = `<img src="/images/ui/font-size.svg" alt="" /><span>${t(x.labelKey)}</span>`;
+    item.innerHTML = `<img src="images/ui/font-size.svg" alt="" /><span>${t(x.labelKey)}</span>`;
     item.addEventListener('click', () => {
       closeFontMenu();
       setFontSize(x.value);
@@ -572,16 +483,13 @@ function updateFontButton() {
 function closeFontMenu() {
   const menu = document.getElementById('font-menu');
   const toggle = document.getElementById('font-toggle');
-  if (menu) menu.classList.remove('open');
-  if (toggle) toggle.setAttribute('aria-expanded', 'false');
+  closeDropdownMenu(menu, toggle);
 }
 
 function toggleFontMenu() {
   const menu = document.getElementById('font-menu');
   const toggle = document.getElementById('font-toggle');
-  if (!menu || !toggle) return;
-  const open = menu.classList.toggle('open');
-  toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+  toggleDropdownMenu(menu, toggle, [closeThemeStyleMenu, closeThemeMenu, closePollMenu, closeLanguageMenu]);
 }
 
 function renderPollMenu() {
@@ -594,7 +502,7 @@ function renderPollMenu() {
     item.className = 'theme-item';
     item.setAttribute('role', 'option');
     item.setAttribute('data-poll', x.value);
-    item.innerHTML = `<img src="/images/ui/interval.svg" alt="" /><span>${formatPollInterval(x.value)}</span>`;
+    item.innerHTML = `<img src="images/ui/interval.svg" alt="" /><span>${formatPollInterval(x.value)}</span>`;
     item.addEventListener('click', () => {
       closePollMenu();
       savePollInterval(x.value).catch(() => {});
@@ -613,16 +521,13 @@ function updatePollButton() {
 function closePollMenu() {
   const menu = document.getElementById('poll-menu');
   const toggle = document.getElementById('poll-toggle');
-  if (menu) menu.classList.remove('open');
-  if (toggle) toggle.setAttribute('aria-expanded', 'false');
+  closeDropdownMenu(menu, toggle);
 }
 
 function togglePollMenu() {
   const menu = document.getElementById('poll-menu');
   const toggle = document.getElementById('poll-toggle');
-  if (!menu || !toggle) return;
-  const open = menu.classList.toggle('open');
-  toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+  toggleDropdownMenu(menu, toggle, [closeThemeStyleMenu, closeThemeMenu, closeFontMenu, closeLanguageMenu]);
 }
 
 function formatPollInterval(v) {
@@ -799,7 +704,9 @@ function applyThemeStyle() {
   const mode = picked && picked.value ? picked.value : 'modern';
   const css = document.getElementById('theme-style-css');
   if (css) {
-    const href = (picked && picked.css) ? picked.css : `/images/ui/styles-${mode}.css`;
+    const href = (picked && picked.css)
+      ? String(picked.css).replace(/^\/+/, '').replace(/^images\/ui\//, '').replace(/^style-/g, 'styles-')
+      : `styles-${mode}.css`;
     css.setAttribute('href', `${href}?v=${THEME_CSS_VERSION}`);
   }
   document.documentElement.setAttribute('data-theme-style', mode);
@@ -1163,8 +1070,8 @@ async function loadThemeConfig() {
   const q = `?_=${Date.now()}`;
   try {
     const [themeOptions, themeStyleOptions] = await Promise.all([
-      fetch('/common/theme-options.json' + q).then(r => r.json()),
-      fetch('/common/theme-styles.json' + q).then(r => r.json())
+      fetch('common/theme-options.json' + q).then(r => r.json()),
+      fetch('common/theme-styles.json' + q).then(r => r.json())
     ]);
     state.themeOptions = normalizeThemeOptions(themeOptions);
     state.themeStyleOptions = normalizeThemeStyleOptions(themeStyleOptions);
@@ -1174,39 +1081,6 @@ async function loadThemeConfig() {
   }
   renderThemeMenu();
   renderThemeStyleMenu();
-}
-
-function applyHeaderControlsConfig(cfg) {
-  const controlsRoot = document.querySelector('.controls');
-  if (!controlsRoot || !cfg || typeof cfg !== 'object') return;
-  const controls = new Map();
-  controlsRoot.querySelectorAll('[data-header-control]').forEach((el) => {
-    controls.set(el.getAttribute('data-header-control'), el);
-  });
-
-  const visible = (cfg.visible && typeof cfg.visible === 'object') ? cfg.visible : {};
-  controls.forEach((el, key) => {
-    if (Object.prototype.hasOwnProperty.call(visible, key) && visible[key] === false) {
-      el.style.display = 'none';
-    } else {
-      el.style.display = '';
-    }
-  });
-
-  if (Array.isArray(cfg.order)) {
-    cfg.order.forEach((key) => {
-      const el = controls.get(String(key));
-      if (el) controlsRoot.appendChild(el);
-    });
-  }
-}
-
-async function loadHeaderControlsConfig() {
-  const q = `?_=${Date.now()}`;
-  try {
-    const cfg = await fetch('/common/header-controls.json' + q).then(r => r.json());
-    applyHeaderControlsConfig(cfg);
-  } catch (_) {}
 }
 
 async function saveSettings(patch) {
@@ -1301,7 +1175,7 @@ document.addEventListener('click', (e) => {
   if (!wrap || !wrap.contains(e.target)) closeLanguageMenu();
 });
 document.querySelectorAll('.tab').forEach(btn => btn.addEventListener('click', () => setActiveTab(btn.dataset.tab)));
-Promise.all([loadHeaderControlsConfig(), loadThemeConfig()]).then(() => {
+loadThemeConfig().then(() => {
   applyThemeStyle();
   applyTheme();
   applyFontSize();

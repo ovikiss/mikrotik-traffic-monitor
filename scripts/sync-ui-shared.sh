@@ -57,17 +57,21 @@ copy_tree_files() {
   done
 }
 
-mkdir -p "${ROOT_DIR}/app/common"
-mkdir -p "${ROOT_DIR}/app/images"
+rm -rf "${ROOT_DIR}/app/common" "${ROOT_DIR}/app/images" "${ROOT_DIR}/app/www/common" "${ROOT_DIR}/app/www/images"
+rm -f "${ROOT_DIR}/app/www"/styles-*.css
 
-copy_tree_files "${SHARED_DIR}/ui/common" "${ROOT_DIR}/app/common"
-copy_tree_files "${SHARED_DIR}/ui/images" "${ROOT_DIR}/app/images"
-mkdir -p "${ROOT_DIR}/app/images/ui"
+mkdir -p "${ROOT_DIR}/app/i18n"
+mkdir -p "${ROOT_DIR}/app/www/common"
+mkdir -p "${ROOT_DIR}/app/www/images"
+
+copy_tree_files "${SHARED_DIR}/ui/i18n" "${ROOT_DIR}/app/i18n"
+copy_tree_files "${SHARED_DIR}/ui/common" "${ROOT_DIR}/app/www/common"
+copy_tree_files "${SHARED_DIR}/ui/images" "${ROOT_DIR}/app/www/images"
 for src in "${SHARED_DIR}"/ui/css/style-*.css; do
   [ -e "$src" ] || continue
   base="$(basename "$src")"
   base="${base/style-/styles-}"
-  cp -f "$src" "${ROOT_DIR}/app/images/ui/$base"
+  cp -f "$src" "${ROOT_DIR}/app/www/$base"
 done
 
 echo "Synced UI assets from ${SHARED_DIR}"

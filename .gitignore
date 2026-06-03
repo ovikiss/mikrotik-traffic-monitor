@@ -5,3 +5,6 @@ SESSION_SUMMARY.md
 app/common/
 app/images/
 app/i18n/
+app/www/common/
+app/www/images/
+app/www/styles*.css
