@@ -35,6 +35,10 @@
   /container/remove [find where name=$mtmContainerName]
 }
 
+# Recreate only the container root filesystem; persistent data lives in mtmDataPath.
+:foreach f in=[/file/find where name~"^usb1/containers/trafficdb/"] do={ /file/remove $f }
+:if ([:len [/file/find where name="usb1/containers/trafficdb"]] > 0) do={ /file/remove [find where name="usb1/containers/trafficdb"] }
+
 # Ensure persistent data directory exists.
 :if ([:len [/file find where name=$mtmDataDir]] = 0) do={ /file add name=$mtmDataDir type=directory }
 

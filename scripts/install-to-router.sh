@@ -34,6 +34,8 @@ echo "Building and pushing $IMAGE for $PLATFORM"
 docker buildx build \
   --platform "$PLATFORM" \
   --build-arg "UI_SHARED_REV=$UI_SHARED_REV" \
+  --provenance=false \
+  --sbom=false \
   -t "$IMAGE" \
   --push \
   .
