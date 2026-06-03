@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>MikroTik Traffic Monitor</title>
-    <link rel="stylesheet" id="theme-style-css" href="/images/ui/style-modern.css?v=20260516f" />
+    <title></title>
+    <link rel="stylesheet" id="theme-style-css" href="/images/ui/styles-modern.css?v=20260516f" />
 </head>
 <body>
   <div class="dashboard-container">
@@ -26,47 +26,39 @@
             <path d="M39.33,9.57L23.3.62c-1.48-.83-3.28-.83-4.76,0L2.5,9.57c-1.54.86-2.5,2.49-2.5,4.26v17.08c0,1.78.97,3.42,2.53,4.28l16.04,8.82c1.46.81,3.24.81,4.7,0l16.04-8.82c1.56-.86,2.53-2.5,2.53-4.28V13.83c0-1.77-.96-3.4-2.5-4.26ZM36.95,32.33l-15.01,8.26c-.64.35-1.41.35-2.05,0l-15.01-8.26c-.68-.37-1.1-1.09-1.1-1.86V14.27c0-.77.42-1.48,1.09-1.86l15.01-8.38c.64-.36,1.43-.36,2.07,0l15.01,8.38c.67.38,1.09,1.09,1.09,1.86v16.2c0,.78-.42,1.49-1.1,1.86Z"/>
           </g>
         </svg>
-        <span class="brand-text">Traffic Monitor</span>
+        <span class="brand-text" id="brand-text"></span>
       </h1>
-      <div class="subtitle" id="subtitle">Day / Month / Year aggregation, updated hourly.</div>
+      <div class="subtitle" id="subtitle"></div>
     </div>
     <div class="controls">
       <label class="control" data-header-control="themeStyle" for="theme-style">
-        <span id="theme-style-label">Theme</span>
+        <span id="theme-style-label"></span>
         <div class="theme-dropdown" id="theme-style-dropdown">
           <button type="button" class="theme-toggle" id="theme-style-toggle" aria-haspopup="listbox" aria-expanded="false">
             <img src="/images/ui/theme-style.svg" alt="" />
-            <span id="theme-style-current-label">Modern</span>
+            <span id="theme-style-current-label"></span>
           </button>
           <div class="theme-menu" id="theme-style-menu" role="listbox" aria-label="Theme style options"></div>
-          <select id="theme-style" class="sr-only" tabindex="-1" aria-hidden="true">
-            <option value="modern" id="style-opt-modern">Modern</option>
-            <option value="classic" id="style-opt-classic">Classic</option>
-            <option value="glass" id="style-opt-glass">Glass Dashboard</option>
-          </select>
+          <select id="theme-style" class="sr-only" tabindex="-1" aria-hidden="true"></select>
         </div>
       </label>
       <label class="control" data-header-control="theme" for="theme">
-        <span id="theme-label">Mode</span>
+        <span id="theme-label"></span>
         <div class="theme-dropdown" id="theme-dropdown">
           <button type="button" class="theme-toggle" id="theme-toggle" aria-haspopup="listbox" aria-expanded="false">
             <img id="theme-current-icon" src="/images/ui/theme-auto.svg" alt="" />
-            <span id="theme-current-label">Auto</span>
+            <span id="theme-current-label"></span>
           </button>
           <div class="theme-menu" id="theme-menu" role="listbox" aria-label="Theme options"></div>
-          <select id="theme" class="sr-only" tabindex="-1" aria-hidden="true">
-            <option value="auto" id="theme-opt-auto">Auto</option>
-            <option value="light" id="theme-opt-light">Light</option>
-            <option value="dark" id="theme-opt-dark">Dark</option>
-          </select>
+          <select id="theme" class="sr-only" tabindex="-1" aria-hidden="true"></select>
         </div>
       </label>
       <label class="control" data-header-control="fontSize" for="font-size">
-        <span id="font-label">Font size</span>
+        <span id="font-label"></span>
         <div class="theme-dropdown" id="font-dropdown">
           <button type="button" class="theme-toggle" id="font-toggle" aria-haspopup="listbox" aria-expanded="false">
             <img src="/images/ui/font-size.svg" alt="" />
-            <span id="font-current-label">100%</span>
+            <span id="font-current-label"></span>
           </button>
           <div class="theme-menu" id="font-menu" role="listbox" aria-label="Font size options"></div>
           <select id="font-size" class="sr-only" tabindex="-1" aria-hidden="true">
@@ -77,11 +69,11 @@
         </div>
       </label>
       <label class="control" data-header-control="pollInterval" for="poll-interval">
-        <span id="poll-label">Poll</span>
+        <span id="poll-label"></span>
         <div class="theme-dropdown" id="poll-dropdown">
           <button type="button" class="theme-toggle" id="poll-toggle" aria-haspopup="listbox" aria-expanded="false">
             <img src="/images/ui/interval.svg" alt="" />
-            <span id="poll-current-label">1 hour</span>
+            <span id="poll-current-label"></span>
           </button>
           <div class="theme-menu" id="poll-menu" role="listbox" aria-label="Poll interval options"></div>
           <select id="poll-interval" class="sr-only" tabindex="-1" aria-hidden="true">
@@ -93,17 +85,14 @@
         </div>
       </label>
       <label class="control" data-header-control="language" for="lang">
-        <span id="lang-label">Language</span>
+        <span id="lang-label"></span>
         <div class="lang-dropdown" id="lang-dropdown">
           <button type="button" class="lang-toggle" id="lang-toggle" aria-haspopup="listbox" aria-expanded="false">
             <img id="lang-current-icon" src="/images/lang/en.svg" alt="" />
-            <span id="lang-current-label">EN</span>
+            <span id="lang-current-label"></span>
           </button>
           <div class="lang-menu" id="lang-menu" role="listbox" aria-label="Language options"></div>
-          <select id="lang" class="sr-only" tabindex="-1" aria-hidden="true">
-            <option value="en">EN</option>
-            <option value="ro">RO</option>
-          </select>
+          <select id="lang" class="sr-only" tabindex="-1" aria-hidden="true"></select>
         </div>
       </label>
     </div>
@@ -240,22 +229,24 @@ const state = {
   details: { monthDays: [], yearMonths: [] },
   expanded: { month: null, year: null },
   info: {},
-  languages: DEFAULT_LANGUAGES.slice()
+  languages: DEFAULT_LANGUAGES.slice(),
+  themeOptions: [],
+  themeStyleOptions: []
 };
 const prefersDarkQuery = window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)') : null;
 const MONTH_NAMES = {
   en: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
   ro: ['Ian', 'Feb', 'Mar', 'Apr', 'Mai', 'Iun', 'Iul', 'Aug', 'Sep', 'Oct', 'Noi', 'Dec']
 };
-const THEME_ITEMS = [
-  { value: 'auto', labelKey: 'auto', icon: '/images/ui/theme-auto.svg' },
-  { value: 'light', labelKey: 'light', icon: '/images/ui/theme-light.svg' },
-  { value: 'dark', labelKey: 'dark', icon: '/images/ui/theme-dark.svg' }
+const DEFAULT_THEME_OPTIONS = [
+  { value: 'auto', label: { en: 'Auto', ro: 'Auto' }, icon: '/images/ui/theme-auto.svg' },
+  { value: 'light', label: { en: 'Light', ro: 'Luminos' }, icon: '/images/ui/theme-light.svg' },
+  { value: 'dark', label: { en: 'Dark', ro: 'Intunecat' }, icon: '/images/ui/theme-dark.svg' }
 ];
-let THEME_STYLE_ITEMS = [
-  { value: 'modern', labelKey: 'styleModern' },
-  { value: 'classic', labelKey: 'styleClassic' },
-  { value: 'glass', labelKey: 'styleGlass' }
+const DEFAULT_THEME_STYLE_OPTIONS = [
+  { value: 'modern', label: { en: 'Modern', ro: 'Modern' }, css: '/images/ui/styles-modern.css' },
+  { value: 'classic', label: { en: 'Classic', ro: 'Clasic' }, css: '/images/ui/styles-classic.css' },
+  { value: 'glass', label: { en: 'Glass', ro: 'Glass' }, css: '/images/ui/styles-glass.css' }
 ];
 const POLL_ITEMS = [
   { value: '1h', amount: 1 },
@@ -288,15 +279,6 @@ function fmtBytes(v) {
 }
 function t(key) {
   return (I18N[state.lang] && I18N[state.lang][key]) || (I18N.en && I18N.en[key]) || I18N_FALLBACK[key] || key;
-}
-
-function getThemeStyleLabel(item) {
-  const labels = item && item.label;
-  if (labels && typeof labels === 'object') {
-    if (state.lang === 'ro' && labels.ro) return String(labels.ro);
-    if (labels.en) return String(labels.en);
-  }
-  return t(item && item.labelKey ? item.labelKey : 'styleModern');
 }
 
 function uiMetricIcon(name) {
@@ -336,6 +318,63 @@ function normalizeLanguageList(items) {
   return out.length ? out : DEFAULT_LANGUAGES.slice();
 }
 
+function normalizeThemeOptions(items) {
+  if (!Array.isArray(items)) return DEFAULT_THEME_OPTIONS.slice();
+  const out = [];
+  const seen = new Set();
+  items.forEach((x) => {
+    if (!x || typeof x !== 'object') return;
+    const value = String(x.value || '').trim().toLowerCase();
+    if (!/^[a-z][a-z0-9_-]{1,15}$/.test(value) || seen.has(value)) return;
+    const label = x.label && typeof x.label === 'object'
+      ? x.label
+      : { en: String(x.label || value), ro: String(x.label || value) };
+    const icon = String(x.icon || `/images/ui/theme-${value}.svg`).trim();
+    out.push({ value, label, icon });
+    seen.add(value);
+  });
+  return out.length ? out : DEFAULT_THEME_OPTIONS.slice();
+}
+
+function normalizeThemeStyleOptions(items) {
+  if (!Array.isArray(items)) return DEFAULT_THEME_STYLE_OPTIONS.slice();
+  const out = [];
+  const seen = new Set();
+  items.forEach((x) => {
+    if (!x || typeof x !== 'object') return;
+    const value = String(x.value || '').trim().toLowerCase();
+    if (!/^[a-z][a-z0-9_-]{1,15}$/.test(value) || seen.has(value)) return;
+    const label = x.label && typeof x.label === 'object'
+      ? x.label
+      : { en: String(x.label || value), ro: String(x.label || value) };
+    const css = String(x.css || `/images/ui/styles-${value}.css`)
+      .trim()
+      .replace(/\/images\/ui\/style-/g, '/images/ui/styles-')
+      .replace(/\/images\/ui\/styles-/g, '/images/ui/styles-')
+      .replace(/^style-/g, 'styles-');
+    out.push({ value, label, css });
+    seen.add(value);
+  });
+  return out.length ? out : DEFAULT_THEME_STYLE_OPTIONS.slice();
+}
+
+function getLocalizedLabel(entry) {
+  if (!entry) return '';
+  if (entry.label && typeof entry.label === 'object') {
+    return entry.label[state.lang] || entry.label.en || entry.label.ro || entry.label[Object.keys(entry.label)[0]] || '';
+  }
+  if (entry.labelKey) return t(entry.labelKey);
+  return String(entry.label || entry.value || '');
+}
+
+function currentThemeOption() {
+  return (state.themeOptions || []).find((x) => x.value === state.theme) || (state.themeOptions || [])[0] || DEFAULT_THEME_OPTIONS[0];
+}
+
+function currentThemeStyleOption() {
+  return (state.themeStyleOptions || []).find((x) => x.value === state.themeStyle) || (state.themeStyleOptions || [])[0] || DEFAULT_THEME_STYLE_OPTIONS[0];
+}
+
 function renderLanguageOptions() {
   const sel = document.getElementById('lang');
   const menu = document.getElementById('lang-menu');
@@ -360,6 +399,7 @@ function renderLanguageOptions() {
     menu.appendChild(item);
   });
   updateLanguageButton();
+  if (sel) sel.value = state.lang;
 }
 function themeIconByMode(mode) {
   if (mode === 'light') return '/images/ui/theme-light.svg';
@@ -373,33 +413,47 @@ function updateLanguageButton() {
   const label = document.getElementById('lang-current-label');
   if (icon) icon.setAttribute('src', (langDef && langDef.icon) ? langDef.icon : '/images/lang/en.svg');
   if (label) label.textContent = (langDef && langDef.label) ? langDef.label : 'EN';
+  const sel = document.getElementById('lang');
+  if (sel) sel.value = state.lang;
 }
 
 function renderThemeStyleMenu() {
   const menu = document.getElementById('theme-style-menu');
+  const sel = document.getElementById('theme-style');
   if (!menu) return;
   menu.innerHTML = '';
-  THEME_STYLE_ITEMS.forEach((x) => {
+  if (sel) sel.innerHTML = '';
+  (state.themeStyleOptions || []).forEach((x) => {
+    const label = getLocalizedLabel(x);
     const item = document.createElement('button');
     item.type = 'button';
     item.className = 'theme-item';
     item.setAttribute('role', 'option');
     item.setAttribute('data-theme-style', x.value);
-    item.innerHTML = `<img src="/images/ui/theme-style.svg" alt="" /><span>${getThemeStyleLabel(x)}</span>`;
+    item.innerHTML = `<img src="/images/ui/theme-style.svg" alt="" /><span>${esc(label)}</span>`;
     item.addEventListener('click', () => {
       closeThemeStyleMenu();
       setThemeStyle(x.value);
     });
     menu.appendChild(item);
+
+    if (sel) {
+      const opt = document.createElement('option');
+      opt.value = x.value;
+      opt.textContent = label;
+      sel.appendChild(opt);
+    }
   });
   updateThemeStyleButton();
+  if (sel) sel.value = state.themeStyle;
 }
 
 function updateThemeStyleButton() {
   const label = document.getElementById('theme-style-current-label');
   if (!label) return;
-  const picked = THEME_STYLE_ITEMS.find((x) => x.value === state.themeStyle) || THEME_STYLE_ITEMS[0];
-  label.textContent = getThemeStyleLabel(picked);
+  label.textContent = getLocalizedLabel(currentThemeStyleOption());
+  const sel = document.getElementById('theme-style');
+  if (sel) sel.value = state.themeStyle;
 }
 
 function closeThemeStyleMenu() {
@@ -434,29 +488,43 @@ function toggleLanguageMenu() {
 
 function renderThemeMenu() {
   const menu = document.getElementById('theme-menu');
+  const sel = document.getElementById('theme');
   if (!menu) return;
   menu.innerHTML = '';
-  THEME_ITEMS.forEach((x) => {
+  if (sel) sel.innerHTML = '';
+  (state.themeOptions || []).forEach((x) => {
+    const label = getLocalizedLabel(x);
     const item = document.createElement('button');
     item.type = 'button';
     item.className = 'theme-item';
     item.setAttribute('role', 'option');
     item.setAttribute('data-theme', x.value);
-    item.innerHTML = `<img src="${x.icon}" alt="" /><span>${t(x.labelKey)}</span>`;
+    item.innerHTML = `<img src="${x.icon || themeIconByMode(x.value)}" alt="" /><span>${esc(label)}</span>`;
     item.addEventListener('click', () => {
       closeThemeMenu();
       setTheme(x.value);
     });
     menu.appendChild(item);
+
+    if (sel) {
+      const opt = document.createElement('option');
+      opt.value = x.value;
+      opt.textContent = label;
+      sel.appendChild(opt);
+    }
   });
   updateThemeButton();
+  if (sel) sel.value = state.theme;
 }
 
 function updateThemeButton() {
   const icon = document.getElementById('theme-current-icon');
   const label = document.getElementById('theme-current-label');
-  if (icon) icon.setAttribute('src', themeIconByMode(state.theme));
-  if (label) label.textContent = t(state.theme === 'light' ? 'light' : state.theme === 'dark' ? 'dark' : 'auto');
+  const picked = currentThemeOption();
+  if (icon) icon.setAttribute('src', picked && picked.icon ? picked.icon : themeIconByMode(state.theme));
+  if (label) label.textContent = getLocalizedLabel(picked);
+  const sel = document.getElementById('theme');
+  if (sel) sel.value = state.theme;
 }
 
 function closeThemeMenu() {
@@ -677,16 +745,11 @@ function parseInfo(txt) {
 
 function applyLanguage() {
   document.documentElement.lang = state.lang;
+  document.title = t('appTitle');
+  const brand = document.getElementById('brand-text');
+  if (brand) brand.textContent = t('brandText');
   document.getElementById('theme-style-label').textContent = t('themeStyle');
-  document.getElementById('style-opt-modern').textContent = t('styleModern');
-  document.getElementById('style-opt-classic').textContent = t('styleClassic');
-  if (document.getElementById('style-opt-glass')) {
-    document.getElementById('style-opt-glass').textContent = t('styleGlass');
-  }
   document.getElementById('theme-label').textContent = t('theme');
-  document.getElementById('theme-opt-auto').textContent = t('auto');
-  document.getElementById('theme-opt-light').textContent = t('light');
-  document.getElementById('theme-opt-dark').textContent = t('dark');
   document.getElementById('poll-label').textContent = t('poll');
   document.getElementById('font-label').textContent = t('fontSize');
   document.getElementById('font-opt-legacy').textContent = t('fontLegacy');
@@ -699,6 +762,7 @@ function applyLanguage() {
   document.getElementById('lang').value = state.lang;
   document.getElementById('lang-label').textContent = t('language');
   updateLanguageButton();
+  renderLanguageOptions();
   renderThemeStyleMenu();
   renderThemeMenu();
   renderFontMenu();
@@ -731,13 +795,12 @@ function applyTheme() {
 }
 
 function applyThemeStyle() {
-  const allowed = THEME_STYLE_ITEMS.map((x) => x.value);
-  const mode = allowed.includes(state.themeStyle) ? state.themeStyle : (THEME_STYLE_ITEMS[0] ? THEME_STYLE_ITEMS[0].value : 'modern');
-  const picked = THEME_STYLE_ITEMS.find((x) => x.value === mode) || THEME_STYLE_ITEMS[0];
-  const cssFile = (picked && picked.css) ? String(picked.css) : (mode === 'classic' ? 'style-classic.css' : mode === 'glass' ? 'style-glass.css' : 'style-modern.css');
+  const picked = currentThemeStyleOption();
+  const mode = picked && picked.value ? picked.value : 'modern';
   const css = document.getElementById('theme-style-css');
   if (css) {
-    css.setAttribute('href', `/images/ui/${cssFile}?v=${THEME_CSS_VERSION}`);
+    const href = (picked && picked.css) ? picked.css : `/images/ui/styles-${mode}.css`;
+    css.setAttribute('href', `${href}?v=${THEME_CSS_VERSION}`);
   }
   document.documentElement.setAttribute('data-theme-style', mode);
   document.getElementById('theme-style').value = mode;
@@ -1011,74 +1074,17 @@ function setLanguage(lang) {
 }
 
 function setTheme(theme) {
-  state.theme = (theme === 'dark' || theme === 'light' || theme === 'auto') ? theme : 'auto';
+  state.theme = getThemeDef(String(theme || '').toLowerCase()) ? String(theme || '').toLowerCase() : 'auto';
   localStorage.setItem('mtm_theme', state.theme);
   applyTheme();
   saveSettings({ theme: state.theme }).catch(() => {});
 }
 
 function setThemeStyle(mode) {
-  const allowed = THEME_STYLE_ITEMS.map((x) => x.value);
-  state.themeStyle = allowed.includes(mode) ? mode : (THEME_STYLE_ITEMS[0] ? THEME_STYLE_ITEMS[0].value : 'modern');
+  state.themeStyle = getThemeStyleDef(String(mode || '').toLowerCase()) ? String(mode || '').toLowerCase() : 'modern';
   localStorage.setItem('mtm_theme_style', state.themeStyle);
   applyThemeStyle();
   renderRows();
-}
-
-function normalizeThemeStyleConfig(items) {
-  if (!Array.isArray(items)) return null;
-  const out = [];
-  items.forEach((x) => {
-    if (!x || typeof x !== 'object') return;
-    const value = String(x.value || '').trim().toLowerCase();
-    const css = String(x.css || '').trim();
-    if (!value || !css) return;
-    const label = (x.label && typeof x.label === 'object') ? x.label : null;
-    out.push({ value, css, label, labelKey: x.labelKey || value });
-  });
-  return out.length ? out : null;
-}
-
-function applyHeaderControlsConfig(cfg) {
-  const controlsRoot = document.querySelector('.controls');
-  if (!controlsRoot || !cfg || typeof cfg !== 'object') return;
-  const controls = new Map();
-  controlsRoot.querySelectorAll('[data-header-control]').forEach((el) => {
-    controls.set(el.getAttribute('data-header-control'), el);
-  });
-
-  const visible = (cfg.visible && typeof cfg.visible === 'object') ? cfg.visible : {};
-  controls.forEach((el, key) => {
-    if (Object.prototype.hasOwnProperty.call(visible, key) && visible[key] === false) {
-      el.style.display = 'none';
-    } else {
-      el.style.display = '';
-    }
-  });
-
-  if (Array.isArray(cfg.order)) {
-    cfg.order.forEach((key) => {
-      const el = controls.get(String(key));
-      if (el) controlsRoot.appendChild(el);
-    });
-  }
-}
-
-async function loadHeaderControlsConfig() {
-  const q = `?_=${Date.now()}`;
-  try {
-    const cfg = await fetch('/i18n/header-controls.json' + q).then(r => r.json());
-    applyHeaderControlsConfig(cfg);
-  } catch (_) {}
-}
-
-async function loadThemeStylesConfig() {
-  const q = `?_=${Date.now()}`;
-  try {
-    const cfg = await fetch('/i18n/theme-styles.json' + q).then(r => r.json());
-    const parsed = normalizeThemeStyleConfig(cfg);
-    if (parsed) THEME_STYLE_ITEMS = parsed;
-  } catch (_) {}
 }
 
 function setFontSize(mode) {
@@ -1119,7 +1125,7 @@ async function loadSettings() {
     const d = await fetch('/api/settings.json' + q).then(r => r.json());
     const pRaw = (d && d.poll_interval) ? d.poll_interval : ((d && d.effective_poll_interval) ? d.effective_poll_interval : '');
     const p = normalizePollIntervalOption(pRaw);
-    const theme = (d && (d.theme === 'light' || d.theme === 'dark' || d.theme === 'auto')) ? d.theme : '';
+    const theme = (d && getThemeDef(String(d.theme || '').toLowerCase())) ? String(d.theme || '').toLowerCase() : '';
     const lang = (d && getLanguageDef(String(d.language || '').toLowerCase())) ? String(d.language || '').toLowerCase() : '';
     const fontSize = (d && (d.font_size === '25' || d.font_size === '50' || d.font_size === '100')) ? d.font_size : '';
     state.pollInterval = p;
@@ -1142,6 +1148,64 @@ async function loadSettings() {
     }
     renderSubtitle();
     renderRows();
+  } catch (_) {}
+}
+
+function getThemeDef(code) {
+  return (state.themeOptions || []).find((x) => x.value === code) || null;
+}
+
+function getThemeStyleDef(code) {
+  return (state.themeStyleOptions || []).find((x) => x.value === code) || null;
+}
+
+async function loadThemeConfig() {
+  const q = `?_=${Date.now()}`;
+  try {
+    const [themeOptions, themeStyleOptions] = await Promise.all([
+      fetch('/common/theme-options.json' + q).then(r => r.json()),
+      fetch('/common/theme-styles.json' + q).then(r => r.json())
+    ]);
+    state.themeOptions = normalizeThemeOptions(themeOptions);
+    state.themeStyleOptions = normalizeThemeStyleOptions(themeStyleOptions);
+  } catch (_) {
+    state.themeOptions = DEFAULT_THEME_OPTIONS.slice();
+    state.themeStyleOptions = DEFAULT_THEME_STYLE_OPTIONS.slice();
+  }
+  renderThemeMenu();
+  renderThemeStyleMenu();
+}
+
+function applyHeaderControlsConfig(cfg) {
+  const controlsRoot = document.querySelector('.controls');
+  if (!controlsRoot || !cfg || typeof cfg !== 'object') return;
+  const controls = new Map();
+  controlsRoot.querySelectorAll('[data-header-control]').forEach((el) => {
+    controls.set(el.getAttribute('data-header-control'), el);
+  });
+
+  const visible = (cfg.visible && typeof cfg.visible === 'object') ? cfg.visible : {};
+  controls.forEach((el, key) => {
+    if (Object.prototype.hasOwnProperty.call(visible, key) && visible[key] === false) {
+      el.style.display = 'none';
+    } else {
+      el.style.display = '';
+    }
+  });
+
+  if (Array.isArray(cfg.order)) {
+    cfg.order.forEach((key) => {
+      const el = controls.get(String(key));
+      if (el) controlsRoot.appendChild(el);
+    });
+  }
+}
+
+async function loadHeaderControlsConfig() {
+  const q = `?_=${Date.now()}`;
+  try {
+    const cfg = await fetch('/common/header-controls.json' + q).then(r => r.json());
+    applyHeaderControlsConfig(cfg);
   } catch (_) {}
 }
 
@@ -1211,13 +1275,8 @@ const storedThemeStyle = localStorage.getItem('mtm_theme_style');
 const storedFontSize = localStorage.getItem('mtm_font_size');
 state.lang = (typeof storedLang === 'string' && storedLang) ? storedLang.toLowerCase() : 'en';
 state.theme = (storedTheme === 'dark' || storedTheme === 'light' || storedTheme === 'auto') ? storedTheme : 'auto';
-state.themeStyle = storedThemeStyle || 'modern';
+state.themeStyle = (typeof storedThemeStyle === 'string' && storedThemeStyle) ? storedThemeStyle.toLowerCase() : 'modern';
 state.fontSize = (storedFontSize === '25' || storedFontSize === '50' || storedFontSize === '100') ? storedFontSize : '100';
-applyThemeStyle();
-applyTheme();
-applyFontSize();
-renderLanguageOptions();
-applyLanguage();
 if (prefersDarkQuery) {
   const onThemePrefChange = () => { if (state.theme === 'auto') applyTheme(); };
   if (prefersDarkQuery.addEventListener) prefersDarkQuery.addEventListener('change', onThemePrefChange);
@@ -1242,10 +1301,13 @@ document.addEventListener('click', (e) => {
   if (!wrap || !wrap.contains(e.target)) closeLanguageMenu();
 });
 document.querySelectorAll('.tab').forEach(btn => btn.addEventListener('click', () => setActiveTab(btn.dataset.tab)));
-loadAll().catch(e => { document.getElementById('meta').textContent = `${t('loadError')}: ${e}`; });
-loadHeaderControlsConfig().catch(() => {}).then(() => loadThemeStylesConfig()).then(() => {
+Promise.all([loadHeaderControlsConfig(), loadThemeConfig()]).then(() => {
   applyThemeStyle();
-  renderThemeStyleMenu();
+  applyTheme();
+  applyFontSize();
+  renderLanguageOptions();
+  applyLanguage();
+  loadAll().catch(e => { document.getElementById('meta').textContent = `${t('loadError')}: ${e}`; });
   loadLanguageConfig().then(() => {
     loadSettings().catch(() => {});
     loadTranslations().catch(() => {});
@@ -1254,6 +1316,12 @@ loadHeaderControlsConfig().catch(() => {}).then(() => loadThemeStylesConfig()).t
     loadTranslations().catch(() => {});
   });
 }).catch(() => {
+  applyThemeStyle();
+  applyTheme();
+  applyFontSize();
+  renderLanguageOptions();
+  applyLanguage();
+  loadAll().catch(e => { document.getElementById('meta').textContent = `${t('loadError')}: ${e}`; });
   loadLanguageConfig().then(() => {
     loadSettings().catch(() => {});
     loadTranslations().catch(() => {});

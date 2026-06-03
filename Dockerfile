@@ -2,9 +2,14 @@
 FROM --platform=$BUILDPLATFORM golang:1.22-alpine AS builder
 
 WORKDIR /src
-COPY app/server.go /src/
+RUN apk add --no-cache git
+
+COPY . /src
 ARG TARGETOS TARGETARCH
-RUN GOOS=$TARGETOS GOARCH=$TARGETARCH go build -ldflags="-s -w" -o server server.go
+ARG UI_SHARED_REPO=https://github.com/ovikiss/mikrotik-ui-shared.git
+ARG UI_SHARED_REF=main
+RUN UI_SHARED_REPO="$UI_SHARED_REPO" UI_SHARED_REF="$UI_SHARED_REF" sh scripts/sync-ui-shared.sh
+RUN GOOS=$TARGETOS GOARCH=$TARGETARCH go build -ldflags="-s -w" -o server app/server.go
 
 # Stage 2: Final minimal image
 FROM alpine:3.20
@@ -15,11 +20,8 @@ RUN apk add --no-cache \
   tzdata
 
 WORKDIR /app
-COPY app/mt-traffic.sh /app/mt-traffic.sh
 COPY --from=builder /src/server /app/server
-COPY app/www /app/www
-COPY app/i18n /app/i18n
-COPY app/images /app/images
+COPY --from=builder /src/app /app
 RUN chmod +x /app/mt-traffic.sh /app/server
 
 EXPOSE 8080

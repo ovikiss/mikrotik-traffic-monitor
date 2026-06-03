@@ -7,3 +7,7 @@ docs
 homeassistant
 mikrotik
 scripts
+!scripts/sync-ui-shared.sh
+app/common/
+app/images/
+app/i18n/

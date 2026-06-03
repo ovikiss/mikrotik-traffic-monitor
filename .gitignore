@@ -2,3 +2,6 @@
 data/
 *.log
 SESSION_SUMMARY.md
+app/common/
+app/images/
+app/i18n/

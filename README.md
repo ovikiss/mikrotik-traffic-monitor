@@ -25,13 +25,8 @@ Containerized MikroTik WAN traffic monitor with:
 - `app/mt-traffic.sh` - runtime entrypoint: SNMP collector, SQLite writer, native JSON generator, and Go server launcher
 - `app/server.go` - lightweight, high-performance static asset and settings REST API web server written in Go (zero dependencies, compiles to a ~5MB static binary)
 - `app/www/index.html` - static frontend (glass UI, tabs Day/Month/Year, settings persistence)
-- `app/i18n/languages.json` - language registry used by the UI selector
-- `app/i18n/*.json` - translations
-- `app/images/lang/*.svg` - language icons
-- `app/images/ui/*.svg` - UI icons (theme, poll interval, metrics, status row)
-- `app/images/ui/style-modern.css` - Modern (glass) theme stylesheet
-- `app/images/ui/style-glass.css` - Glass Dashboard theme stylesheet (alternate sleek side-by-side layout)
-- `app/images/ui/style-classic.css` - Classic theme stylesheet
+- `scripts/sync-ui-shared.sh` - syncs shared UI assets from `mikrotik-ui-shared` into the working tree or Docker build
+- `app/i18n/`, `app/images/`, `app/common/` - generated from `mikrotik-ui-shared` at build time and intentionally not tracked as source
 - `mikrotik/install.rsc` - RouterOS install/deploy script (container, env, mount, NAT)
 - `scripts/install-to-router.sh` - helper that uploads/imports `install.rsc` over SSH
 - `homeassistant/mikrotik_traffic_package.yaml` - Home Assistant REST + template entities
@@ -45,6 +40,7 @@ Containerized MikroTik WAN traffic monitor with:
 ```bash
 docker build -t ghcr.io/ovikiss/mikrotik-traffic-monitor:local .
 ```
+The Docker build syncs shared UI assets automatically from `mikrotik-ui-shared`. For local Go builds outside Docker, run `./scripts/sync-ui-shared.sh` first.
 
 ## Run locally
 ```bash
