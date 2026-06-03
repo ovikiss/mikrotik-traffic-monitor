@@ -1,5 +1,5 @@
 # MikroTik install script for Traffic Monitor container
-# Import with: /import file-name=install.rsc
+# Import with: /import file-name=install-traffic-monitor.rsc
 # Adjust variables below before import.
 
 :local mtmVeth "veth-tdb"
