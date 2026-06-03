@@ -2,6 +2,10 @@
 
 All notable changes to the MikroTik Traffic Monitor project will be documented in this file.
 
+## [0.5.2] - 2026-06-04
+### Changed
+- **Shared header baseline alignment**: the universal header now aligns the project name on the same lower baseline across `Modern`, `Classic`, and `Glass`, so Traffic Monitor and Container Update GUI stay visually consistent.
+
 ## [0.5.1] - 2026-06-04
 ### Changed
 - **Dynamic header version badge**: the shared header now renders a small version label next to the brand text.
