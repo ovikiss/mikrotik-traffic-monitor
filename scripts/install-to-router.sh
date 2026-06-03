@@ -28,4 +28,7 @@ scp "$RSC_LOCAL" "$ROUTER:$RSC_REMOTE"
 echo "Importing script on router"
 ssh "$ROUTER" "/import file-name=$RSC_REMOTE"
 
+echo "Cleaning up uploaded script"
+ssh "$ROUTER" "/file remove [find where name=\"$RSC_REMOTE\"]" || true
+
 echo "Done. Open: http://192.168.88.1:8088/"
