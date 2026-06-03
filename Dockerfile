@@ -9,8 +9,9 @@ ARG TARGETOS TARGETARCH
 ARG UI_SHARED_REPO=https://github.com/ovikiss/mikrotik-ui-shared.git
 ARG UI_SHARED_REF=main
 ARG UI_SHARED_REV=unknown
+ARG APP_VERSION=dev
 RUN UI_SHARED_REPO="$UI_SHARED_REPO" UI_SHARED_REF="$UI_SHARED_REF" UI_SHARED_REV="$UI_SHARED_REV" sh scripts/sync-ui-shared.sh
-RUN GOOS=$TARGETOS GOARCH=$TARGETARCH go build -ldflags="-s -w" -o server app/server.go
+RUN GOOS=$TARGETOS GOARCH=$TARGETARCH go build -ldflags="-s -w -X main.Version=${APP_VERSION}" -o server app/server.go
 
 # Stage 2: Final minimal image
 FROM alpine:3.20

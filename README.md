@@ -2,7 +2,7 @@
 
 MikroTik Traffic Monitor is a lightweight Go container for RouterOS that polls interface traffic through SNMP, stores historical counters in SQLite, and serves a polished local dashboard with shared theming and translations.
 
-Current release: `v0.5.0`
+Current release: `v0.5.1`
 
 ## Highlights
 - Low-footprint Go runtime optimized for MikroTik container environments.

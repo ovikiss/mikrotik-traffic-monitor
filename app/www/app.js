@@ -132,6 +132,12 @@ function textIfExists(id, value) {
   if (el) el.textContent = value;
 }
 
+function brandingVersionLabel() {
+  const raw = String(BRANDING.version || '').trim();
+  if (!raw) return '';
+  return /^v\s*/i.test(raw) ? raw.replace(/^v\s*/i, 'v ') : `v ${raw}`;
+}
+
 function htmlIfExists(id, value) {
   const el = document.getElementById(id);
   if (el) el.innerHTML = value;
@@ -587,6 +593,8 @@ function applyLanguage() {
   document.title = t('appTitle');
   const brand = document.getElementById('brand-text');
   if (brand) brand.textContent = t('brandText');
+  const brandVersion = document.getElementById('brand-version');
+  if (brandVersion) brandVersion.textContent = brandingVersionLabel();
   if (!SHARED_HEADER_OWNS_CONTROLS) {
     textIfExists('theme-style-label', t('themeStyle'));
     textIfExists('theme-label', t('theme'));

@@ -18,6 +18,7 @@ var (
 	staticDir             = os.Getenv("STATIC_DIR_ENV")
 	effectivePollInterval = os.Getenv("EFFECTIVE_POLL_INTERVAL_ENV")
 	port                  = os.Getenv("HTTP_PORT_ENV")
+	Version               = "dev"
 )
 
 type Settings struct {
@@ -285,8 +286,16 @@ func main() {
 			filepathStr = filepath.Join(staticDir, path)
 			cacheStatic = true
 		} else if path == "/branding.json" {
-			filepathStr = filepath.Join(staticDir, "branding.json")
-			cacheStatic = true
+			payload, err := readBranding(filepath.Join(staticDir, "branding.json"))
+			if err != nil {
+				http.Error(w, "File not found", http.StatusNotFound)
+				return
+			}
+			payload["version"] = strings.TrimSpace(Version)
+			w.Header().Set("Content-Type", "application/json; charset=utf-8")
+			w.Header().Set("Cache-Control", "public, max-age=3600")
+			json.NewEncoder(w).Encode(payload)
+			return
 		} else if path == "/header-controls.json" {
 			filepathStr = filepath.Join(staticDir, "www/header-controls.json")
 			cacheStatic = true
@@ -362,4 +371,16 @@ func serveFile(w http.ResponseWriter, path string, cacheStatic bool) {
 	w.Header().Set("Content-Length", strconv.FormatInt(stat.Size(), 10))
 
 	io.Copy(w, f)
+}
+
+func readBranding(path string) (map[string]interface{}, error) {
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return nil, err
+	}
+	var payload map[string]interface{}
+	if err := json.Unmarshal(data, &payload); err != nil {
+		return nil, err
+	}
+	return payload, nil
 }

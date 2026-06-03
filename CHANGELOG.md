@@ -2,6 +2,11 @@
 
 All notable changes to the MikroTik Traffic Monitor project will be documented in this file.
 
+## [0.5.1] - 2026-06-04
+### Changed
+- **Dynamic header version badge**: the shared header now renders a small version label next to the brand text.
+- **Build-driven runtime versioning**: Traffic Monitor injects the current app version into branding responses from the Go binary, so future releases automatically display the active version after refresh.
+
 ## [0.5.0] - 2026-06-04
 ### Changed
 - **Shared UI release alignment**: Traffic Monitor is now documented and released in lockstep with the shared UI system used by the companion MikroTik projects.
