@@ -248,6 +248,9 @@ func main() {
 		} else if strings.HasPrefix(path, "/www/") {
 			filepathStr = filepath.Join(staticDir, path)
 			cacheStatic = true
+		} else if path == "/branding.json" {
+			filepathStr = filepath.Join(staticDir, "branding.json")
+			cacheStatic = true
 		} else if strings.HasPrefix(path, "/styles-") || strings.HasPrefix(path, "/images/") || strings.HasPrefix(path, "/common/") {
 			filepathStr = filepath.Join(staticDir, "www", strings.TrimPrefix(path, "/"))
 			cacheStatic = true

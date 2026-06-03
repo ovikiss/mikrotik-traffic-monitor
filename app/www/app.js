@@ -3,6 +3,7 @@ const DEFAULT_LANGUAGES = [
   { code: 'ro', label: 'RO', flag: '\uD83C\uDDF7\uD83C\uDDF4', file: '/i18n/ro.json', icon: 'images/lang/ro.svg' }
 ];
 const I18N = {};
+let BRANDING = {};
 const I18N_FALLBACK = {
   themeStyle: 'Theme',
   styleModern: 'Modern',
@@ -110,7 +111,7 @@ function fmtBytes(v) {
   return `${(n / (1024 * 1024 * 1024)).toFixed(2)} GB`;
 }
 function t(key) {
-  return (I18N[state.lang] && I18N[state.lang][key]) || (I18N.en && I18N.en[key]) || I18N_FALLBACK[key] || key;
+  return BRANDING[key] || (I18N[state.lang] && I18N[state.lang][key]) || (I18N.en && I18N.en[key]) || I18N_FALLBACK[key] || key;
 }
 
 function uiMetricIcon(name) {
@@ -1035,6 +1036,11 @@ async function saveSettings(patch) {
 async function loadTranslations() {
   const q = `?_=${Date.now()}`;
   try {
+    try {
+      BRANDING = await fetch('/branding.json' + q).then(r => r.ok ? r.json() : {});
+    } catch (_) {
+      BRANDING = {};
+    }
     const loaded = await Promise.all((state.languages || []).map(async (l) => {
       const data = await fetch(`${l.file}${q}`).then(r => r.json());
       return { code: l.code, data: data || {} };
