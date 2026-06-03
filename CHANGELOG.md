@@ -2,6 +2,12 @@
 
 All notable changes to the MikroTik Traffic Monitor project will be documented in this file.
 
+## [0.5.0] - 2026-06-04
+### Changed
+- **Shared UI release alignment**: Traffic Monitor is now documented and released in lockstep with the shared UI system used by the companion MikroTik projects.
+- **Theme persistence hardened**: `theme_style` is now saved and restored correctly, so `Modern`, `Classic`, and `Glass` remain stable after refresh.
+- **Release documentation rebuilt**: README now reflects the current Go runtime, install flow, shared UI dependency, settings model, and RouterOS deployment path.
+
 ## [0.8.10] - 2026-05-28
 ### Added
 - **Shared Glass theme propagation**: Theme manifest in shared UI now includes `glass`, with shared CSS/background assets (`style-glass.css`, `bg-glass.jpg`) published from `ovikiss/mikrotik-ui-shared`.
