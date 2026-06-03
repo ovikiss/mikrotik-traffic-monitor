@@ -20,17 +20,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
 
-      - name: Sync latest shared UI
-        run: |
-          set -euo pipefail
-          git clone --depth 1 https://github.com/ovikiss/mikrotik-ui-shared.git /tmp/mikrotik-ui-shared
-          cp -a /tmp/mikrotik-ui-shared/ui/css/. app/images/ui/
-          cp -a /tmp/mikrotik-ui-shared/ui/images/ui/. app/images/ui/
-          cp -a /tmp/mikrotik-ui-shared/ui/images/lang/. app/images/lang/
-          cp -a /tmp/mikrotik-ui-shared/ui/i18n/. app/i18n/
-          cp -f /tmp/mikrotik-ui-shared/ui/common/theme-styles.json app/i18n/theme-styles.json
-          cp -f /tmp/mikrotik-ui-shared/ui/common/header-controls.json app/i18n/header-controls.json
-
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v4
 
@@ -132,4 +121,3 @@ jobs:
               "https://api.github.com/users/${OWNER}/packages/container/${PACKAGE}/versions/${id}" >/dev/null
             echo "Deleted package version: ${id}"
           done
-
