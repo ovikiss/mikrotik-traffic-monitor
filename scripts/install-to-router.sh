@@ -7,6 +7,13 @@ IMAGE="ghcr.io/ovikiss/mikrotik-traffic-monitor:latest"
 RSC_LOCAL="mikrotik/install.rsc"
 RSC_REMOTE="install-traffic-monitor.rsc"
 
+cleanup_remote_files() {
+  ssh "$ROUTER" '/file remove [find where name~"^install-.*\.rsc$"]' >/dev/null 2>&1 || true
+  ssh "$ROUTER" "/file remove [find where name=\"$RSC_REMOTE\"]" >/dev/null 2>&1 || true
+}
+
+trap cleanup_remote_files EXIT
+
 if [[ ! -f "$RSC_LOCAL" ]]; then
   echo "Missing $RSC_LOCAL"
   exit 1
@@ -22,13 +29,16 @@ docker buildx build \
   --push \
   .
 
+echo "Cleaning old install scripts on router"
+cleanup_remote_files
+
 echo "Uploading install script to $ROUTER:$RSC_REMOTE"
 scp "$RSC_LOCAL" "$ROUTER:$RSC_REMOTE"
 
 echo "Importing script on router"
 ssh "$ROUTER" "/import file-name=$RSC_REMOTE"
 
-echo "Cleaning up uploaded script"
-ssh "$ROUTER" "/file remove [find where name=\"$RSC_REMOTE\"]" || true
+echo "Cleaning up uploaded script and old install files"
+cleanup_remote_files
 
 echo "Done. Open: http://192.168.88.1:8088/"
