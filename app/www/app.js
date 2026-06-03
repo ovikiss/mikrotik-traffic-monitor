@@ -126,6 +126,21 @@ function esc(v) {
     .replaceAll("'", '&#39;');
 }
 
+function textIfExists(id, value) {
+  const el = document.getElementById(id);
+  if (el) el.textContent = value;
+}
+
+function htmlIfExists(id, value) {
+  const el = document.getElementById(id);
+  if (el) el.innerHTML = value;
+}
+
+function valueIfExists(id, value) {
+  const el = document.getElementById(id);
+  if (el) el.value = value;
+}
+
 function getLanguageDef(code) {
   return (state.languages || []).find(l => l.code === code) || null;
 }
@@ -482,7 +497,7 @@ function isAllowedPollInterval(v) {
 
 function renderSubtitle() {
   const poll = formatPollInterval(state.pollInterval || '1h');
-  document.getElementById('subtitle').textContent = `${t('subtitleBase')} ${poll}.`;
+  textIfExists('subtitle', `${t('subtitleBase')} ${poll}.`);
 }
 
 function formatUpdatedLocal(raw) {
@@ -571,19 +586,21 @@ function applyLanguage() {
   document.title = t('appTitle');
   const brand = document.getElementById('brand-text');
   if (brand) brand.textContent = t('brandText');
-  document.getElementById('theme-style-label').textContent = t('themeStyle');
-  document.getElementById('theme-label').textContent = t('theme');
-  document.getElementById('poll-label').textContent = t('poll');
-  document.getElementById('font-label').textContent = t('fontSize');
-  document.getElementById('font-opt-legacy').textContent = t('fontLegacy');
-  document.getElementById('font-opt-current').textContent = t('fontCurrent');
-  document.getElementById('font-opt-large').textContent = t('fontLarge');
-  document.getElementById('poll-interval-1h').textContent = `1 ${t('hoursSingular')}`;
-  document.getElementById('poll-interval-3h').textContent = `3 ${t('hoursPlural')}`;
-  document.getElementById('poll-interval-6h').textContent = `6 ${t('hoursPlural')}`;
-  document.getElementById('poll-interval-12h').textContent = `12 ${t('hoursPlural')}`;
-  document.getElementById('lang').value = state.lang;
-  document.getElementById('lang-label').textContent = t('language');
+  if (!SHARED_HEADER_OWNS_CONTROLS) {
+    textIfExists('theme-style-label', t('themeStyle'));
+    textIfExists('theme-label', t('theme'));
+    textIfExists('poll-label', t('poll'));
+    textIfExists('font-label', t('fontSize'));
+    textIfExists('font-opt-legacy', t('fontLegacy'));
+    textIfExists('font-opt-current', t('fontCurrent'));
+    textIfExists('font-opt-large', t('fontLarge'));
+    textIfExists('poll-interval-1h', `1 ${t('hoursSingular')}`);
+    textIfExists('poll-interval-3h', `3 ${t('hoursPlural')}`);
+    textIfExists('poll-interval-6h', `6 ${t('hoursPlural')}`);
+    textIfExists('poll-interval-12h', `12 ${t('hoursPlural')}`);
+    valueIfExists('lang', state.lang);
+    textIfExists('lang-label', t('language'));
+  }
   updateLanguageButton();
   if (!SHARED_HEADER_OWNS_CONTROLS) {
     renderLanguageOptions();
@@ -593,12 +610,12 @@ function applyLanguage() {
     renderPollMenu();
   }
   renderSubtitle();
-  document.getElementById('label-day').textContent = t('totalToday');
-  document.getElementById('label-month').textContent = t('totalMonth');
-  document.getElementById('label-year').textContent = t('totalYear');
-  document.getElementById('tab-day').textContent = t('day');
-  document.getElementById('tab-month').textContent = t('month');
-  document.getElementById('tab-year').textContent = t('year');
+  textIfExists('label-day', t('totalToday'));
+  textIfExists('label-month', t('totalMonth'));
+  textIfExists('label-year', t('totalYear'));
+  textIfExists('tab-day', t('day'));
+  textIfExists('tab-month', t('month'));
+  textIfExists('tab-year', t('year'));
   
   const headerRow = document.getElementById('table-header-row');
   if (headerRow) {
@@ -615,7 +632,7 @@ function applyLanguage() {
 function applyTheme() {
   const resolved = state.theme === 'auto' ? ((prefersDarkQuery && prefersDarkQuery.matches) ? 'dark' : 'light') : state.theme;
   document.documentElement.setAttribute('data-theme', resolved);
-  document.getElementById('theme').value = state.theme;
+  valueIfExists('theme', state.theme);
   updateThemeButton();
 }
 
@@ -630,14 +647,14 @@ function applyThemeStyle() {
     css.setAttribute('href', `${href}?v=${THEME_CSS_VERSION}`);
   }
   document.documentElement.setAttribute('data-theme-style', mode);
-  document.getElementById('theme-style').value = mode;
+  valueIfExists('theme-style', mode);
   updateThemeStyleButton();
 }
 
 function applyFontSize() {
   const mode = (state.fontSize === '25' || state.fontSize === '50' || state.fontSize === '100') ? state.fontSize : '100';
   document.documentElement.setAttribute('data-font-size', mode);
-  document.getElementById('font-size').value = mode;
+  valueIfExists('font-size', mode);
   updateFontButton();
 }
 
@@ -883,7 +900,7 @@ function renderRows() {
   const activeLabel = t(TAB_LABEL_KEY[state.activeTab] || state.activeTab);
   const poll = formatPollInterval(state.pollInterval);
   const dbSize = fmtBytes(state.info.db_size_bytes || '0');
-  document.getElementById('meta').innerHTML = `${t('tab')}: ${esc(activeLabel)} | ${uiMetricIcon('samples')}${t('samples')}: ${esc(samples)} | ${uiMetricIcon('updated')}${t('lastUpdate')}: ${esc(updated)} | ${uiMetricIcon('db-size')}${t('dbSize')}: ${esc(dbSize)} | ${uiMetricIcon('interval')}${t('pollInterval')}: ${esc(poll)}`;
+  htmlIfExists('meta', `${t('tab')}: ${esc(activeLabel)} | ${uiMetricIcon('samples')}${t('samples')}: ${esc(samples)} | ${uiMetricIcon('updated')}${t('lastUpdate')}: ${esc(updated)} | ${uiMetricIcon('db-size')}${t('dbSize')}: ${esc(dbSize)} | ${uiMetricIcon('interval')}${t('pollInterval')}: ${esc(poll)}`);
 }
 
 function setActiveTab(tab) {
@@ -920,7 +937,7 @@ function setFontSize(mode) {
   localStorage.setItem('mtm_font_size', next);
   applyFontSize();
   saveSettings({ font_size: next }).catch(() => {});
-  document.getElementById('meta').textContent = `${t('fontSaved')}: ${t(next === '25' ? 'fontLegacy' : next === '100' ? 'fontLarge' : 'fontCurrent')}`;
+  textIfExists('meta', `${t('fontSaved')}: ${t(next === '25' ? 'fontLegacy' : next === '100' ? 'fontLarge' : 'fontCurrent')}`);
   setTimeout(() => { window.location.reload(); }, 500);
 }
 
@@ -956,7 +973,7 @@ async function loadSettings() {
     const lang = (d && getLanguageDef(String(d.language || '').toLowerCase())) ? String(d.language || '').toLowerCase() : '';
     const fontSize = (d && (d.font_size === '25' || d.font_size === '50' || d.font_size === '100')) ? d.font_size : '';
     state.pollInterval = p;
-    document.getElementById('poll-interval').value = isAllowedPollInterval(p) ? p : '1h';
+    valueIfExists('poll-interval', isAllowedPollInterval(p) ? p : '1h');
     updatePollButton();
     if (theme) {
       state.theme = theme;
@@ -1041,29 +1058,29 @@ async function loadLanguageConfig() {
     renderLanguageOptions();
   }
   if (!getLanguageDef(state.lang)) state.lang = 'en';
-  document.getElementById('lang').value = state.lang;
+  valueIfExists('lang', state.lang);
 }
 
 async function savePollInterval(value) {
   const sel = document.getElementById('poll-interval');
   const v = normalizePollIntervalOption(value || sel.value || '');
   if (!isAllowedPollInterval(v)) {
-    document.getElementById('meta').textContent = t('pollInvalid');
+    textIfExists('meta', t('pollInvalid'));
     return;
   }
 
   try {
     await saveSettings({ poll_interval: v });
   } catch (_) {
-    document.getElementById('meta').textContent = t('loadError');
+    textIfExists('meta', t('loadError'));
     return;
   }
   state.pollInterval = v;
-  sel.value = v;
+  if (sel) sel.value = v;
   updatePollButton();
   renderSubtitle();
   renderRows();
-  document.getElementById('meta').textContent = `${t('pollSaved')}: ${formatPollInterval(v)}`;
+  textIfExists('meta', `${t('pollSaved')}: ${formatPollInterval(v)}`);
   setTimeout(() => { renderRows(); }, 1200);
 }
 
@@ -1080,7 +1097,7 @@ if (prefersDarkQuery) {
   if (prefersDarkQuery.addEventListener) prefersDarkQuery.addEventListener('change', onThemePrefChange);
   else if (prefersDarkQuery.addListener) prefersDarkQuery.addListener(onThemePrefChange);
 }
-document.getElementById('meta').textContent = t('loading');
+textIfExists('meta', t('loading'));
 if (!SHARED_HEADER_OWNS_CONTROLS) {
   document.getElementById('theme-style-toggle').addEventListener('click', () => toggleThemeStyleMenu());
   document.getElementById('theme-toggle').addEventListener('click', () => toggleThemeMenu());
@@ -1125,7 +1142,7 @@ window.addEventListener('mikrotik:header-setting-changed', async (event) => {
     renderRows();
   } else if (detail.key === 'pollInterval') {
     state.pollInterval = detail.value || state.pollInterval;
-    document.getElementById('poll-interval').value = isAllowedPollInterval(state.pollInterval) ? state.pollInterval : '1h';
+    valueIfExists('poll-interval', isAllowedPollInterval(state.pollInterval) ? state.pollInterval : '1h');
     updatePollButton();
     renderSubtitle();
     renderRows();
@@ -1151,7 +1168,7 @@ loadThemeConfig().then(() => {
   applyTheme();
   applyFontSize();
   applyLanguage();
-  loadAll().catch(e => { document.getElementById('meta').textContent = `${t('loadError')}: ${e}`; });
+  loadAll().catch(e => { textIfExists('meta', `${t('loadError')}: ${e}`); });
   loadLanguageConfig().then(() => {
     loadSettings().catch(() => {});
     loadTranslations().catch(() => {});
@@ -1164,7 +1181,7 @@ loadThemeConfig().then(() => {
   applyTheme();
   applyFontSize();
   applyLanguage();
-  loadAll().catch(e => { document.getElementById('meta').textContent = `${t('loadError')}: ${e}`; });
+  loadAll().catch(e => { textIfExists('meta', `${t('loadError')}: ${e}`); });
   loadLanguageConfig().then(() => {
     loadSettings().catch(() => {});
     loadTranslations().catch(() => {});

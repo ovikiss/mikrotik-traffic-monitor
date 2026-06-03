@@ -8,7 +8,14 @@ RSC_LOCAL="mikrotik/install.rsc"
 RSC_REMOTE="install-traffic-monitor.rsc"
 
 cleanup_remote_files() {
-  ssh "$ROUTER" '/file remove [find where name~"^install-.*\.rsc$"]' >/dev/null 2>&1 || true
+  while IFS= read -r remote_file; do
+    [[ -z "$remote_file" ]] && continue
+    ssh "$ROUTER" "/file remove [find where name=\"$remote_file\"]" >/dev/null 2>&1 || true
+  done < <(
+    ssh "$ROUTER" ':foreach f in=[/file find] do={ :put [/file get $f name] }' 2>/dev/null \
+      | grep -E '(^|/)install-[^/]+\.rsc$' || true
+  )
+
   ssh "$ROUTER" "/file remove [find where name=\"$RSC_REMOTE\"]" >/dev/null 2>&1 || true
 }
 
