@@ -2,6 +2,10 @@
 
 All notable changes to the MikroTik Traffic Monitor project will be documented in this file.
 
+## [0.5.4] - 2026-06-04
+### Changed
+- **Release alignment for multi-container update testing**: this release keeps Traffic Monitor in sync with the shared UI/header line and provides a fresh test target alongside MCUG.
+
 ## [0.5.2] - 2026-06-04
 ### Changed
 - **Shared header baseline alignment**: the universal header now aligns the project name on the same lower baseline across `Modern`, `Classic`, and `Glass`, so Traffic Monitor and Container Update GUI stay visually consistent.
