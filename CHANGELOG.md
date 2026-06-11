@@ -2,6 +2,10 @@
 
 All notable changes to the MikroTik Traffic Monitor project will be documented in this file.
 
+## [0.5.6] - 2026-06-11
+### Changed
+- **Release companion for MCUG bulk-update validation**: this release keeps Traffic Monitor aligned for a fresh test cycle so MCUG can detect a new update on both companion containers.
+
 ## [0.5.5] - 2026-06-11
 ### Changed
 - **Browser language auto-detection refined**: when no saved language exists, Traffic Monitor now maps `ro` / `ro-*` to Romanian and `en` / `en-*` to English from the browser locale.
