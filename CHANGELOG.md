@@ -2,6 +2,11 @@
 
 All notable changes to the MikroTik Traffic Monitor project will be documented in this file.
 
+## [0.5.5] - 2026-06-11
+### Changed
+- **Browser language auto-detection refined**: when no saved language exists, Traffic Monitor now maps `ro` / `ro-*` to Romanian and `en` / `en-*` to English from the browser locale.
+- **Explicit English fallback added**: any other browser locale now falls back to `en` deterministically.
+
 ## [0.5.4] - 2026-06-04
 ### Changed
 - **Release alignment for multi-container update testing**: this release keeps Traffic Monitor in sync with the shared UI/header line and provides a fresh test target alongside MCUG.

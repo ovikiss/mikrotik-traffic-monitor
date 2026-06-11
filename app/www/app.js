@@ -152,6 +152,35 @@ function getLanguageDef(code) {
   return (state.languages || []).find(l => l.code === code) || null;
 }
 
+function availableLanguageCode(code) {
+  return Boolean(getLanguageDef(String(code || '').trim().toLowerCase()));
+}
+
+function detectBrowserLanguage() {
+  const raw = [
+    navigator.language,
+    ...(Array.isArray(navigator.languages) ? navigator.languages : [])
+  ].map((value) => String(value || '').trim().toLowerCase()).filter(Boolean);
+
+  for (const candidate of raw) {
+    const base = candidate.split('-')[0];
+    if (base === 'ro' && availableLanguageCode('ro')) {
+      return 'ro';
+    }
+    if (base === 'en' && availableLanguageCode('en')) {
+      return 'en';
+    }
+  }
+
+  if (availableLanguageCode('en')) {
+    return 'en';
+  }
+  if (availableLanguageCode('ro')) {
+    return 'ro';
+  }
+  return 'en';
+}
+
 function normalizeLanguageList(items) {
   if (!Array.isArray(items)) return DEFAULT_LANGUAGES.slice();
   const out = [];
@@ -982,7 +1011,8 @@ async function loadSettings() {
     const theme = (d && getThemeDef(String(d.theme || '').toLowerCase())) ? String(d.theme || '').toLowerCase() : '';
     const themeStyleRaw = String((d && (d.theme_style || d.themeStyle)) || '').toLowerCase();
     const themeStyle = (d && getThemeStyleDef(themeStyleRaw)) ? themeStyleRaw : '';
-    const lang = (d && getLanguageDef(String(d.language || '').toLowerCase())) ? String(d.language || '').toLowerCase() : '';
+    const requestedLang = String((d && d.language) || '').trim().toLowerCase();
+    const lang = getLanguageDef(requestedLang) ? requestedLang : detectBrowserLanguage();
     const fontSize = (d && (d.font_size === '25' || d.font_size === '50' || d.font_size === '100')) ? d.font_size : '';
     state.pollInterval = p;
     valueIfExists('poll-interval', isAllowedPollInterval(p) ? p : '1h');
@@ -997,11 +1027,9 @@ async function loadSettings() {
       localStorage.setItem('mtm_theme_style', themeStyle);
       applyThemeStyle();
     }
-    if (lang) {
-      state.lang = lang;
-      localStorage.setItem('mtm_lang', lang);
-      applyLanguage();
-    }
+    state.lang = getLanguageDef(lang) ? lang : 'en';
+    localStorage.setItem('mtm_lang', state.lang);
+    applyLanguage();
     if (fontSize) {
       state.fontSize = fontSize;
       localStorage.setItem('mtm_font_size', fontSize);
